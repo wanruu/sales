@@ -1,0 +1,11 @@
+{
+  "short_name": "发货清单",
+  "name": "发货清单管理",
+  "icons": [
+
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}
