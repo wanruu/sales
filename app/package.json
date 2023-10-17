@@ -1,6 +1,6 @@
 {
     "name": "sales",
-    "version": "0.9.0",
+    "version": "0.0.1",
     "private": true,
     "main": "public/electron.js",
     "description": "Designed for invoice management.",
@@ -13,6 +13,7 @@
         "antd": "^5.4.7",
         "axios": "^1.4.0",
         "cors": "^2.8.5",
+        "decimal": "^0.0.2",
         "echarts-for-react": "^3.0.2",
         "electron-squirrel-startup": "^1.0.0",
         "mathjs": "^11.8.0",
@@ -22,6 +23,7 @@
         "react-dom": "^18.2.0",
         "react-scripts": "^5.0.1",
         "react-to-print": "^2.14.12",
+        "react-uuid": "^2.0.0",
         "rsyncwrapper": "^3.0.1",
         "sqlite3": "^5.1.6",
         "xlsx": "^0.18.5"
@@ -30,7 +32,7 @@
         "start": "electron-forge start",
         "react-start": "set NODE_OPTIONS=--openssl-legacy-provider && react-scripts start",
         "react-build": "set NODE_OPTIONS=--openssl-legacy-provider && react-scripts build",
-        "electron-start": "set APP_DEV=true && electron public/electron.js",
+        "electron-start": "APP_DEV=true electron public/electron.js",
         "electron-build": "electron-builder",
         "package": "electron-forge package",
         "make": "electron-forge make --arch=x64 --platform=win32"
@@ -60,8 +62,8 @@
         "electron-builder": "^23.6.0"
     },
     "build": {
-        "productName": "发货清单",
-        "appId": "com.wanruuu.sales.zss",
+        "productName": "清单管理",
+        "appId": "com.wanruuu.sales.hsz",
         "files": [
             "build/**/*",
             "node_modules/**/*"
@@ -82,7 +84,7 @@
             "allowElevation": true,
             "allowToChangeInstallationDirectory": true,
             "createDesktopShortcut": true,
-            "shortcutName": "发货清单",
+            "shortcutName": "清单管理",
             "include": "installer.nsh"
         }
     }

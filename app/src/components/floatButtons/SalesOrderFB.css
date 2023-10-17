@@ -1,0 +1,47 @@
+#draftTable table { 
+    font-size: 10px
+}
+
+#draftTable button { 
+    font-size: 10px
+}
+
+#draftTable tbody td {
+    padding-top: 1px;
+    padding-bottom: 1px;
+}
+
+#editTable table {
+    font-size: 12px
+}
+
+#editTable input {
+    font-size: 12px;
+}
+
+#editTable tbody td {
+    padding: 2px;
+}
+
+
+/* select */
+/* dropdown options */
+.ant-select-item-option-content {
+    font-size: 12px;
+}
+.ant-select-item {
+    padding: 0px;
+}
+
+#editTable .ant-select-selector {
+    font-size: 12px;
+    border-radius: 4px;
+}
+
+#editTable .ant-select-selection-item {
+    padding: 0px;
+}
+
+#editTable .ant-select-arrow {
+    display: none 
+}

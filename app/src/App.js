@@ -1,55 +1,42 @@
-import { useState, useEffect } from 'react';
-import React from 'react';
+import { useState, useEffect } from 'react'
+import React from 'react'
+import { Layout, theme } from 'antd'
+
+const { Header, Content, Footer, Sider } = Layout
 
 import MyMenu from './components/MyMenu.js'
-import InvoiceList from './pages/InvoiceList.js'
-import NewInvoice from './pages/NewInvoice.js';
+import SalesOrderList from './pages/SalesOrderList.js'
 import Setting from './pages/Setting.js';
-import Bin from './pages/Bin.js';
-import SaleStat from './pages/SaleStat.js'
-import CustomerStat from './pages/CustomerStat.js';
-import ProductStat from './pages/ProductStat.js';
+
 
 function App() {
-    const [menuKey, setMenuKey] = useState('newInvoice');
-
+    const [menuKey, setMenuKey] = useState('salesOrder')
+    const { token: { colorBgContainer }, } = theme.useToken()
     const pages = {
-        // 'newInvoice': <NewInvoice />,
-        'invoices': <InvoiceList />,
-        'sales': <SaleStat />,
-        'products': <ProductStat />,
-        'customers': <CustomerStat />,
-        'bin': <Bin />,
+        'salesOrder': <SalesOrderList />,
+        'salesRefund': 'SalesRefundList',
+        'purchaseOrder': 'PurchaseOrder',
+        'purchaseRefund': 'PurchaseRefund',
         'settings': <Setting />,
     };
 
-    const onSelectMenuKey = (key) => {
-        setMenuKey(key);
-    };
-
-
-    const [newInvoicePageState, setNewInvoicePageState] = useState(0);
-    useEffect(() => {
-        if (menuKey === 'newInvoice') {
-            setNewInvoicePageState(newInvoicePageState + 1);
-        }
-    }, [menuKey]);
-
     return (
-        <div style={{ overflow: 'hidden' }}>
-            <div style={{ float: 'left', width: '20%', height: '100vh', overflow: 'auto', }}>
-                <MyMenu setSelectedMenuKey={onSelectMenuKey} defaultKey={menuKey} />
-            </div>
-            <div style={{ float: 'right', width: '80%', height: '100vh', overflow: 'auto', }} >
-                <div style={{ marginLeft: '15px', marginRight: '15px' }}>
-                    <div style={{ display: menuKey !== 'newInvoice' ? 'none' : 'block', overflow: 'none', }}>
-                        <NewInvoice state={newInvoicePageState} />
+        <Layout hasSider style={{ background: colorBgContainer }}>
+            <Sider style={{ overflow: 'auto', height: '100vh', position: 'fixed', left: 0, top: 0, bottom: 0, background: colorBgContainer }}>
+                <MyMenu setSelectedMenuKey={key => setMenuKey(key)} defaultKey={menuKey} />
+            </Sider>
+            <Layout className="site-layout" style={{ marginLeft: 200, }}>
+                {/* <Header style={{ padding: 0, background: colorBgContainer }} >
+                    header
+                </Header> */}
+                <Content style={{ overflow: 'initial', background: colorBgContainer }}>
+                    <div style={{ paddingLeft: 18, paddingRight: 18, background: colorBgContainer }}>
+                        {pages[menuKey]}
                     </div>
-                    {menuKey !== 'newInvoice' ? pages[menuKey] : ''}
-                </div>
-            </div>
-        </div>
-    );
+                </Content>
+            </Layout>
+        </Layout>
+    )
 }
 
 export default App;

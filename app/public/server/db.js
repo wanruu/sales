@@ -16,27 +16,131 @@ fs.chmod(dbName, '777', (err) => {
 })
 
 
+const partner = `CREATE TABLE IF NOT EXISTS partner(
+    name TEXT PRIMARY KEY,
+    phone TEXT,
+    address TEXT
+);`
 
-const createInvoices = 'CREATE table IF NOT EXISTS invoices' +
-    '(id TEXT NOT NULL, customer TEXT NOT NULL, create_date TEXT NOT NULL, delete_date TEXT, is_paid INTEGER, is_invoiced INTEGER, ' +
-    'PRIMARY KEY(id))'
-const createProducts = 'CREATE table IF NOT EXISTS products' +
-    '(invoice_id TEXT NOT NULL, material TEXT NOT NULL, name TEXT NOT NULL, spec TEXT NOT NULL, ' +
-    'unit_price REAL NOT NULL, quantity REAL NOT NULL, remark TEXT, ' +
-    'FOREIGN KEY(invoice_id) REFERENCES invoices(id) ON DELETE CASCADE)'
+const product = `CREATE TABLE IF NOT EXISTS product(
+    id TEXT UNIQUE,
+    material TEXT NOT NULL, 
+    name TEXT NOT NULL, 
+    spec TEXT NOT NULL, 
+    unit TEXT NOT NULL,
+    quantity TEXT NOT NULL,
+    PRIMARY KEY(material, name, spec)
+);`
 
+// sales: order & refund
+const salesOrderItem = `CREATE TABLE IF NOT EXISTS salesOrderItem(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    productId INTEGER,
+    price TEXT NOT NULL,
+    discount INTEGER NOT NULL,
+    quantity TEXT NOT NULL,
+    originalAmount TEXT NOT NULL,
+    amount TEXT NOT NULL,
+    remark TEXT,
+    delivered INTEGER,
+    orderId INTEGER,
+    FOREIGN KEY(orderId) REFERENCES salesOrder(id) ON DELETE CASCADE
+);`
+
+const salesOrder = `CREATE TABLE IF NOT EXISTS salesOrder(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    partner TEXT NOT NULL,
+    date TEXT NOT NULL,
+    amount TEXT NOT NULL,
+    prepayment TEXT NOT NULL,
+    payment TEXT NOT NULL
+);`
+
+const salesRefundItem = `CREATE TABLE IF NOT EXISTS salesRefundItem(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    orderId INTEGER,
+    quantity TEXT NOT NULL,
+    originalAmount TEXT NOT NULL,
+    amount TEXT NOT NULL,
+    remark TEXT,
+    delivered INTEGER,
+    refundId INTEGER,
+    FOREIGN KEY(refundId) REFERENCES salesRefund(id) ON DELETE CASCADE
+);`
+
+const salesRefund = `CREATE TABLE IF NOT EXISTS salesRefund(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    partner TEXT NOT NULL,
+    date TEXT NOT NULL,
+    amount TEXT NOT NULL,
+    payment TEXT NOT NULL
+);`
+
+
+// purchase 
+const purchaseOrderItem = `CREATE TABLE IF NOT EXISTS purchaseOrderItem(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    productId INTEGER,
+    price TEXT NOT NULL,
+    discount INTEGER NOT NULL,
+    quantity TEXT NOT NULL,
+    weight TEXT NOT NULL,
+    originalAmount TEXT NOT NULL,
+    amount TEXT NOT NULL,
+    remark TEXT,
+    delivered INTEGER,
+    orderId INTEGER,
+    FOREIGN KEY(orderId) REFERENCES purchaseOrder(id) ON DELETE CASCADE
+);`
+
+const purchaseOrder = `CREATE TABLE IF NOT EXISTS purchaseOrder(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    partner TEXT NOT NULL,
+    date TEXT NOT NULL,
+    amount TEXT NOT NULL,
+    payment TEXT NOT NULL
+);`
+
+const purchaseRefundItem = `CREATE TABLE IF NOT EXISTS purchaseRefundItem(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    orderId INTEGER,
+    quantity TEXT NOT NULL,
+    weight TEXT NOT NULL,
+    originalAmount TEXT NOT NULL,
+    amount TEXT NOT NULL,
+    remark TEXT,
+    delivered INTEGER,
+    refundId INTEGER,
+    FOREIGN KEY(refundId) REFERENCES purchaseRefund(id) ON DELETE CASCADE
+);`
+
+const purchaseRefund = `CREATE TABLE IF NOT EXISTS purchaseRefund(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    partner TEXT NOT NULL,
+    date TEXT NOT NULL,
+    amount TEXT NOT NULL,
+    payment TEXT NOT NULL
+);`
+
+
+const creations = [ 
+    partner, product, 
+    salesOrderItem, salesOrder, 
+    salesRefundItem, salesRefund,
+    purchaseOrderItem, purchaseOrder,
+    purchaseRefundItem, purchaseRefund
+]
 
 // create tables
 db.serialize(() => {
     console.log('Init database')
     db.run('PRAGMA foreign_keys=ON')  // auto delete product when deleting invoice
     
-    db.run(createInvoices, (err) => {
-        if (err) console.log(err)
-    })
-    db.run(createProducts, (err) => {
-        if (err) console.log(err)
-    })
+    for (const creation of creations) {
+        db.run(creation, (err) => {
+            if (err) console.log(err)
+        })
+    }
 })
 
 

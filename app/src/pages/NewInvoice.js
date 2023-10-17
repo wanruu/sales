@@ -292,20 +292,6 @@ function NewInvoice(props) {
         loadInvoices();
     }, [props.state])
 
-    // enter -> add product
-    // useEffect(() => {
-    //     const handleKeyDown = (event) => {
-    //         if (event.key === 'Enter') {
-    //             if (modesDict[activeTabKey] == 'edit') {
-    //                 addProduct(activeTabKey);
-    //             }
-    //         }
-    //     };
-    //     document.addEventListener('keydown', handleKeyDown);
-    //     return () => {
-    //         document.removeEventListener('keydown', handleKeyDown);
-    //     };
-    // }, [activeTabKey, editInvoicesDict, modesDict]);
 
     // button
     const addProduct = (key) => {

@@ -1,7 +1,7 @@
-const outBillRouter = require("./outBill")
+const salesOrderRouter = require("./salesOrder")
 
 const routes = (app) => {
-    app.use("/outBill", outBillRouter)
+    app.use("/salesOrder", salesOrderRouter)
 }
 
 module.exports = routes
