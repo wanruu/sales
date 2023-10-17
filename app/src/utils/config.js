@@ -1,9 +1,10 @@
-
+import Decimal from "decimal.js"
 
 export const baseURL = () => {
     return "http://localhost:8888/"
 }
-export const dateFormat = 'YYYY年MM月DD日';
+
+export const dateFormat = 'YYYY-MM-DD';
 
 // export const calItemAmount = (item) => {
 //     // if (item.quantity * item.unitPrice === 0) return -1;
@@ -32,4 +33,22 @@ export const invoiceSettings = {
     hPadding: () => localStorage.getItem('hPadding') || 28,
     vPadding: () => localStorage.getItem('vPadding') || 25,
     defaultEditRowNum: () => localStorage.getItem('defaultEditRowNum') || 10,
+}
+
+export const unitOptions = [
+    { label: '-', value: '' },
+    { label: '千件', value: '千件' },
+    { label: '只', value: '只' },
+    { label: '包', value: '包' },
+    { label: '斤', value: '斤' },
+    { label: '套', value: '套' }
+]
+
+export const unitCoeffDict = {
+    '': new Decimal(0),
+    '千件': new Decimal(1000),
+    '只': new Decimal(1),
+    '包': new Decimal(1),
+    '斤': new Decimal(1),
+    '套': new Decimal(1),
 }

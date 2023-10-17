@@ -1,8 +1,8 @@
 import dayjs from 'dayjs'
 import uuid from 'react-uuid'
-const Decimal = require('decimal')
+import { Decimal } from 'decimal.js';
 
-import { invoiceSettings } from './config'
+import { invoiceSettings, dateFormat } from './config'
 
 export const emptySalesOrderItem = () => {
     return { 
@@ -31,10 +31,27 @@ export const emptySalesOrder = () => {
         date: dayjs(),
         draftTime: undefined,
         amount: Decimal(0),
+        prepayment: '',
         // items: [...Array(parseInt(invoiceSettings.defaultEditRowNum())).keys()].map(_ => emptySalesOrderItem()),
         items: [emptySalesOrderItem()]
     };
 };
+
+export const initSalesOrderForPreview = (itemNum=1) => {
+    return {
+        id: 999999,
+        partner: '',
+        date: dayjs().format(dateFormat),
+        amount: '0',
+        prepayment: '',
+        items: [...Array(itemNum).keys()].map(_ => { return {
+            material: '', name: '', spec: '', 
+            quantity: '0', unit: '', price: '0', 
+            amount: '0',
+            remark: ''
+        }}),
+    };
+}
 
 export const dcSalesOrder = (order) => {
     return {
@@ -43,6 +60,7 @@ export const dcSalesOrder = (order) => {
         date: dayjs(order.date),
         draftTime: order.draftTime,
         amount: order.amount,
+        prepayment: order.prepayment,
         items: JSON.parse(JSON.stringify(order.items))
     }
 };

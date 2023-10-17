@@ -1,0 +1,49 @@
+.invoiceWrapper {
+    position: relative;
+}
+
+.invoiceWrapper::before {
+    content: "";
+    display: block;
+    padding-bottom: 64%;
+}
+
+.invoiceContent {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    background-color: white;
+}
+
+.flexVCenter {
+    display: flex;
+    justify-content: center;
+}
+/* 
+.ftnote {
+    line-height: 60%;
+    font-size: 9pt;
+    text-align: left;
+}
+
+.compactInput {
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: 6px;
+    padding-right: 6px;
+}
+
+.flexCenter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.flexHCenter {
+    display: flex;
+    align-items: center;
+}
+*/

@@ -25,6 +25,4 @@ const formatInsert = (oper, tableName, dictArray, fieldnames) => {
     return { query: query, flatData: flatData }
 }
 
-module.exports = {
-    formatInsert: formatInsert
-}
+exports.formatInsert = formatInsert

@@ -1,73 +1,36 @@
 import React from "react";
-import { useEffect, useState, useRef } from "react";
-import { Table, Modal, Button, message, Input, AutoComplete, DatePicker, Col, InputNumber, Row, FloatButton, Space, Popover, Select } from "antd";
+import { useEffect, useState, } from "react";
+import { Table, Modal, Button, message, Input, AutoComplete, DatePicker, Col, InputNumber, Row, FloatButton, Space, Popover, Select, Divider } from "antd";
 import { PlusOutlined, InboxOutlined, } from '@ant-design/icons'
+import { Decimal } from 'decimal.js';
 import dayjs from 'dayjs'
 import Axios from "axios";
-const Decimal = require('decimal')
 
 const { Column } = Table
 
 import { emptySalesOrder, dcSalesOrder, isSalesOrderItemEmpty, emptySalesOrderItem, isSalesOrderItemComplete } from '../../utils/salesOrderConfig'
-import { baseURL } from "../../utils/config";
+import { baseURL, unitCoeffDict, unitOptions, dateFormat } from "../../utils/config";
 import './SalesOrderFB.css';
 
 
-const unitOptions = [
-    { label: '-', value: '' },
-    { label: '千件', value: '千件' },
-    { label: '只', value: '只' },
-    { label: '包', value: '包' },
-    { label: '斤', value: '斤' },
-    { label: '套', value: '套' }
-]
-const unitCoeffDict = {
-    '': Decimal(0),
-    '千件': Decimal(1000),
-    '只': Decimal(1),
-    '包': Decimal(1),
-    '斤': Decimal(1),
-    '套': Decimal(1),
-}
 
-const updateAmount = (itemDict) => {
-    var itemDict = itemDict
-    if (itemDict.quantity == null || itemDict.price == null || itemDict.unit === '') {
-        itemDict.originalAmount = Decimal(0)
-    } else {
-        itemDict.originalAmount = Decimal(itemDict.quantity).mul(itemDict.price).mul(unitCoeffDict[itemDict.unit])
-    }
-    if (itemDict.originalAmount.internal === '00') { itemDict.originalAmount = Decimal(0) }
-    if (itemDict.discount == null) {
-        itemDict.amount = Decimal(0)
-    } else {
-        itemDict.amount = Decimal(itemDict.originalAmount).mul(itemDict.discount).div(100)
-    }
-    return itemDict
-}
 const calItemAmount = (itemDict) => {
-    var orginalAmount = itemDict.quantity == null || itemDict.price == null || itemDict.unit === '' ?
-        Decimal(0) : Decimal(itemDict.quantity).mul(itemDict.price).mul(unitCoeffDict[itemDict.unit])
-    if (orginalAmount.internal === '00') { 
-        orginalAmount = Decimal(0)
-    }
-    var amount = itemDict.discount == null ? Decimal(0) : Decimal(orginalAmount).mul(itemDict.discount).div(100)
-    if (amount.internal === '00') { 
-        amount = Decimal(0)
-    }
-    console.log(orginalAmount.toString())
-    return { orginalAmount: orginalAmount, amount: amount}
+    const quantity = new Decimal(itemDict.quantity || 0)
+    const price = new Decimal(itemDict.price || 0)
+    const unit = new Decimal(unitCoeffDict[itemDict.unit])
+    const discount = new Decimal(itemDict.discount || 0)
+
+    const originalAmount = quantity.times(price).times(unit)
+    const amount = originalAmount.times(discount).dividedBy(100)
+
+    return { originalAmount: originalAmount.toFixed(2, Decimal.ROUND_HALF_UP), amount: amount.toFixed(2, Decimal.ROUND_HALF_UP)}
 }
 const calTotalAmount = (items) => {
-    const amount = items.reduce((previous, current) => previous.add(current.amount), Decimal(0))
-    if (amount.internal === '00') { 
-        return Decimal(0)
-    }
-    return amount
+    return items.reduce((previous, current) => previous.plus(current.amount), new Decimal(0))
 }
 
 
-function SalesOrderFB() {
+function SalesOrderFB(props) {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [editOrder, setEditOrder] = useState(emptySalesOrder())
     const [draftOrders, setDraftOrders] = useState([])
@@ -86,8 +49,7 @@ function SalesOrderFB() {
         }
     }, [editOrder])
 
-
-    // modal
+    // modal show/hide
     const showModal = () => {
         setIsModalOpen(true)
     }
@@ -95,7 +57,7 @@ function SalesOrderFB() {
         setIsModalOpen(false)
     }
 
-    // edit
+    // user editing
     const updatePartner = (value) => {
         const newOrder = dcSalesOrder(editOrder)
         newOrder.partner = value
@@ -106,22 +68,26 @@ function SalesOrderFB() {
         newOrder.date = value
         setEditOrder(newOrder)
     }
+    const updatePrepayment = (value) => {
+        const newOrder = dcSalesOrder(editOrder)
+        newOrder.prepayment = value
+        setEditOrder(newOrder)
+    }
     const updateRow = (id, field, value) => {
+        const ifUpdateAmount = ['quantity', 'unit', 'price', 'discount'].includes(field)
         const newEditOrder = dcSalesOrder(editOrder)
         newEditOrder.items = newEditOrder.items.map(item => {
             if (item.id === id) { item[field] = value }
-            if (['quantity', 'unit', 'price', 'discount'].includes(field)) {
-                // item = updateAmount(item)
-                const { orginalAmount, amount } = calItemAmount(item)
-                item.orginalAmount = orginalAmount
+            if (ifUpdateAmount) {
+                const { originalAmount, amount } = calItemAmount(item)
+                item.originalAmount = originalAmount
                 item.amount = amount
             }
             return item
         })
-        if (['quantity', 'unit', 'price', 'discount'].includes(field)) {
+        if (ifUpdateAmount) {
             newEditOrder.amount = calTotalAmount(newEditOrder.items)
         }
-        console.log(newEditOrder.items)
         setEditOrder(newEditOrder)
     }
 
@@ -147,21 +113,40 @@ function SalesOrderFB() {
         setIsModalOpen(true)
     }
 
-    // upload
+    // upload order
     const upload = () => {
         setIsUploading(true)
         // clean data
         const order = dcSalesOrder(editOrder);
-        order.date = order.date.format('YYYY-MM-DD');
-        order.items = order.items.filter(item => !isSalesOrderItemEmpty(item));
+        order.date = order.date.format(dateFormat);
+        order.items = order.items.filter(item => !isSalesOrderItemEmpty(item)).map(item => {
+            item.quantity = (item.quantity || Decimal(0)).toString()
+            item.price = (item.quantity || Decimal(0)).toString()
+            return item
+        });
+        order.prepayment = order.prepayment || '0'
         const nIncomplete = order.items.filter(item => !isSalesOrderItemComplete(item)).length;
-
+        var isRepeat = false;
+        for (const item1 of order.items) {
+            for (const item2 of order.items) {
+                if (item1.id !== item2.id && item1.name === item2.name && item1.spec === item2.spec && item1.material === item2.material) {
+                    isRepeat = true;
+                    break;
+                }
+            }
+            if (isRepeat) {
+                break;
+            }
+        }
         // check data
         if (order.partner === '') {
             messageApi.open({ type: 'error', content: '收货单位不得为空', });
             setIsUploading(false)
         } else if (nIncomplete > 0) {
             messageApi.open({ type: 'error', content: '表格填写不完整', });
+            setIsUploading(false)
+        } else if (isRepeat) {
+            messageApi.open({ type: 'error', content: '产品材质、名称、规格不得重复', });
             setIsUploading(false)
         } else {
             Axios({
@@ -176,6 +161,9 @@ function SalesOrderFB() {
                     setEditOrder(emptySalesOrder())
                     hideModal()
                     removeDraft(order)
+                    if (props.refresh !== undefined) {
+                        props.refresh()
+                    }
                 } else {
                     messageApi.open({ type: 'error', content: `${res.status}: 保存失败`, });
                 }
@@ -189,7 +177,7 @@ function SalesOrderFB() {
 
     return (<>
         {contextHolder}
-        <Popover title={`草稿箱 (${draftOrders.length})`} placement="topLeft" zIndex={999} content={
+        <Popover title={`草稿箱 (${draftOrders.length})`} placement="topLeft" zIndex={999} trigger='click' content={
             <Table id='draftTable' dataSource={draftOrders} size='small' pagination={{pageSize: 5, size: 'small'}} hideOnSinglePage bordered>
                 <Column title='保存时间' dataIndex='draftTime' align='center' render={time => time.format('HH:mm:ss')} />
                 <Column title='收货单位' dataIndex='partner' align='center' />
@@ -209,19 +197,19 @@ function SalesOrderFB() {
         </Popover>
         
         <FloatButton icon={<PlusOutlined />} type='primary' onClick={showModal} style={{ right: 24, }} />
-        <Modal open={isModalOpen} width={900} centered onCancel={hideModal} footer={
+        <Modal title='新建销售清单' open={isModalOpen} width={1000} centered onCancel={hideModal} footer={
             <Space>
                 <Button onClick={saveDraft}>保存草稿</Button>
                 <Button onClick={upload} type='primary' loading={isUploading}>保存</Button>
             </Space>
         }>
-            <br/>
-            <Row>
+            <Row style={{ marginTop: '20px', marginBottom: '15px' }}>
                 <Col span={12}>收货单位：<AutoComplete style={{width: 200}} size='small' value={editOrder.partner} onChange={value => updatePartner(value)} /></Col>
                 <Col span={12}>日期：<DatePicker size='small' value={editOrder.date} onChange={value => updateDate(value)}/></Col>
             </Row>
-            <br/>
-            <Table id='editTable' dataSource={editOrder.items} size='small' bordered scroll={{x: 'max-content', y: 300 }} pagination={false} >
+
+            <Table id='editTable' dataSource={editOrder.items} size='small' bordered style={{height: 400}} scroll={{x: 'max-content', y: 400 }} pagination={false} >
+                <Column title='序号' align='center' width={40} render={(_, __, idx) => idx+1} />
                 <Column title='材质' dataIndex='material' align='center' width={45} render={(_, row) => 
                     <AutoComplete size='small' style={{width: '100%'}} value={row.material} onChange={value => updateRow(row.id, 'material', value)} />
                 } />
@@ -232,19 +220,23 @@ function SalesOrderFB() {
                     <AutoComplete size='small' style={{width: '100%'}} value={row.spec} onChange={value => updateRow(row.id, 'spec', value)} />
                 } />
                 <Column title='数量' dataIndex='quantity' align='center' width={60} render={(_, row) => 
-                    <InputNumber keyboard={false} size='small' controls={false} style={{width: '100%'}} value={row.quantity} onChange={value => updateRow(row.id, 'quantity', value)} />
+                    <InputNumber stringMode keyboard={false} size='small' controls={false} style={{width: '100%'}} value={row.quantity} onChange={value => updateRow(row.id, 'quantity', value)} />
                 } />
                 <Column title='单位' dataIndex='unit' align='center' width={50} render={(_, row) => 
                     <Select size='small' options={unitOptions} align='center' style={{width: '100%'}} value={row.unit} onChange={value => updateRow(row.id, 'unit', value)} />
                 } />
                 <Column title='单价' dataIndex='price' align='center' width={70} render={(_, row) => 
-                    <InputNumber keyboard={false} size='small' controls={false} style={{width: '100%'}} value={row.price} onChange={value => updateRow(row.id, 'price', value)} />
+                    <InputNumber stringMode keyboard={false} size='small' controls={false} style={{width: '100%'}} value={row.price} onChange={value => updateRow(row.id, 'price', value)} />
                 } />
                 <Column title='金额' dataIndex='originalAmount' align='center' width={80} render={originalAmount => 
                     originalAmount.toString()
                 } />
                 <Column title='折扣' dataIndex='discount' align='center' width={40} render={(_, row) => 
-                    <InputNumber keyboard={false} size='small' min={0} max={100} controls={false} style={{width: '100%'}} value={row.discount} onChange={value => updateRow(row.id, 'discount', value)} />
+                    <InputNumber keyboard={false} size='small' min={0} max={100} controls={false} style={{width: '100%'}} 
+                        value={row.discount} onChange={value => updateRow(row.id, 'discount', value)}
+                        formatter={(value) => `${value}%`}
+                        parser={(value) => value.replace('%', '')}
+                    />
                 } />
                 <Column title='折后价' dataIndex='amount' align='center' width={80} render={amount => 
                     amount.toString()
@@ -253,8 +245,16 @@ function SalesOrderFB() {
                     <Input size='small' style={{width: '100%'}} value={row.remark} onChange={e => updateRow(row.id, 'remark', e.target.value)} />
                 } />
             </Table>
-            <br/>
-            总计：{editOrder.amount.toString()}
+            <Divider />
+            <Row>
+                <Col span={12}>总计：{editOrder.amount.toString()}</Col>
+                <Col span={12}>
+                    预付款：<InputNumber size='small' keyboard={false} stringMode controls={false} style={{width: '90%', maxWidth: '150px'}} 
+                        value={editOrder.prepayment} onChange={value => updatePrepayment(value)}
+                    />
+                </Col>
+            </Row>
+            
         </Modal>
     </>)
 }

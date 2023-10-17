@@ -4,13 +4,16 @@ import React from 'react';
 import * as XLSX from 'xlsx';
 import Axios from 'axios';
 
-import Invoice from "../components/Invoice.js";
-import { baseURL, emptyInvoice, invoiceSettings } from "../config";
+// import Invoice from "../components/Invoice.js";
+import { baseURL, invoiceSettings } from "../utils/config";
+import { initSalesOrderForPreview } from "../utils/salesOrderConfig";
+import SalesOrderPreview from "../components/salesOrderComponents/SalesOrderPreview";
+
 
 const { TextArea } = Input;
 
 
-function Setting() {
+function SettingPage() {
     const [width, setWidth] = useState(invoiceSettings.width())
     const [height, setHeight] = useState(invoiceSettings.height())
     const [fontSize, setFontSize] = useState(invoiceSettings.fontSize())
@@ -209,6 +212,10 @@ function Setting() {
                 <InputNumber addonBefore="水平" value={hPadding} onChange={onHPaddingChange} />
                 <InputNumber addonBefore="垂直" value={vPadding} onChange={onVPaddingChange} />
             </Space>
+
+            {/* <h3>开单设置</h3>
+            <InputNumber addonBefore='默认行数' value={defaultEditRowNum} onChange={onDefaultEditRowNumChange} style={{maxWidth: '200px'}}/> */}
+
             
             <br/>
             <Button
@@ -218,11 +225,9 @@ function Setting() {
             >
                 {showPreview ? '隐藏预览' : '显示预览'} <span style={{ color: 'gray' }}>&nbsp;(以打印页面为准)</span>
             </Button>
-            {showPreview ? <Invoice mode='view' invoice={emptyInvoice()} editInvoice={emptyInvoice()} /> : ''}
+            {showPreview ? <SalesOrderPreview salesOrder={initSalesOrderForPreview(10)} /> : ''}
             
-            <h2>开单设置</h2>
-            <InputNumber addonBefore='默认行数' value={defaultEditRowNum} onChange={onDefaultEditRowNumChange} style={{maxWidth: '200px'}}/>
-
+            
             {/* <h3>同步选项</h3>
             <p>服务器地址</p>
             <Input placeholder='服务器地址' value={syncServer} onChange={onSyncServerChange} style={{maxWidth: '400px'}}/>
@@ -232,14 +237,14 @@ function Setting() {
             <Input.Password placeholder='密码' value={syncPassword} onChange={onSyncPasswordChange} style={{maxWidth: '400px'}} />
             <Button>同步</Button> */}
 
-            <h2>导入</h2>
+            {/* <h2>导入</h2>
             <Upload directory accept=".xlsx" customRequest={handleUpload}>
                 <Button>
                     选择.xlsx文件
                 </Button>
-            </Upload>
+            </Upload> */}
         </div>
     );
 }
 
-export default Setting;
+export default SettingPage;

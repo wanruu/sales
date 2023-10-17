@@ -44,7 +44,8 @@ const salesOrderItem = `CREATE TABLE IF NOT EXISTS salesOrderItem(
     remark TEXT,
     delivered INTEGER,
     orderId INTEGER,
-    FOREIGN KEY(orderId) REFERENCES salesOrder(id) ON DELETE CASCADE
+    FOREIGN KEY(orderId) REFERENCES salesOrder(id) ON DELETE CASCADE,
+    FOREIGN KEY(productId) REFERENCES product(id) ON DELETE CASCADE
 );`
 
 const salesOrder = `CREATE TABLE IF NOT EXISTS salesOrder(
@@ -65,7 +66,8 @@ const salesRefundItem = `CREATE TABLE IF NOT EXISTS salesRefundItem(
     remark TEXT,
     delivered INTEGER,
     refundId INTEGER,
-    FOREIGN KEY(refundId) REFERENCES salesRefund(id) ON DELETE CASCADE
+    FOREIGN KEY(refundId) REFERENCES salesRefund(id) ON DELETE CASCADE,
+    FOREIGN KEY(orderId) REFERENCES salesOrder(id) ON DELETE CASCADE
 );`
 
 const salesRefund = `CREATE TABLE IF NOT EXISTS salesRefund(

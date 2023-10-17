@@ -4,20 +4,22 @@ import { Layout, theme } from 'antd'
 
 const { Header, Content, Footer, Sider } = Layout
 
-import MyMenu from './components/MyMenu.js'
-import SalesOrderList from './pages/SalesOrderList.js'
-import Setting from './pages/Setting.js';
+import MyMenu from './components/common/MyMenu.js'
+import SalesOrderPage from './pages/SalesOrderPage.js'
+import SettingPage from './pages/SettingPage.js';
+import ProductPage from './pages/ProductPage.js'
 
 
 function App() {
     const [menuKey, setMenuKey] = useState('salesOrder')
     const { token: { colorBgContainer }, } = theme.useToken()
     const pages = {
-        'salesOrder': <SalesOrderList />,
+        'salesOrder': <SalesOrderPage />,
         'salesRefund': 'SalesRefundList',
         'purchaseOrder': 'PurchaseOrder',
         'purchaseRefund': 'PurchaseRefund',
-        'settings': <Setting />,
+        'product': <ProductPage />,
+        'settings': <SettingPage />,
     };
 
     return (

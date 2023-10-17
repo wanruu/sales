@@ -4,6 +4,7 @@ import {
     BarChartOutlined,
     PlusCircleOutlined,
     MinusCircleOutlined,
+    BankOutlined,
 } from '@ant-design/icons'
 import { Menu } from 'antd'
 import React from 'react'
@@ -22,12 +23,13 @@ function MyMenu(props) {
             getItem('销售退货', 'purchaseOrder'),
             getItem('采购退货', 'purchaseRefund')
         ]),
+        getItem('产品', 'product', <BankOutlined />),
         // getItem('统计数据', 'stats', <BarChartOutlined />, [
         //     getItem('摘要', 'sales'),
         //     getItem('客户结算', 'customrs'),
         //     getItem('产品数据', 'products'),
         // ]),
-        getItem('设置', 'settings', <SettingOutlined />)
+        getItem('设置', 'settings', <SettingOutlined />),
     ]
     
 
