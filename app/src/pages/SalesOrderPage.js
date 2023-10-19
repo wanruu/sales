@@ -12,12 +12,13 @@ const { confirm } = Modal;
 import SalesOrderFB from '../components/salesOrderComponents/SalesOrderFB'
 import SalesOrderPreview from '../components/salesOrderComponents/SalesOrderPreview';
 import { baseURL } from '../utils/config';
-
+import SalesOrderEditView from '../components/salesOrderComponents/SalesOrderEditView';
 
 function SalesOrderPage() {
     const [salesOrders, setSalesOrders] = useState([])
     const [previewOrderId, setPreviewOrderId] = useState(undefined)
-    
+    const [editOrderId, setEditOrderId] = useState(undefined)
+    const [messageApi, contextHolder] = message.useMessage();
 
     const load = () => {
         Axios({
@@ -29,7 +30,7 @@ function SalesOrderPage() {
         }).then(res => {
             if (res.status === 200) {
                 setSalesOrders(res.data)
-            }
+            } 
         }).catch(_ => {
             
         });
@@ -45,8 +46,12 @@ function SalesOrderPage() {
         }).then(res => {
             if (res.status === 200) {
                 load()
+                messageApi.open({ type: 'success', content: '删除成功', });
+            } else {
+                messageApi.open({ type: 'error', content: '删除失败', });
             }
         }).catch(_ => {
+            messageApi.open({ type: 'error', content: '删除失败', });
         }); 
     }
 
@@ -68,13 +73,18 @@ function SalesOrderPage() {
     }, [])
 
     return (<>
+        {contextHolder}
         <SalesOrderFB refresh={load} />
 
         <Modal open={previewOrderId !== undefined} width={900} destroyOnClose onCancel={_ => setPreviewOrderId(undefined)}>
             <SalesOrderPreview id={previewOrderId} />
         </Modal>
+        <Modal title='编辑销售清单' open={editOrderId !== undefined} width={900} destroyOnClose 
+        onCancel={_ => setEditOrderId(undefined)} footer={null}>
+            <SalesOrderEditView id={editOrderId} refresh={load}/>
+        </Modal>
 
-        <Table dataSource={salesOrders} bordered size='small' 
+        <Table dataSource={salesOrders} bordered size='small'
         pagination={{defaultPageSize: 50, pageSizeOptions: [50, 100], showQuickJumper: true, showSizeChanger: true}}>
             <Column title='编号' align='center' render={(_, __, idx) => idx+1} />
             <Column title='单号' dataIndex='id' align='center' render={id => 
@@ -92,7 +102,7 @@ function SalesOrderPage() {
             }} />
             <Column title='操作' align='center' render={(_, row) => (
                 <Space.Compact size='small'>
-                    <Button type='link'>编辑</Button>
+                    <Button type='link' onClick={_ => setEditOrderId(row.id)}>编辑</Button>
                     <Button type='link' onClick={_ => setPreviewOrderId(row.id)}>预览</Button>
                     <Button type='link' onClick={_ => showDeleteConfirm(row.id)} danger>删除</Button>
                 </Space.Compact>

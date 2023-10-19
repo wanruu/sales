@@ -2,7 +2,36 @@
 
 # API
 
-## Invoice
+## salesOrder
+
+### POST /salesOrder
+
+```json
+{
+    "partner": "xxx",
+    "date": "MMMM-YY-DD",
+    "amount" "1",
+    "items": [
+        {
+        	"material": "xxx",
+            "name": "xxx",
+            "spec": "xxx",
+            "unit": "xxx",
+
+            "price": "1",
+            "discount": "1",
+            "quantity": "1",
+            "originalAmount": "1",
+    		"amount": "1",
+            "remark": "xxx"
+        }
+    ]
+}
+```
+
+1. partner、date、items、amount缺一不可，否则返回`400: Insufficient data`。成功则返回`{"id": "xxx"}`。
+2. date必须为`MMMM-YY-DD`格式，否则返回`400: Wrong data format, use MMMM-YY-DD`。
+3. 服务器错误则返回`500`。
 
 ### POST /invoice
 

@@ -8,7 +8,7 @@ import MyMenu from './components/common/MyMenu.js'
 import SalesOrderPage from './pages/SalesOrderPage.js'
 import SettingPage from './pages/SettingPage.js';
 import ProductPage from './pages/ProductPage.js'
-
+import PartnerPage from './pages/PartnerPage.js'
 
 function App() {
     const [menuKey, setMenuKey] = useState('salesOrder')
@@ -19,6 +19,7 @@ function App() {
         'purchaseOrder': 'PurchaseOrder',
         'purchaseRefund': 'PurchaseRefund',
         'product': <ProductPage />,
+        'partner': <PartnerPage />,
         'settings': <SettingPage />,
     };
 

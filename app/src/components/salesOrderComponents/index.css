@@ -11,16 +11,16 @@
     padding-bottom: 1px;
 }
 
-#editTable table {
+.editTable table {
     font-size: 12px
 }
 
-#editTable input {
-    font-size: 12px;
+.editTable input {
+    font-size: 12px !important;
 }
 
-#editTable tbody td {
-    padding: 2px;
+.editTable tbody td {
+    padding: 2px !important;
 }
 
 
@@ -30,18 +30,21 @@
     font-size: 12px;
 }
 .ant-select-item {
-    padding: 0px;
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+    text-align: center;
 }
 
-#editTable .ant-select-selector {
+.editTable .ant-select-selector {
     font-size: 12px;
     border-radius: 4px;
 }
 
-#editTable .ant-select-selection-item {
-    padding: 0px;
+.editTable .ant-select-selection-item {
+    padding: 0px !important;
+    font-size: 12px;
 }
 
-#editTable .ant-select-arrow {
+.editTable .ant-select-arrow {
     display: none 
 }

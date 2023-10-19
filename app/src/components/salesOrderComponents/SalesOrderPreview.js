@@ -12,7 +12,7 @@ import { invoiceSettings, baseURL } from "../../utils/config";
 
 
 function SalesOrderPreview(props) {
-    const [salesOrder, setSalesOrders] = useState(initSalesOrderForPreview(1))
+    const [salesOrder, setSalesOrder] = useState(initSalesOrderForPreview(1))
 
     const load = () => {
         Axios({
@@ -21,13 +21,13 @@ function SalesOrderPreview(props) {
             url: `salesOrder/id/${props.id}`,
             'Content-Type': 'application/json',
         }).then(res => {
-            setSalesOrders(res.data);
+            setSalesOrder(res.data);
         }).catch(err => { });
     }
 
     useEffect(() => {
         if (props.salesOrder !== undefined) {
-            setSalesOrders(props.salesOrder)
+            setSalesOrder(props.salesOrder)
         } else if (props.id !== undefined) {
             load()
         }

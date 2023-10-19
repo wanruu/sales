@@ -1,6 +1,8 @@
 import React from "react";
 import { useEffect, useState, } from "react";
-import { Table, Modal, Button, message, Input, AutoComplete, DatePicker, Col, InputNumber, Row, FloatButton, Space, Popover, Select, Divider } from "antd";
+import { Table, Modal, Button, message, Input, AutoComplete, DatePicker, Col, InputNumber, 
+    Row, FloatButton, Space, Popover, Select, Divider 
+} from "antd";
 import { PlusOutlined, InboxOutlined, } from '@ant-design/icons'
 import { Decimal } from 'decimal.js';
 import dayjs from 'dayjs'
@@ -8,26 +10,12 @@ import Axios from "axios";
 
 const { Column } = Table
 
-import { emptySalesOrder, dcSalesOrder, isSalesOrderItemEmpty, emptySalesOrderItem, isSalesOrderItemComplete } from '../../utils/salesOrderConfig'
-import { baseURL, unitCoeffDict, unitOptions, dateFormat } from "../../utils/config";
-import './SalesOrderFB.css';
+import { emptySalesOrder, dcSalesOrder, isSalesOrderItemEmpty, emptySalesOrderItem, 
+    isSalesOrderItemComplete, calItemAmount, calTotalAmount
+} from '../../utils/salesOrderConfig'
+import { baseURL, unitOptions, dateFormat } from "../../utils/config";
+import './index.css';
 
-
-
-const calItemAmount = (itemDict) => {
-    const quantity = new Decimal(itemDict.quantity || 0)
-    const price = new Decimal(itemDict.price || 0)
-    const unit = new Decimal(unitCoeffDict[itemDict.unit])
-    const discount = new Decimal(itemDict.discount || 0)
-
-    const originalAmount = quantity.times(price).times(unit)
-    const amount = originalAmount.times(discount).dividedBy(100)
-
-    return { originalAmount: originalAmount.toFixed(2, Decimal.ROUND_HALF_UP), amount: amount.toFixed(2, Decimal.ROUND_HALF_UP)}
-}
-const calTotalAmount = (items) => {
-    return items.reduce((previous, current) => previous.plus(current.amount), new Decimal(0))
-}
 
 
 function SalesOrderFB(props) {
@@ -208,8 +196,8 @@ function SalesOrderFB(props) {
                 <Col span={12}>日期：<DatePicker size='small' value={editOrder.date} onChange={value => updateDate(value)}/></Col>
             </Row>
 
-            <Table id='editTable' dataSource={editOrder.items} size='small' bordered style={{height: 400}} scroll={{x: 'max-content', y: 400 }} pagination={false} >
-                <Column title='序号' align='center' width={40} render={(_, __, idx) => idx+1} />
+            <Table className='editTable' dataSource={editOrder.items} size='small' bordered style={{height: 400}} scroll={{x: 'max-content', y: 400 }} pagination={false} >
+                <Column align='center' width={30} render={(_, __, idx) => idx+1} />
                 <Column title='材质' dataIndex='material' align='center' width={45} render={(_, row) => 
                     <AutoComplete size='small' style={{width: '100%'}} value={row.material} onChange={value => updateRow(row.id, 'material', value)} />
                 } />
@@ -231,7 +219,7 @@ function SalesOrderFB(props) {
                 <Column title='金额' dataIndex='originalAmount' align='center' width={80} render={originalAmount => 
                     originalAmount.toString()
                 } />
-                <Column title='折扣' dataIndex='discount' align='center' width={40} render={(_, row) => 
+                <Column title='折扣' dataIndex='discount' align='center' width={50} render={(_, row) => 
                     <InputNumber keyboard={false} size='small' min={0} max={100} controls={false} style={{width: '100%'}} 
                         value={row.discount} onChange={value => updateRow(row.id, 'discount', value)}
                         formatter={(value) => `${value}%`}
@@ -254,7 +242,6 @@ function SalesOrderFB(props) {
                     />
                 </Col>
             </Row>
-            
         </Modal>
     </>)
 }

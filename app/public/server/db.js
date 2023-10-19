@@ -35,7 +35,7 @@ const product = `CREATE TABLE IF NOT EXISTS product(
 // sales: order & refund
 const salesOrderItem = `CREATE TABLE IF NOT EXISTS salesOrderItem(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    productId INTEGER,
+    productId TEXT,
     price TEXT NOT NULL,
     discount INTEGER NOT NULL,
     quantity TEXT NOT NULL,
@@ -54,12 +54,13 @@ const salesOrder = `CREATE TABLE IF NOT EXISTS salesOrder(
     date TEXT NOT NULL,
     amount TEXT NOT NULL,
     prepayment TEXT NOT NULL,
-    payment TEXT NOT NULL
+    payment TEXT NOT NULL,
+    FOREIGN KEY(partner) REFERENCES partner(name)
 );`
 
 const salesRefundItem = `CREATE TABLE IF NOT EXISTS salesRefundItem(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    orderId INTEGER,
+    orderItemId INTEGER,
     quantity TEXT NOT NULL,
     originalAmount TEXT NOT NULL,
     amount TEXT NOT NULL,
@@ -67,7 +68,7 @@ const salesRefundItem = `CREATE TABLE IF NOT EXISTS salesRefundItem(
     delivered INTEGER,
     refundId INTEGER,
     FOREIGN KEY(refundId) REFERENCES salesRefund(id) ON DELETE CASCADE,
-    FOREIGN KEY(orderId) REFERENCES salesOrder(id) ON DELETE CASCADE
+    FOREIGN KEY(orderItemId) REFERENCES salesOrderItem(id) ON DELETE CASCADE
 );`
 
 const salesRefund = `CREATE TABLE IF NOT EXISTS salesRefund(
@@ -75,14 +76,15 @@ const salesRefund = `CREATE TABLE IF NOT EXISTS salesRefund(
     partner TEXT NOT NULL,
     date TEXT NOT NULL,
     amount TEXT NOT NULL,
-    payment TEXT NOT NULL
+    payment TEXT NOT NULL,
+    FOREIGN KEY(partner) REFERENCES partner(name)
 );`
 
 
 // purchase 
 const purchaseOrderItem = `CREATE TABLE IF NOT EXISTS purchaseOrderItem(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    productId INTEGER,
+    productId TEXT,
     price TEXT NOT NULL,
     discount INTEGER NOT NULL,
     quantity TEXT NOT NULL,
@@ -92,7 +94,8 @@ const purchaseOrderItem = `CREATE TABLE IF NOT EXISTS purchaseOrderItem(
     remark TEXT,
     delivered INTEGER,
     orderId INTEGER,
-    FOREIGN KEY(orderId) REFERENCES purchaseOrder(id) ON DELETE CASCADE
+    FOREIGN KEY(orderId) REFERENCES purchaseOrder(id) ON DELETE CASCADE,
+    FOREIGN KEY(productId) REFERENCES product(id) ON DELETE CASCADE
 );`
 
 const purchaseOrder = `CREATE TABLE IF NOT EXISTS purchaseOrder(
@@ -100,12 +103,13 @@ const purchaseOrder = `CREATE TABLE IF NOT EXISTS purchaseOrder(
     partner TEXT NOT NULL,
     date TEXT NOT NULL,
     amount TEXT NOT NULL,
-    payment TEXT NOT NULL
+    payment TEXT NOT NULL,
+    FOREIGN KEY(partner) REFERENCES partner(name)
 );`
 
 const purchaseRefundItem = `CREATE TABLE IF NOT EXISTS purchaseRefundItem(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    orderId INTEGER,
+    orderItemId INTEGER,
     quantity TEXT NOT NULL,
     weight TEXT NOT NULL,
     originalAmount TEXT NOT NULL,
@@ -113,7 +117,8 @@ const purchaseRefundItem = `CREATE TABLE IF NOT EXISTS purchaseRefundItem(
     remark TEXT,
     delivered INTEGER,
     refundId INTEGER,
-    FOREIGN KEY(refundId) REFERENCES purchaseRefund(id) ON DELETE CASCADE
+    FOREIGN KEY(refundId) REFERENCES purchaseRefund(id) ON DELETE CASCADE,
+    FOREIGN KEY(orderItemId) REFERENCES purchaseOrder(id) ON DELETE CASCADE
 );`
 
 const purchaseRefund = `CREATE TABLE IF NOT EXISTS purchaseRefund(
@@ -121,7 +126,8 @@ const purchaseRefund = `CREATE TABLE IF NOT EXISTS purchaseRefund(
     partner TEXT NOT NULL,
     date TEXT NOT NULL,
     amount TEXT NOT NULL,
-    payment TEXT NOT NULL
+    payment TEXT NOT NULL,
+    FOREIGN KEY(partner) REFERENCES partner(name)
 );`
 
 

@@ -6,20 +6,6 @@ export const baseURL = () => {
 
 export const dateFormat = 'YYYY-MM-DD';
 
-// export const calItemAmount = (item) => {
-//     // if (item.quantity * item.unitPrice === 0) return -1;
-//     return parseFloat((item.quantity * item.unitPrice).toFixed(2));
-// };
-
-// export const dcInvoice = (invoice) => {
-//     return {
-//         no: invoice.no,
-//         customer: invoice.customer,
-//         date: dayjs(invoice.date),
-//         items: JSON.parse(JSON.stringify(invoice.items))
-//     }
-// };
-
 
 export const invoiceSettings = {
     width: () => localStorage.getItem('width') || 772,
