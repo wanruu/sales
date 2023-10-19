@@ -14,6 +14,7 @@ import SalesOrderPreview from '../components/salesOrderComponents/SalesOrderPrev
 import { baseURL } from '../utils/config';
 import SalesOrderEditView from '../components/salesOrderComponents/SalesOrderEditView';
 
+
 function SalesOrderPage() {
     const [salesOrders, setSalesOrders] = useState([])
     const [previewOrderId, setPreviewOrderId] = useState(undefined)
@@ -76,7 +77,8 @@ function SalesOrderPage() {
         {contextHolder}
         <SalesOrderFB refresh={load} />
 
-        <Modal open={previewOrderId !== undefined} width={900} destroyOnClose onCancel={_ => setPreviewOrderId(undefined)}>
+        <Modal open={previewOrderId !== undefined} width={900} destroyOnClose 
+        onCancel={_ => setPreviewOrderId(undefined)} footer={null}>
             <SalesOrderPreview id={previewOrderId} />
         </Modal>
         <Modal title='编辑销售清单' open={editOrderId !== undefined} width={900} destroyOnClose 
@@ -86,11 +88,12 @@ function SalesOrderPage() {
 
         <Table dataSource={salesOrders} bordered size='small'
         pagination={{defaultPageSize: 50, pageSizeOptions: [50, 100], showQuickJumper: true, showSizeChanger: true}}>
-            <Column title='编号' align='center' render={(_, __, idx) => idx+1} />
+            <Column align='center' render={(_, __, idx) => idx+1} />
             <Column title='单号' dataIndex='id' align='center' render={id => 
                 `${id}`.padStart(6, '0')
             } />
-            <Column title='收货单位' dataIndex='partner' align='center' />
+            <Column title='日期' dataIndex='date' align='center' />
+            <Column title='客户' dataIndex='partner' align='center' />
             <Column title='金额' dataIndex='amount' align='center' render={amount => 
                 `${amount}`
             } />

@@ -266,7 +266,6 @@ router.put('/id/:id', async (req, res) => {
                     resolve()
                 })
             }).catch(err => {
-                console.log('here')
                 console.error(err)
                 res.status(500).send()
                 return
@@ -277,7 +276,7 @@ router.put('/id/:id', async (req, res) => {
     // [{id,productId,material,name,spec,unit,price,discount,originalQuantity,quantity,originalAmount,amount,remark}]
     if (updatedOrderItems !== undefined && updatedOrderItems.length > 0) {
         for (const item of updatedOrderItems) {
-            var query;
+            var productId;
             
             // 是否创建新product
             const newProductId = crypto.randomUUID()
@@ -295,10 +294,7 @@ router.put('/id/:id', async (req, res) => {
             })
             if (ifCreateProduct === 1) {
                 // 创建了新product
-                query = `UPDATE salesOrderItem 
-                SET productId="${newProductId}", price="${item.price}", discount=${item.discount}, quantity="${item.quantity}", 
-                originalAmount="${item.originalAmount}", amount="${item.amount}", remark="${item.remark}" 
-                WHERE id=${id}`
+                productId = newProductId
             } else {
                 // 没有创建新product
                 const product = await new Promise((resolve, reject) => {
@@ -324,11 +320,12 @@ router.put('/id/:id', async (req, res) => {
                         return
                     })
                 }
-                query = `UPDATE salesOrderItem 
-                SET productId="${product.id}", price="${item.price}", discount=${item.discount}, quantity="${item.quantity}", 
+                productId = product.id
+            }
+            const query = `UPDATE salesOrderItem 
+                SET productId="${productId}", price="${item.price}", discount=${item.discount}, quantity="${item.quantity}", 
                 originalAmount="${item.originalAmount}", amount="${item.amount}", remark="${item.remark}" 
                 WHERE id=${id}`
-            }
             await new Promise((resolve, reject) => {
                 db.run(query, err => {
                     if (err) { reject(err) }
@@ -340,8 +337,12 @@ router.put('/id/:id', async (req, res) => {
                 return
             })
             // update product
-            updateProductQuantityById(item.productId, Decimal(item.originalQuantity).toString())
-            updateProductQuantityByInfo(item.material, item.name, item.spec, item.unit, -Decimal(item.quantity).toString())
+            if (item.productId === productId) {
+                updateProductQuantityById(productId, Decimal(item.originalQuantity).minus(item.quantity).toString())
+            } else {
+                updateProductQuantityById(item.productId, item.originalQuantity)
+                updateProductQuantityById(productId, "-" + item.quantity)
+            }
         }
     }
     // 4. update salesRefundItem, salesRefund amount
@@ -384,6 +385,35 @@ router.get('/', (req, res) => {
             return
         }
         res.send(rows)
+    })
+})
+
+router.get('/detailed', (req, res) => {
+    db.all('SELECT * FROM salesOrder', (err, orders) => {
+        if (err) {
+            console.error(err)
+            res.status(500).send()
+            return
+        }
+        const query = `SELECT i.orderId, i.id, p.material, p.name, p.spec, p.unit, price, i.quantity, i.amount, discount, originalAmount, remark, delivered 
+        FROM salesOrder o, salesOrderItem i, product p 
+        WHERE o.id=i.orderId AND p.id=productId`
+        db.all(query, (err, items) => {
+            if (err) {
+                console.error(err)
+                res.status(500).send()
+                return
+            }
+            for (const item of items) {
+                const order = orders.find(order => order.id === item.orderId)
+                if (order.items === undefined) {
+                    order.items = [item]
+                } else {
+                    order.items.push(item)
+                }
+            }
+            res.send(orders)
+        })
     })
 })
 
@@ -491,18 +521,18 @@ router.delete('/id/:id', async (req, res) => {
                 return
             }
             // update salesRefund amount (refundId, orderId, amount)
-            const updateRefundOrder = refunds.filter(refund => `${refund.orderId}` !== `${id}`).reduce((previous, current) => {
-                const refundId = current.refundId
-                if (previous[refundId] === undefined) {
-                    previous[refundId] = { refundId: refundId, amount: Decimal(current.amount) }
-                } else {
-                    previous[refundId].amount = previous[refundId].amount.plus(Decimal(current.amount))
-                }
+            const init = refunds.reduce((previous, current) => {
+                previous[current.refundId] = { refundId: current.refundId, amount: Decimal(0) }
                 return previous
             }, {})
+            const updateRefundOrder = refunds.filter(refund => `${refund.orderId}` !== `${id}`).reduce((previous, current) => {
+                const refundId = current.refundId
+                previous[refundId].amount = previous[refundId].amount.plus(Decimal(current.amount))
+                return previous
+            }, init)
             db.serialize(() => {
                 for (let refundId in updateRefundOrder) {
-                    db.run(`UPDATE salesRefund SET amount="${updateRefundOrder[refundId].toString()}" WHERE id=${refundId}`, err => {
+                    db.run(`UPDATE salesRefund SET amount="${updateRefundOrder[refundId].amount.toString()}" WHERE id=${refundId}`, err => {
                         if (err) {
                             console.error(err)
                             res.status(500).send()

@@ -6,7 +6,7 @@ import Axios from 'axios';
 
 // import Invoice from "../components/Invoice.js";
 import { baseURL, invoiceSettings } from "../utils/config";
-import { initSalesOrderForPreview } from "../utils/salesOrderConfig";
+import { initSalesOrderForPreview } from "../utils/salesOrderUtils";
 import SalesOrderPreview from "../components/salesOrderComponents/SalesOrderPreview";
 
 

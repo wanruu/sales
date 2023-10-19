@@ -6,28 +6,28 @@ import { PrinterOutlined, FieldNumberOutlined } from '@ant-design/icons';
 
 
 import PreviewTable from "../common/PreviewTable";
-import { initSalesOrderForPreview } from "../../utils/salesOrderUtils";
 import '../common/InvoicePreview.css'
 import { invoiceSettings, baseURL } from "../../utils/config";
+import { initSalesRefundForPreview } from "../../utils/salesRefundUtils";
 
 
-function SalesOrderPreview(props) {
-    const [salesOrder, setSalesOrder] = useState(initSalesOrderForPreview(1))
+function SalesRefundPreview(props) {
+    const [salesRefund, setSalesRefund] = useState(initSalesRefundForPreview(0))
 
     const load = () => {
         Axios({
             method: 'get',
             baseURL: baseURL(),
-            url: `salesOrder/id/${props.id}`,
+            url: `salesRefund/id/${props.id}`,
             'Content-Type': 'application/json',
         }).then(res => {
-            setSalesOrder(res.data);
+            setSalesRefund(res.data);
         }).catch(err => { });
     }
 
     useEffect(() => {
-        if (props.salesOrder !== undefined) {
-            setSalesOrder(props.salesOrder)
+        if (props.salesRefund !== undefined) {
+            setSalesRefund(props.salesRefund)
         } else if (props.id !== undefined) {
             load()
         }
@@ -59,17 +59,17 @@ function SalesOrderPreview(props) {
                             </div>
                             <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: 'center' }}>
                                 <div style={{ width: '36%', textAlign: 'left', fontSize: invoiceSettings.fontSize() + 'px' }}>
-                                    客户：{salesOrder.partner}
+                                    客户：{salesRefund.partner}
                                 </div>
                                 <div style={{ width: '35%', textAlign: 'left', fontSize: invoiceSettings.fontSize() + 'px' }}>
-                                    日期：{salesOrder.date}
+                                    日期：{salesRefund.date}
                                 </div>
                                 <div style={{ width: '28%', textAlign: 'right', fontSize: invoiceSettings.fontSize() + 'px'}}>
-                                    <FieldNumberOutlined/> {`${salesOrder.id}`.padStart(6, '0')}
+                                    <FieldNumberOutlined/> {`${salesRefund.id}`.padStart(6, '0')}
                                 </div>
                             </div>
                             <div style={{ fontSize: invoiceSettings.fontSize() + 'px'}}>
-                                <PreviewTable invoice={salesOrder} />
+                                <PreviewTable invoice={salesRefund} />
                             </div>
                         </Space>
                     </div>
@@ -80,4 +80,4 @@ function SalesOrderPreview(props) {
 }
 
 
-export default SalesOrderPreview
+export default SalesRefundPreview

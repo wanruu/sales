@@ -9,13 +9,15 @@ import SalesOrderPage from './pages/SalesOrderPage.js'
 import SettingPage from './pages/SettingPage.js';
 import ProductPage from './pages/ProductPage.js'
 import PartnerPage from './pages/PartnerPage.js'
+import SalesRefundPage from './pages/SalesRefundPage.js'
+
 
 function App() {
     const [menuKey, setMenuKey] = useState('salesOrder')
     const { token: { colorBgContainer }, } = theme.useToken()
     const pages = {
         'salesOrder': <SalesOrderPage />,
-        'salesRefund': 'SalesRefundList',
+        'salesRefund': <SalesRefundPage />,
         'purchaseOrder': 'PurchaseOrder',
         'purchaseRefund': 'PurchaseRefund',
         'product': <ProductPage />,

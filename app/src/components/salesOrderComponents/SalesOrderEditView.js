@@ -11,7 +11,7 @@ import { FieldNumberOutlined, EditOutlined, RedoOutlined } from '@ant-design/ico
 import { baseURL, dateFormat, unitOptions } from "../../utils/config";
 import { emptySalesOrder, dcSalesOrder, calTotalAmount, calItemAmount, emptySalesOrderItem, 
     isSalesOrderItemEmpty, isSalesOrderItemComplete 
-} from "../../utils/salesOrderConfig";
+} from "../../utils/salesOrderUtils";
 import './index.css';
 
 

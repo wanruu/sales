@@ -12,7 +12,7 @@ const { Column } = Table
 
 import { emptySalesOrder, dcSalesOrder, isSalesOrderItemEmpty, emptySalesOrderItem, 
     isSalesOrderItemComplete, calItemAmount, calTotalAmount
-} from '../../utils/salesOrderConfig'
+} from '../../utils/salesOrderUtils'
 import { baseURL, unitOptions, dateFormat } from "../../utils/config";
 import './index.css';
 

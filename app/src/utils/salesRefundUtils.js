@@ -4,7 +4,7 @@ import { Decimal } from 'decimal.js';
 
 import { invoiceSettings, dateFormat, unitCoeffDict } from './config'
 
-export const emptySalesOrderItem = () => {
+export const emptySalesRefundItem = () => {
     return { 
         id: uuid(),
         material: '', name: '', spec: '', 
@@ -14,37 +14,35 @@ export const emptySalesOrderItem = () => {
     };
 };
 
-export const isSalesOrderItemEmpty = (item) => {
-    return item.material === '' && item.name === '' && item.spec === '' && item.quantity === null && 
-    item.unit === '' && item.price === null && item.remark === '' && (item.discount === 100 || item.discount === null);
-}
+// export const isSalesOrderItemEmpty = (item) => {
+//     return item.material === '' && item.name === '' && item.spec === '' && item.quantity === null && 
+//     item.unit === '' && item.price === null && item.remark === '' && (item.discount === 100 || item.discount === null);
+// }
 
-export const isSalesOrderItemComplete = (item) => {
-    return item.material !== '' && item.name !== '' && item.spec !== '' && item.quantity !== null && 
-    item.unit !== '' && item.price !== null && item.discount !== null;
-}
+// export const isSalesOrderItemComplete = (item) => {
+//     return item.material !== '' && item.name !== '' && item.spec !== '' && item.quantity !== null && 
+//     item.unit !== '' && item.price !== null && item.discount !== null;
+// }
 
-export const emptySalesOrder = () => {
+export const emptySalesRefund = () => {
     return {
         id: undefined,
         partner: '',
         date: dayjs(),
         draftTime: undefined,
         amount: Decimal(0),
-        prepayment: '',
         payment: '',
-        // items: [...Array(parseInt(invoiceSettings.defaultEditRowNum())).keys()].map(_ => emptySalesOrderItem()),
-        items: [emptySalesOrderItem()]
+        items:  [],
     };
 };
 
-export const initSalesOrderForPreview = (itemNum=1) => {
+export const initSalesRefundForPreview = (itemNum=1) => {
     return {
         id: 999999,
         partner: '',
         date: dayjs().format(dateFormat),
         amount: '0',
-        prepayment: '',
+        payment: '',
         items: [...Array(itemNum).keys()].map(_ => { return {
             material: '', name: '', spec: '', 
             quantity: '0', unit: '', price: '0', 
@@ -54,16 +52,15 @@ export const initSalesOrderForPreview = (itemNum=1) => {
     };
 }
 
-export const dcSalesOrder = (order) => {
+export const dcSalesRefund = (refund) => {
     return {
-        id: order.id,
-        partner: order.partner,
-        date: dayjs(order.date),
-        draftTime: order.draftTime,
-        amount: order.amount,
-        payment: order.payment,
-        prepayment: order.prepayment,
-        items: JSON.parse(JSON.stringify(order.items))
+        id: refund.id,
+        partner: refund.partner,
+        date: dayjs(refund.date),
+        draftTime: refund.draftTime,
+        amount: refund.amount,
+        payment: refund.payment,
+        items: JSON.parse(JSON.stringify(refund.items))
     }
 };
 

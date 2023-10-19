@@ -41,7 +41,7 @@ const updateProductQuantityById = async (id, quantityChange) => {
                 resolve()
             })
         })
-    }).then(err => {
+    }).catch(err => {
         console.error(err)
     })
 }
@@ -63,7 +63,7 @@ const updateProductQuantityByInfo = async (material, name, spec, unit, quantityC
                 resolve()
             })
         })
-    }).then(err => {
+    }).catch(err => {
         console.error(err)
     })
 }
@@ -80,7 +80,7 @@ const updateSalesRefundAmount = async (refundId) => {
             }, Decimal(0)).toString()
             resolve(amount)
         })
-    }).then(err => {
+    }).catch(err => {
         console.error(err)
     })
 }

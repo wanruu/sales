@@ -34,7 +34,7 @@ function ProductPage() {
     return (
         <Table dataSource={products} size='small' bordered 
         pagination={{ defaultPageSize: 50, showSizeChanger: true, pageSizeOptions: [50, 100], showQuickJumper: true }} >
-            <Column title='编号' align='center' render={(_, __, idx) => idx+1} />
+            <Column align='center' render={(_, __, idx) => idx+1} />
             <Column title='材质' dataIndex='material' align='center' sorter={(a, b) => a.material > b.material ? 1 : (a.material === b.material ? 0 : -1)} />
             <Column title='名称' dataIndex='name' align='center' sorter={(a, b) => a.name > b.name ? 1 : (a.name === b.name ? 0 : -1)} />
             <Column title='规格' dataIndex='spec' align='center' sorter={(a, b) => a.spec > b.spec ? 1 : (a.spec === b.spec ? 0 : -1)} />

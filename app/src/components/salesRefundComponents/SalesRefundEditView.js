@@ -1,0 +1,104 @@
+import React, { useState, useEffect } from 'react'
+import Axios from 'axios'
+import { Row, Col, Button, AutoComplete, DatePicker, Table, Divider, InputNumber, Input 
+} from 'antd'
+
+const { Column } = Table
+
+import { emptySalesRefund, dcSalesRefund, calTotalAmount, calItemAmount } from '../../utils/salesRefundUtils'
+import { baseURL } from '../../utils/config'
+
+
+function SalesRefundEditView(props) {
+    const [refund, setRefund] = useState(emptySalesRefund())
+    const [editRefund, setEditRefund] = useState(emptySalesRefund())
+    const [isSelectionModalOpen, setSelectionModalOpen] = useState(false)
+    
+    const load = () => {
+        Axios({
+            method: 'get',
+            baseURL: baseURL(),
+            url: `salesRefund/id/${props.id}`,
+            'Content-Type': 'application/json',
+        }).then(res => {
+            setRefund(res.data);
+            setEditRefund(dcSalesRefund(res.data));
+        }).catch(err => { });
+    }
+
+    const upload = () => {
+        
+    }
+
+    useEffect(() => {
+        load()
+    }, [])
+
+    const showSelectionModal = () => {
+        setSelectionModalOpen(true)
+    }
+    const hideSelectionModal = () => {
+        setSelectionModalOpen(false)
+    }
+
+    return (<>
+        <Row style={{ marginTop: '20px', marginBottom: '15px' }}>
+            <Col span={8}>
+                客户：{editRefund.items.length === 0 ? 
+                    <AutoComplete style={{width: 200}} size='small' value={editRefund.partner} onChange={value => updatePartner(value)} />:
+                    editRefund.partner
+                }
+            </Col>
+            <Col span={8} align='center'>日期：<DatePicker size='small' value={editRefund.date} onChange={value => updateDate(value)}/></Col>
+            <Col span={8} align='right'>
+                <Button type='primary' onClick={showSelectionModal} disabled={editRefund.partner === ''}>选择产品</Button>
+                </Col>
+        </Row>
+
+        <Table className='editTable' dataSource={editRefund.items} size='small' bordered style={{height: 400}} scroll={{x: 'max-content', y: 400 }} pagination={false} >
+            <Column align='center' width={30} render={(_, __, idx) => idx+1} />
+            <Column title='材质' dataIndex='material' align='center' width={45} />
+            <Column title='名称' dataIndex='name' align='center' width={80} />
+            <Column title='规格' dataIndex='spec' align='center' width={60} />
+            <Column title='数量' dataIndex='quantity' align='center' width={60} render={(_, row) => 
+                <InputNumber stringMode keyboard={false} size='small' controls={false} style={{width: '100%'}} value={row.quantity} onChange={value => updateRow(row.id, 'quantity', value)} />
+            } />
+            <Column title='单位' dataIndex='unit' align='center' width={50} />
+            <Column title='单价' dataIndex='price' align='center' width={70} />
+            <Column title='金额' dataIndex='originalAmount' align='center' width={80} render={originalAmount => 
+                originalAmount.toString()
+            } />
+            <Column title='折扣' dataIndex='discount' align='center' width={50} />
+            <Column title='折后价' dataIndex='amount' align='center' width={80} render={amount => 
+                amount.toString()
+            } />
+            <Column title='备注' dataIndex='remark' align='center' width={90} render={(_, row) => 
+                <Input size='small' style={{width: '100%'}} value={row.remark} onChange={e => updateRow(row.id, 'remark', e.target.value)} />
+            } />
+            <Column title='操作' align="center" width={90} render={(_, __, idx) => 
+                <Button size='small' danger type='link' style={{fontSize: '12px'}} onClick={_ => {
+                    const r = dcSalesRefund(editRefund)
+                    r.items.splice(idx, 1)
+                    r.amount = calTotalAmount(r.items)
+                    setEditRefund(r)
+                }}>删除</Button>
+            } />
+        </Table>
+        <Divider />
+        <Row>
+            <Col span={8}>总计：{editRefund.amount.toString()}</Col>
+            <Col span={8} align='center'>
+                付款：<InputNumber size='small' keyboard={false} stringMode controls={false} style={{width: '90%', maxWidth: '150px'}} 
+                    value={editRefund.payment} onChange={value => updatePayment(value)}
+                />
+            </Col>
+            <Col span={8} align='right'>
+                <Button type='primary' onClick={upload}>保存</Button>
+            </Col>
+        </Row>
+
+    </>)
+}
+
+
+export default SalesRefundEditView

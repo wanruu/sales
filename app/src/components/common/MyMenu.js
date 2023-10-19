@@ -18,10 +18,10 @@ function MyMenu(props) {
     const menuItems = [
         getItem('清单', 'order', <PlusCircleOutlined />, [
             getItem('销售清单', 'salesOrder'),
-            getItem('采购清单', 'salesRefund')
+            getItem('采购清单', 'purchaseOrder')
         ]),
         getItem('退货单', 'refund', <MinusCircleOutlined />, [
-            getItem('销售退货', 'purchaseOrder'),
+            getItem('销售退货', 'salesRefund'),
             getItem('采购退货', 'purchaseRefund')
         ]),
         getItem('产品', 'product', <BankOutlined />),
