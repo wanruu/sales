@@ -68,7 +68,6 @@ function SalesOrderPage() {
         });
     }
 
-
     useEffect(() => {
         load()
     }, [])
@@ -79,7 +78,7 @@ function SalesOrderPage() {
 
         <Modal open={previewOrderId !== undefined} width={900} destroyOnClose 
         onCancel={_ => setPreviewOrderId(undefined)} footer={null}>
-            <SalesOrderPreview id={previewOrderId} />
+            <SalesOrderPreview id={previewOrderId} refresh={load} />
         </Modal>
         <Modal title='编辑销售清单' open={editOrderId !== undefined} width={900} destroyOnClose 
         onCancel={_ => setEditOrderId(undefined)} footer={null}>

@@ -55,7 +55,7 @@ router.post('/', (req, res) => {
         }
         const items = req.body.items.map(item => {
             return {
-                orderItemId: item.id,
+                orderItemId: item.orderItemId,
                 quantity: item.quantity,
                 originalAmount: item.originalAmount,
                 amount: item.amount,
@@ -65,7 +65,7 @@ router.post('/', (req, res) => {
             }
         })
         req.body.items.forEach(item => {
-            updateProductQuantityByInfo(item.material, item.name, item.spec, item.unit, "-" + item.quantity)
+            updateProductQuantityByInfo(item.material, item.name, item.spec, item.unit, item.quantity)
         })
         const { query, flatData } = formatInsert('INSERT', 'salesRefundItem', items, [])
         db.run(query, flatData, (err) => {
@@ -121,5 +121,77 @@ router.delete('/id/:id', async (req, res) => {
         })
     })
 })
+
+
+
+router.put('/id/:id', async (req, res) => {
+    const refundId = req.params.id
+    // update salesRefund
+    const updateRefund = `UPDATE salesRefund 
+    SET partner="${req.body.partner}", date="${req.body.date}", amount="${req.body.amount}", payment="${req.body.payment}" 
+    WHERE id=${refundId}`
+    await new Promise((resolve, reject) => {
+        db.run(updateRefund, function(err) {
+            if (err) {
+                reject(err)
+            }
+            resolve()
+        })
+    }).catch(err => {
+        console.error(err)
+        res.status(500).send()
+        return
+    })
+    // delete old refund items
+    await new Promise((resolve, reject) => {
+        db.run(`DELETE FROM salesRefundItem WHERE refundId=${refundId}`, function(err) {
+            if (err) {
+                reject(err)
+            }
+            resolve()
+        })
+    }).catch(err => {
+        console.error(err)
+        res.status(500).send()
+        return
+    })
+    // insert new refund items
+    const items = req.body.items.map(item => {
+        return {
+            orderItemId: item.orderItemId,
+            quantity: item.quantity,
+            originalAmount: item.originalAmount,
+            amount: item.amount,
+            remark: item.remark,
+            delivered: item.delivered,
+            refundId: refundId
+        }
+    })
+    const { query, flatData } = formatInsert('INSERT', 'salesRefundItem', items, [])
+    db.run(query, flatData, (err) => {
+        if (err) {
+            console.error(err)
+            res.status(500).send()
+            return
+        }
+        // update product quantity
+        const dict = {}
+        req.body.items.forEach(item => {
+            dict[item.productId] = Decimal(item.quantity)
+        })
+        req.body.oldItems.forEach(item => {
+            if (dict[item.productId] === undefined) {
+                dict[item.productId] = Decimal("-" + item.quantity)
+            } else {
+                dict[item.productId] = dict[item.productId].minus(item.quantity)
+            }
+        })
+        for (const productId in dict) {
+            updateProductQuantityById(productId, dict[productId])
+        }
+        res.send()
+    })
+})
+
 
 module.exports = router

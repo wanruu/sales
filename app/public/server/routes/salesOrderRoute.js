@@ -395,7 +395,7 @@ router.get('/detailed', (req, res) => {
             res.status(500).send()
             return
         }
-        const query = `SELECT i.orderId, i.id, p.material, p.name, p.spec, p.unit, price, i.quantity, i.amount, discount, originalAmount, remark, delivered 
+        const query = `SELECT i.orderId, i.id AS orderItemId, p.id AS productId, p.material, p.name, p.spec, p.unit, price, i.quantity, i.amount, discount, originalAmount, remark, delivered 
         FROM salesOrder o, salesOrderItem i, product p 
         WHERE o.id=i.orderId AND p.id=productId`
         db.all(query, (err, items) => {

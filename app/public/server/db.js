@@ -147,7 +147,7 @@ db.serialize(() => {
     for (const creation of creations) {
         db.run(creation, (err) => {
             if (err) {
-                console.log(err)
+                console.error(err)
             }
         })
     }

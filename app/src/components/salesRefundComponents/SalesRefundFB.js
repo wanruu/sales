@@ -77,7 +77,7 @@ function SalesRefundFB(props) {
     const addSelections = (items) => {
         const newEditRefund = dcSalesRefund(editRefund)
         newEditRefund.items = items.reduce((pre, cur) => {
-            if (pre.find(i => i.id === cur.id) === undefined) {
+            if (pre.find(i => i.orderItemId === cur.orderItemId) === undefined) {
                 pre.push(cur)
             }
             return pre

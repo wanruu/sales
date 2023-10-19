@@ -152,7 +152,6 @@ function SalesOrderEditView(props) {
         }).map(item => Object.assign(item, { 
             originalQuantity: order.items.find(i => i.id === item.id).quantity
         }))
-        console.log(updatedOrderItems)
         // ------------------
         const updatedSalesRefundItems = []  // [{refundId,id,originalAmount,amount}]
         // TODO
@@ -209,7 +208,7 @@ function SalesOrderEditView(props) {
                         // props.refresh()
                     // }
                 } else {
-                    messageApi.open({ type: 'error', content: `${res.status}: 保存失败`, });
+                    messageApi.open({ type: 'error', content: '保存失败', });
                 }
                 // setIsUploading(false)
             }).catch(_ => {

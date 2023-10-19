@@ -30,7 +30,6 @@ function SaleStat() {
             url: 'stat/today',
         }).then(res => {
             setTodayStat(res.data);
-            // console.log(res.data);
         }).catch(err => {
 
         });

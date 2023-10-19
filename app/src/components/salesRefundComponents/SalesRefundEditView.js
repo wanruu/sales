@@ -1,19 +1,22 @@
 import React, { useState, useEffect } from 'react'
 import Axios from 'axios'
-import { Row, Col, Button, AutoComplete, DatePicker, Table, Divider, InputNumber, Input 
+import { Row, Col, Button, AutoComplete, DatePicker, Table, Divider, InputNumber, Input,
+    Modal, message 
 } from 'antd'
+import dayjs from 'dayjs'
 
 const { Column } = Table
 
 import { emptySalesRefund, dcSalesRefund, calTotalAmount, calItemAmount } from '../../utils/salesRefundUtils'
-import { baseURL } from '../../utils/config'
-
+import { baseURL, dateFormat } from '../../utils/config'
+import SalesRefundItemSelectView from "./SalesRefundItemSelectView";
 
 function SalesRefundEditView(props) {
     const [refund, setRefund] = useState(emptySalesRefund())
     const [editRefund, setEditRefund] = useState(emptySalesRefund())
     const [isSelectionModalOpen, setSelectionModalOpen] = useState(false)
-    
+    const [messageApi, contextHolder] = message.useMessage();
+
     const load = () => {
         Axios({
             method: 'get',
@@ -21,13 +24,91 @@ function SalesRefundEditView(props) {
             url: `salesRefund/id/${props.id}`,
             'Content-Type': 'application/json',
         }).then(res => {
+            console.log(res.data)
             setRefund(res.data);
             setEditRefund(dcSalesRefund(res.data));
         }).catch(err => { });
     }
 
     const upload = () => {
-        
+        const data = dcSalesRefund(editRefund)
+        data.date = data.date.format(dateFormat)
+        data.oldItems = refund.items.map(item => {
+            return {
+                productId: item.productId,
+                quantity: item.quantity
+            }
+        })
+        data.items = data.items.map(item => {
+            item.quantity = item.quantity || "0"
+            return item
+        })
+        data.payment = data.payment || "0"
+        Axios({
+            method: 'put',
+            baseURL: baseURL(),
+            url: `salesRefund/id/${props.id}`,
+            data: data,
+            'Content-Type': 'application/json',
+        }).then(res => {
+            if (res.status === 200) {
+                messageApi.open({ type: 'success', content: '保存成功', });
+                load()
+                if (props.refresh !== undefined) {
+                    props.refresh()
+                }
+            } else {
+                messageApi.open({ type: 'error', content: '保存失败', });
+            }
+        }).catch(err => {
+            messageApi.open({ type: 'error', content: '保存失败', });
+        });
+    }
+
+    // update data
+    const updatePartner = (value) => {
+        const newRefund = dcSalesRefund(editRefund)
+        newRefund.partner = value
+        setEditRefund(newRefund)
+    }
+    const updateDate = (value) => {
+        const newRefund = dcSalesRefund(editRefund)
+        newRefund.date = value
+        setEditRefund(newRefund)
+    }
+    const updatePayment = (value) => {
+        const newRefund = dcSalesRefund(editRefund)
+        newRefund.payment = value
+        setEditRefund(newRefund)
+    }
+    const updateRow = (id, field, value) => {
+        const ifUpdateAmount = field === 'quantity'
+        const newEditRefund = dcSalesRefund(editRefund)
+        newEditRefund.items = newEditRefund.items.map(item => {
+            if (item.id === id) { item[field] = value }
+            if (ifUpdateAmount) {
+                const { originalAmount, amount } = calItemAmount(item)
+                item.originalAmount = originalAmount
+                item.amount = amount
+            }
+            return item
+        })
+        if (ifUpdateAmount) {
+            newEditRefund.amount = calTotalAmount(newEditRefund.items)
+        }
+        setEditRefund(newEditRefund)
+    }
+    const addSelections = (items) => {
+        const newEditRefund = dcSalesRefund(editRefund)
+        newEditRefund.items = items.reduce((pre, cur) => {
+            if (pre.find(i => i.orderItemId === cur.orderItemId) === undefined) {
+                pre.push(cur)
+            }
+            return pre
+        }, newEditRefund.items)
+        newEditRefund.amount = calTotalAmount(newEditRefund.items)
+        setEditRefund(newEditRefund)
+        hideSelectionModal()
     }
 
     useEffect(() => {
@@ -42,6 +123,7 @@ function SalesRefundEditView(props) {
     }
 
     return (<>
+        {contextHolder}
         <Row style={{ marginTop: '20px', marginBottom: '15px' }}>
             <Col span={8}>
                 客户：{editRefund.items.length === 0 ? 
@@ -93,10 +175,12 @@ function SalesRefundEditView(props) {
                 />
             </Col>
             <Col span={8} align='right'>
-                <Button type='primary' onClick={upload}>保存</Button>
+                <Button type='primary' onClick={upload} disabled={editRefund.items.length===0}>保存</Button>
             </Col>
         </Row>
-
+        <Modal title='选择产品' open={isSelectionModalOpen} width={1000} center onCancel={hideSelectionModal} footer={null} destroyOnClose>
+            <SalesRefundItemSelectView addSelections={addSelections} partner={editRefund.partner} />
+        </Modal>
     </>)
 }
 

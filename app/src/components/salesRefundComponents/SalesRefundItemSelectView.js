@@ -18,11 +18,9 @@ function SalesRefundItemSelectView(props) {
             method: 'get',
             baseURL: baseURL(),
             url: 'salesOrder/detailed',
-            params: {  },
             'Content-Type': 'application/json',
         }).then(res => {
             if (res.status === 200) {
-                // console.log(res.data)
                 setSalesOrders(res.data.filter(order => order.partner === props.partner))
             }
         }).catch(_ => {
@@ -37,7 +35,7 @@ function SalesRefundItemSelectView(props) {
 
     const rowSelection = {
         getCheckboxProps: (record) => ({
-            id: record.id,
+            id: record.orderItemId,
         }),
         onSelect: (record, selected, selectedRows, nativeEvent) => {
             const orderId = record.orderId
@@ -67,20 +65,14 @@ function SalesRefundItemSelectView(props) {
             </Col>
         </Row>
         <br/>
-        {/* <Space.Compact style={{width: '100%', marginBottom: '10px', marginTop: '10px'}}>
-            <Input placeholder='单号' style={{width: '30%'}} />
-            <AutoComplete placeholder='客户' style={{width: '30%'}} />
-            <Button type='primary'>查询</Button>
-        </Space.Compact> */}
         
-
         <Table dataSource={salesOrders}  size='small' showHeader={false}
         rowKey={record => record.id}
         pagination={false}
         style={{height: 400}} scroll={{x: 'max-content', y: 400 }}
         expandable={{
             expandedRowRender: (record) => (
-                <Table dataSource={record.items} pagination={false} bordered rowKey={record => record.id} rowSelection={rowSelection}>
+                <Table dataSource={record.items} pagination={false} bordered rowKey={record => record.orderItemId} rowSelection={rowSelection}>
                     <Column title='材质' dataIndex='material' align='center' />
                     <Column title='名称' dataIndex='name' align='center' />
                     <Column title='规格' dataIndex='spec' align='center' />

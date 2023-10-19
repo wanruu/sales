@@ -80,7 +80,7 @@ function SalesRefundPage() {
 
         <Modal open={previewRefundId !== undefined} width={900} destroyOnClose 
         onCancel={_ => setPreviewRefundId(undefined)} footer={null}>
-            <SalesRefundPreview id={previewRefundId} />
+            <SalesRefundPreview id={previewRefundId} refresh={load} />
         </Modal>
 
         <Modal title='编辑销售退款单' open={editRefundId !== undefined} width={900} destroyOnClose 
