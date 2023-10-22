@@ -2,7 +2,7 @@ import dayjs from 'dayjs'
 import uuid from 'react-uuid'
 import { Decimal } from 'decimal.js';
 
-import { invoiceSettings, dateFormat, unitCoeffDict } from './config'
+import { dateFormat, unitCoeffDict } from './config'
 
 export const emptySalesOrderItem = () => {
     return { 

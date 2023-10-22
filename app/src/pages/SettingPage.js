@@ -7,8 +7,9 @@ import Axios from 'axios';
 // import Invoice from "../components/Invoice.js";
 import { baseURL, invoiceSettings } from "../utils/config";
 import { initSalesOrderForPreview } from "../utils/salesOrderUtils";
+import { initSalesRefundForPreview } from "../utils/salesRefundUtils";
 import SalesOrderPreview from "../components/salesOrderComponents/SalesOrderPreview";
-
+import SalesRefundPreview from "../components/salesRefundComponents/SalesRefundPreview";
 
 const { TextArea } = Input;
 
@@ -21,13 +22,18 @@ function SettingPage() {
     const [title, setTitle] = useState(invoiceSettings.title())
     const [titleFontSize, setTitleFontSize] = useState(invoiceSettings.titleFontSize())
 
+    const [salesOrderTitle, setSalesOrderTitle] = useState(invoiceSettings.salesOrderTitle())
+    const [salesRefundTitle, setSalesRefundTitle] = useState(invoiceSettings.salesRefundTitle())
+    const [purchaseOrderTitle, setPurchaseOrderTitle] = useState(invoiceSettings.purchaseOrderTitle())
+    const [purchaseRefundTitle, setPurchaseRefundTitle] = useState(invoiceSettings.purchaseRefundTitle())
+
     const [footnote, setFootnote] = useState(invoiceSettings.footnote())
     const [footnoteFontSize, setFootnoteFontSize] = useState(invoiceSettings.footnoteFontSize())
 
     const [hPadding, setHPadding] = useState(invoiceSettings.hPadding())
     const [vPadding, setVPadding] = useState(invoiceSettings.vPadding())
 
-    const [showPreview, setShowPreview] = useState(false);
+    const [previewType, setPreviewType] = useState('salesOrder');
 
     const [defaultEditRowNum, setDefaultEditRowNum] = useState(invoiceSettings.defaultEditRowNum())
     // const [syncServer, setSyncServer] = useState(localStorage.getItem('syncServer') || '');
@@ -56,6 +62,22 @@ function SettingPage() {
     const onTitleFontSizeChange = (value) => {
         setTitleFontSize(value);
         localStorage.setItem('titleFontSize', value);
+    }
+    const onSalesOrderTitleChange = (event) => {
+        setSalesOrderTitle(event.target.value);
+        localStorage.setItem('salesOrderTitle', event.target.value);
+    }
+    const onPurchaseOrderTitleChange = (event) => {
+        setPurchaseOrderTitle(event.target.value);
+        localStorage.setItem('purchaseOrderTitle', event.target.value);
+    }
+    const onSalesRefundTitleChange = (event) => {
+        setSalesRefundTitle(event.target.value);
+        localStorage.setItem('salesRefundTitle', event.target.value);
+    }
+    const onPurchaseRefundTitleChange = (event) => {
+        setPurchaseRefundTitle(event.target.value);
+        localStorage.setItem('purchaseRefundTitle', event.target.value);
     }
 
     // 脚注
@@ -197,10 +219,19 @@ function SettingPage() {
             
             <h3>标题</h3>
             <Space>
-                <Input placeholder='标题' value={title} onChange={onTitleChange} style={{width: '400px'}}/>
+                <Input addonBefore='公司' value={title} onChange={onTitleChange} style={{width: '400px'}}/>
                 <InputNumber addonAfter='px' value={titleFontSize} onChange={onTitleFontSizeChange} style={{maxWidth: '100px'}}/>
             </Space>
-
+            <br/><br/>
+            <Space>
+                <Input addonBefore='销售清单' value={salesOrderTitle} onChange={onSalesOrderTitleChange} style={{width: '200px'}}/>
+                <Input addonBefore='采购清单' value={purchaseOrderTitle} onChange={onPurchaseOrderTitleChange} style={{width: '200px'}}/>
+            </Space>
+            <br/><br/>
+            <Space>
+                <Input addonBefore='销售退款' value={salesRefundTitle} onChange={onSalesRefundTitleChange} style={{width: '200px'}}/>
+                <Input addonBefore='采购退款' value={purchaseRefundTitle} onChange={onPurchaseRefundTitleChange} style={{width: '200px'}}/>
+            </Space>
             <h3>脚注</h3>
             <Space direction="vertical">
                 <TextArea placeholder='脚注' autoSize value={footnote} onChange={onFootnoteChange} style={{width: '600px'}}/>
@@ -217,16 +248,24 @@ function SettingPage() {
             <InputNumber addonBefore='默认行数' value={defaultEditRowNum} onChange={onDefaultEditRowNumChange} style={{maxWidth: '200px'}}/> */}
 
             
-            <br/>
-            <Button
+            <h3>预览
+                <Space.Compact size="small" style={{color:'gray', fontWeight: 'normal', marginLeft: '10px'}}>
+                    <Button type='link' disabled={previewType==='salesOrder'} onClick={_ => setPreviewType('salesOrder')}>销售清单</Button>/
+                    <Button type='link' disabled={previewType==='purchaseOrder'} onClick={_ => setPreviewType('purchaseOrder')}>采购清单</Button>/
+                    <Button type='link' disabled={previewType==='salesRefund'} onClick={_ => setPreviewType('salesRefund')}>销售退款</Button>/
+                    <Button type='link' disabled={previewType==='purchaseRefund'} onClick={_ => setPreviewType('purchaseRefund')}>采购退款</Button>
+                </Space.Compact>
+            </h3>
+            {/* <Button
                 type='link'
                 style={{ padding: 0 }}
                 onClick={() => setShowPreview(!showPreview)}
             >
                 {showPreview ? '隐藏预览' : '显示预览'} <span style={{ color: 'gray' }}>&nbsp;(以打印页面为准)</span>
-            </Button>
-            {showPreview ? <SalesOrderPreview salesOrder={initSalesOrderForPreview(10)} /> : ''}
-            
+            </Button> */}
+            {previewType === 'salesOrder' ? <SalesOrderPreview salesOrder={initSalesOrderForPreview(10)} /> : ''}
+            {previewType === 'salesRefund' ? <SalesRefundPreview salesRefund={initSalesRefundForPreview(10)} /> : ''}
+
             
             {/* <h3>同步选项</h3>
             <p>服务器地址</p>

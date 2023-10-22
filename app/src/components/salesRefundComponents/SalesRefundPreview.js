@@ -56,6 +56,8 @@ function SalesRefundPreview(props) {
                             {/* title */}
                             <div className='flexVCenter' style={{ fontSize: invoiceSettings.titleFontSize() + 'px', }}>
                                 {invoiceSettings.title().replace(/ /g, "\xa0")}
+                                &nbsp;&nbsp;&nbsp;
+                                {invoiceSettings.salesRefundTitle().replace(/ /g, "\xa0")}
                             </div>
                             <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: 'center' }}>
                                 <div style={{ width: '36%', textAlign: 'left', fontSize: invoiceSettings.fontSize() + 'px' }}>
@@ -72,6 +74,13 @@ function SalesRefundPreview(props) {
                                 <PreviewTable invoice={salesRefund} />
                             </div>
                         </Space>
+                        <div className='flexHCenter' style={{ fontSize: invoiceSettings.footnoteFontSize() + 'px', }}>
+                            <div>
+                                {invoiceSettings.footnote().replace(/ /g, "\xa0").split('\n').map((line, idx) =>
+                                    <span key={idx}>{line}<br /></span>
+                                )}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

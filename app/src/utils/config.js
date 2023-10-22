@@ -10,10 +10,14 @@ export const dateFormat = 'YYYY-MM-DD';
 export const invoiceSettings = {
     width: () => localStorage.getItem('width') || 772,
     height: () => localStorage.getItem('height') || 493,
-    title: () => localStorage.getItem('title') || '浙江埃尼斯阀门有限公司上海分公司  送货单',
+    title: () => localStorage.getItem('title') || '鑫森（鑫欣）紧固件有限公司',
+    salesOrderTitle: () => localStorage.getItem('salesOrderTitle') || '销售单',
+    salesRefundTitle: () => localStorage.getItem('salesRefundTitle') || '销售退款单',
+    purchaseOrderTitle: () => localStorage.getItem('purchaseOrderTitle') || '采购单',
+    purchaseRefundTitle: () => localStorage.getItem('purchaseRefundTitle') || '采购退款单',
     titleFontSize: () => localStorage.getItem('titleFontSize') || 23,
-    footnote: () => localStorage.getItem('footnote') || '地址：新闸路431号                                    收货单位(盖章)\n' +
-        '电话：021-53752277  53750057              及收货人：',
+    footnote: () => localStorage.getItem('footnote') || '送货电话：13605772335/15858580989/13306773365                                            送货地址：浙江省温州市龙湾区紧固件市场8排34号\n' +
+        '工行：6222 0812 0301 2544 033（陈建挺）                                                           收货人(签字)：',
     footnoteFontSize: () => localStorage.getItem('footnoteFontSize') || 12,
     fontSize: () => localStorage.getItem('fontSize') || 12,
     hPadding: () => localStorage.getItem('hPadding') || 28,

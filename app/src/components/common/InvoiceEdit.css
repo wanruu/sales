@@ -1,12 +1,12 @@
-#draftTable table { 
+.draftTable table { 
     font-size: 10px
 }
 
-#draftTable button { 
+.draftTable button { 
     font-size: 10px
 }
 
-#draftTable tbody td {
+.draftTable tbody td {
     padding-top: 1px;
     padding-bottom: 1px;
 }
@@ -26,10 +26,10 @@
 
 /* select */
 /* dropdown options */
-.ant-select-item-option-content {
+#unitInput_list ~ .rc-virtual-list .ant-select-item-option-content {
     font-size: 12px;
 }
-.ant-select-item {
+#unitInput_list ~ .rc-virtual-list .ant-select-item {
     padding-left: 2px !important;
     padding-right: 2px !important;
     text-align: center;

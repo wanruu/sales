@@ -1,7 +1,7 @@
 import React from 'react'
 import Axios from 'axios'
-import { Table, Modal, Button, Space, message, AutoComplete, DatePicker, Switch, Col, Row } from "antd";
-import { useEffect, useState, useRef } from "react";
+import { Table, Modal, Button, Space, message, } from "antd";
+import { useEffect, useState, } from "react";
 import { Decimal } from 'decimal.js';
 import { ExclamationCircleFilled } from '@ant-design/icons';
 
@@ -85,7 +85,7 @@ function SalesOrderPage() {
             <SalesOrderEditView id={editOrderId} refresh={load}/>
         </Modal>
 
-        <Table dataSource={salesOrders} bordered size='small'
+        <Table dataSource={salesOrders} bordered size='small' rowKey={record => record.id}
         pagination={{defaultPageSize: 50, pageSizeOptions: [50, 100], showQuickJumper: true, showSizeChanger: true}}>
             <Column align='center' render={(_, __, idx) => idx+1} />
             <Column title='单号' dataIndex='id' align='center' render={id => 

@@ -1,9 +1,9 @@
 import React from "react";
 import { useEffect, useState, } from "react";
-import { Table, Modal, Button, message, Input, AutoComplete, DatePicker, Col, InputNumber, 
-    Row, FloatButton, Space, Popover, Select, Divider 
+import { Table, Modal, Button, message, Input, DatePicker, Col, InputNumber, 
+    Row, FloatButton, Space, Popover, Divider 
 } from "antd";
-import { PlusOutlined, InboxOutlined, DeleteOutlined } from '@ant-design/icons'
+import { PlusOutlined, InboxOutlined } from '@ant-design/icons'
 import { Decimal } from 'decimal.js';
 import dayjs from 'dayjs'
 import Axios from "axios";
@@ -11,11 +11,10 @@ import Axios from "axios";
 const { Column } = Table
 
 import SalesRefundItemSelectView from "./SalesRefundItemSelectView";
-import { emptySalesRefund, emptySalesRefundItem, calItemAmount, calTotalAmount, dcSalesRefund
+import { emptySalesRefund, calItemAmount, calTotalAmount, dcSalesRefund
 } from '../../utils/salesRefundUtils'
-import { baseURL, unitOptions, dateFormat } from "../../utils/config";
-// import './index.css';
-
+import { baseURL, dateFormat } from "../../utils/config";
+import { PartnerInput } from "../common/PromptInput";
 
 
 function SalesRefundFB(props) {
@@ -149,7 +148,7 @@ function SalesRefundFB(props) {
     return (<>
         {contextHolder}
         <Popover title={`草稿箱 (${draftRefunds.length})`} placement="topLeft" zIndex={999} trigger='click' content={
-            <Table id='draftTable' dataSource={draftRefunds} size='small' pagination={{pageSize: 5, size: 'small'}} hideOnSinglePage bordered>
+            <Table className='draftTable' dataSource={draftRefunds} size='small' pagination={{pageSize: 5, size: 'small'}} hideOnSinglePage bordered>
                 <Column title='保存时间' dataIndex='draftTime' align='center' render={time => time.format('HH:mm:ss')} />
                 <Column title='收货单位' dataIndex='partner' align='center' />
                 <Column title='产品数' dataIndex='items' align='center' render={items => items.length} />
@@ -178,7 +177,7 @@ function SalesRefundFB(props) {
             <Row style={{ marginTop: '20px', marginBottom: '15px' }}>
                 <Col span={8}>
                     客户：{editRefund.items.length === 0 ? 
-                        <AutoComplete style={{width: 200}} size='small' value={editRefund.partner} onChange={value => updatePartner(value)} />:
+                        <PartnerInput style={{width: 200}} size='small' value={editRefund.partner} onChange={value => updatePartner(value)} />:
                         editRefund.partner
                     }
                 </Col>
@@ -188,13 +187,14 @@ function SalesRefundFB(props) {
                     </Col>
             </Row>
 
-            <Table className='editTable' dataSource={editRefund.items} size='small' bordered style={{height: 400}} scroll={{x: 'max-content', y: 400 }} pagination={false} >
+            <Table className='editTable' dataSource={editRefund.items} size='small' bordered style={{height: 400}} 
+            scroll={{x: 'max-content', y: 400 }} pagination={false} rowKey={r => r.id} >
                 <Column align='center' width={30} render={(_, __, idx) => idx+1} />
                 <Column title='材质' dataIndex='material' align='center' width={45} />
                 <Column title='名称' dataIndex='name' align='center' width={80} />
                 <Column title='规格' dataIndex='spec' align='center' width={60} />
                 <Column title='数量' dataIndex='quantity' align='center' width={60} render={(_, row) => 
-                    <InputNumber stringMode keyboard={false} size='small' controls={false} style={{width: '100%'}} value={row.quantity} onChange={value => updateRow(row.id, 'quantity', value)} />
+                    <InputNumber min={0} stringMode keyboard={false} size='small' controls={false} style={{width: '100%'}} value={row.quantity} onChange={value => updateRow(row.id, 'quantity', value)} />
                 } />
                 <Column title='单位' dataIndex='unit' align='center' width={50} />
                 <Column title='单价' dataIndex='price' align='center' width={70} />

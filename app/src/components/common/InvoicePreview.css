@@ -22,13 +22,13 @@
     display: flex;
     justify-content: center;
 }
-/* 
-.ftnote {
-    line-height: 60%;
-    font-size: 9pt;
-    text-align: left;
+
+.flexHCenter {
+    display: flex;
+    align-items: center;
 }
 
+/* 
 .compactInput {
     padding-top: 0;
     padding-bottom: 0;
@@ -36,14 +36,15 @@
     padding-right: 6px;
 }
 
+.ftnote {
+    line-height: 60%;
+    font-size: 9pt;
+    text-align: left;
+}
+
 .flexCenter {
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-.flexHCenter {
-    display: flex;
-    align-items: center;
 }
 */

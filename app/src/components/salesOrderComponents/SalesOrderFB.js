@@ -13,9 +13,9 @@ const { Column } = Table
 import { emptySalesOrder, dcSalesOrder, isSalesOrderItemEmpty, emptySalesOrderItem, 
     isSalesOrderItemComplete, calItemAmount, calTotalAmount
 } from '../../utils/salesOrderUtils'
+import { PartnerInput, ProductInput, UnitInput } from "../common/PromptInput";
 import { baseURL, unitOptions, dateFormat } from "../../utils/config";
-import './index.css';
-
+import "../common/InvoiceEdit.css"
 
 
 function SalesOrderFB(props) {
@@ -166,9 +166,9 @@ function SalesOrderFB(props) {
     return (<>
         {contextHolder}
         <Popover title={`草稿箱 (${draftOrders.length})`} placement="topLeft" zIndex={999} trigger='click' content={
-            <Table id='draftTable' dataSource={draftOrders} size='small' pagination={{pageSize: 5, size: 'small'}} hideOnSinglePage bordered>
+            <Table className='draftTable' dataSource={draftOrders} size='small' pagination={{pageSize: 5, size: 'small'}} hideOnSinglePage bordered>
                 <Column title='保存时间' dataIndex='draftTime' align='center' render={time => time.format('HH:mm:ss')} />
-                <Column title='收货单位' dataIndex='partner' align='center' />
+                <Column title='客户' dataIndex='partner' align='center' />
                 <Column title='产品数' dataIndex='items' align='center' render={items => items.length-1} />
                 <Column title='操作' align='center' render={(_, draft) => (
                     <Space.Compact size='small'>
@@ -192,29 +192,32 @@ function SalesOrderFB(props) {
             </Space>
         }>
             <Row style={{ marginTop: '20px', marginBottom: '15px' }}>
-                <Col span={12}>收货单位：<AutoComplete style={{width: 200}} size='small' value={editOrder.partner} onChange={value => updatePartner(value)} /></Col>
+                <Col span={12}>客户：<PartnerInput style={{width: 200}} size='small' value={editOrder.partner} onChange={value => updatePartner(value)} /></Col>
                 <Col span={12}>日期：<DatePicker size='small' value={editOrder.date} onChange={value => updateDate(value)}/></Col>
             </Row>
 
-            <Table className='editTable' dataSource={editOrder.items} size='small' bordered style={{height: 400}} scroll={{x: 'max-content', y: 400 }} pagination={false} >
+            <Table className='editTable' dataSource={editOrder.items} size='small' bordered style={{height: 400}} 
+            scroll={{x: 'max-content', y: 400 }} pagination={false} rowKey={record => record.id}>
                 <Column align='center' width={30} render={(_, __, idx) => idx+1} />
                 <Column title='材质' dataIndex='material' align='center' width={45} render={(_, row) => 
-                    <AutoComplete size='small' style={{width: '100%'}} value={row.material} onChange={value => updateRow(row.id, 'material', value)} />
+                    <ProductInput field='material' size='small' style={{width: '100%'}} value={row.material} onChange={value => updateRow(row.id, 'material', value)} />
                 } />
                 <Column title='名称' dataIndex='name' align='center' width={80} render={(_, row) => 
-                    <AutoComplete size='small' style={{width: '100%'}} value={row.name} onChange={value => updateRow(row.id, 'name', value)} />
+                    <ProductInput field='name' size='small' style={{width: '100%'}} value={row.name} onChange={value => updateRow(row.id, 'name', value)} />
                 } />
                 <Column title='规格' dataIndex='spec' align='center' width={60}  render={(_, row) => 
-                    <AutoComplete size='small' style={{width: '100%'}} value={row.spec} onChange={value => updateRow(row.id, 'spec', value)} />
+                    <ProductInput field='spec' size='small' style={{width: '100%'}} value={row.spec} onChange={value => updateRow(row.id, 'spec', value)} />
                 } />
                 <Column title='数量' dataIndex='quantity' align='center' width={60} render={(_, row) => 
-                    <InputNumber stringMode keyboard={false} size='small' controls={false} style={{width: '100%'}} value={row.quantity} onChange={value => updateRow(row.id, 'quantity', value)} />
+                    <InputNumber min={0} stringMode keyboard={false} size='small' controls={false} style={{width: '100%'}} value={row.quantity} onChange={value => updateRow(row.id, 'quantity', value)} />
                 } />
                 <Column title='单位' dataIndex='unit' align='center' width={50} render={(_, row) => 
-                    <Select size='small' options={unitOptions} align='center' style={{width: '100%'}} value={row.unit} onChange={value => updateRow(row.id, 'unit', value)} />
+                    <UnitInput size='small' align='center' style={{width: '100%'}} value={row.unit} 
+                    onChange={value => updateRow(row.id, 'unit', value)} material={row.material} name={row.name} spec={row.spec} />
                 } />
                 <Column title='单价' dataIndex='price' align='center' width={70} render={(_, row) => 
-                    <InputNumber stringMode keyboard={false} size='small' controls={false} style={{width: '100%'}} value={row.price} onChange={value => updateRow(row.id, 'price', value)} />
+                    <InputNumber min={0} stringMode keyboard={false} size='small' controls={false} 
+                    style={{width: '100%'}} value={row.price} onChange={value => updateRow(row.id, 'price', value)} />
                 } />
                 <Column title='金额' dataIndex='originalAmount' align='center' width={80} render={originalAmount => 
                     originalAmount.toString()

@@ -424,7 +424,9 @@ router.get('/id/:id', (req, res) => {
         return
     }
 
-    const orderSelect = `SELECT * FROM salesOrder WHERE id=${id};`
+    const orderSelect = `SELECT * 
+    FROM salesOrder s, partner p 
+    WHERE id=${id} AND s.partner=p.name;`
     db.all(orderSelect, (err, orders) => {
         if (err) {
             console.error(err)

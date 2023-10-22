@@ -1,18 +1,19 @@
 import Axios from 'axios'
-import { Table, Modal, Button, Space, message, AutoComplete, DatePicker, 
+import { Table, Modal, Button, Space, message, DatePicker, 
     Select, Col, Row, InputNumber, Input, Divider, Badge, 
 } from "antd";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState,  } from "react";
 import { Decimal } from 'decimal.js';
 const { Column } = Table
-import { FieldNumberOutlined, EditOutlined, RedoOutlined } from '@ant-design/icons';
+import { FieldNumberOutlined, EditOutlined, } from '@ant-design/icons';
 
 
 import { baseURL, dateFormat, unitOptions } from "../../utils/config";
 import { emptySalesOrder, dcSalesOrder, calTotalAmount, calItemAmount, emptySalesOrderItem, 
     isSalesOrderItemEmpty, isSalesOrderItemComplete 
 } from "../../utils/salesOrderUtils";
-import './index.css';
+import { PartnerInput, ProductInput, UnitInput } from '../common/PromptInput';
+import "../common/InvoiceEdit.css"
 
 
 function SalesOrderEditView(props) {
@@ -181,13 +182,10 @@ function SalesOrderEditView(props) {
         }
         if (editOrder.partner === '') {
             messageApi.open({ type: 'error', content: '收货单位不得为空', });
-        //     // setIsUploading(false)
         } else if (nIncomplete > 0) {
             messageApi.open({ type: 'error', content: '表格填写不完整', });
-        //     // setIsUploading(false)
         } else if (isRepeat) {
             messageApi.open({ type: 'error', content: '产品材质、名称、规格不得重复', });
-        //     // setIsUploading(false)
         } else {
             Axios({
                 method: 'put',
@@ -202,18 +200,11 @@ function SalesOrderEditView(props) {
                     if (props.refresh !== undefined) {
                         props.refresh()
                     }
-                    // hideModal()
-                    // removeDraft(order)
-                    // if (props.refresh !== undefined) {
-                        // props.refresh()
-                    // }
                 } else {
                     messageApi.open({ type: 'error', content: '保存失败', });
                 }
-                // setIsUploading(false)
             }).catch(_ => {
                 messageApi.open({ type: 'error', content: '保存失败', });
-                // setIsUploading(false)
             });
         }
     }
@@ -223,7 +214,7 @@ function SalesOrderEditView(props) {
         {contextHolder}
         <Row style={{marginTop: '20px', marginBottom: '15px'}}>
             <Col span={8}>
-                客户：<AutoComplete status={editOrder.partner !== order.partner ? 'warning' : ''} 
+                客户：<PartnerInput status={editOrder.partner !== order.partner ? 'warning' : ''} 
                 style={{width: 120}} size='small' value={editOrder.partner} 
                 onChange={value => updatePartner(value)} />
             </Col>
@@ -232,10 +223,11 @@ function SalesOrderEditView(props) {
                 size='small' value={editOrder.date} onChange={value => updateDate(value)}/>
             </Col>
             <Col span={8} align='right'>
-                <FieldNumberOutlined /> {props.id.toString().padStart(6, '0')} <Button size='small' icon={<RedoOutlined/>} />
+                <FieldNumberOutlined /> {props.id.toString().padStart(6, '0')}
             </Col>
         </Row>
         <Table className='editTable' dataSource={editOrder.items} size='small' bordered style={{height: 400}} 
+        rowKey={record => record.id}
         scroll={{x: 'max-content', y: 400 }} pagination={false}>
             <Column align='center' width={30} render={(_, row, idx) => {
                 if (row.deleted === true) {
@@ -245,29 +237,29 @@ function SalesOrderEditView(props) {
                 return idx < order.items.length ? no : <Badge dot status='success'>{no}</Badge>} 
             } />
             <Column title='材质' dataIndex='material' align='center' width={45} render={(_, row, idx) => 
-                <AutoComplete size='small' style={{width: '100%'}} status={getInputStatus(idx, 'material')}
+                <ProductInput field='material' size='small' style={{width: '100%'}} status={getInputStatus(idx, 'material')}
                 value={row.material} disabled={getDisabled(idx)} onChange={value => updateRow(idx, 'material', value)} />
             } />
             <Column title='名称' dataIndex='name' align='center' width={80} render={(_, row, idx) => 
-                <AutoComplete size='small' style={{width: '100%'}} status={getInputStatus(idx, 'name')}
+                <ProductInput field='name' size='small' style={{width: '100%'}} status={getInputStatus(idx, 'name')}
                 value={row.name} disabled={getDisabled(idx)} onChange={value => updateRow(idx, 'name', value)} />
             } />
             <Column title='规格' dataIndex='spec' align='center' width={60} render={(_, row, idx) => 
-                <AutoComplete size='small' style={{width: '100%'}} status={getInputStatus(idx, 'spec')}
+                <ProductInput field='spec' size='small' style={{width: '100%'}} status={getInputStatus(idx, 'spec')}
                 value={row.spec} disabled={getDisabled(idx)} onChange={value => updateRow(idx, 'spec', value)} />
             } />
             <Column title='数量' dataIndex='quantity' align='center' width={60} render={(_, row, idx) => 
-                <InputNumber stringMode keyboard={false} size='small' controls={false} style={{width: '100%'}} 
+                <InputNumber min={0} stringMode keyboard={false} size='small' controls={false} style={{width: '100%'}} 
                 status={getInputStatus(idx, 'quantity')} disabled={getDisabled(idx)}
                 value={row.quantity} onChange={value => updateRow(idx, 'quantity', value)} />
             } />
             <Column title='单位' dataIndex='unit' align='center' width={50} render={(_, row, idx) => 
-                <Select status={getInputStatus(idx, 'unit')} disabled={getDisabled(idx)}
-                size='small' options={unitOptions} align='center' style={{width: '100%'}} value={row.unit} 
+                <UnitInput disabled={getDisabled(idx)} material={row.material} name={row.name} spec={row.spec}
+                size='small' align='center' style={{width: '100%'}} value={row.unit} 
                 onChange={value => updateRow(idx, 'unit', value)} />
             } />
             <Column title='单价' dataIndex='price' align='center' width={70} render={(_, row, idx) => 
-                <InputNumber status={getInputStatus(idx, 'price')} disabled={getDisabled(idx)}
+                <InputNumber min={0} status={getInputStatus(idx, 'price')} disabled={getDisabled(idx)}
                 stringMode keyboard={false} size='small' controls={false} style={{width: '100%'}} value={row.price} 
                 onChange={value => updateRow(idx, 'price', value)} />
             } />

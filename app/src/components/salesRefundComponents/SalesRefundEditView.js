@@ -10,6 +10,7 @@ const { Column } = Table
 import { emptySalesRefund, dcSalesRefund, calTotalAmount, calItemAmount } from '../../utils/salesRefundUtils'
 import { baseURL, dateFormat } from '../../utils/config'
 import SalesRefundItemSelectView from "./SalesRefundItemSelectView";
+import { PartnerInput } from '../common/PromptInput'
 
 function SalesRefundEditView(props) {
     const [refund, setRefund] = useState(emptySalesRefund())
@@ -24,7 +25,6 @@ function SalesRefundEditView(props) {
             url: `salesRefund/id/${props.id}`,
             'Content-Type': 'application/json',
         }).then(res => {
-            console.log(res.data)
             setRefund(res.data);
             setEditRefund(dcSalesRefund(res.data));
         }).catch(err => { });
@@ -127,7 +127,7 @@ function SalesRefundEditView(props) {
         <Row style={{ marginTop: '20px', marginBottom: '15px' }}>
             <Col span={8}>
                 客户：{editRefund.items.length === 0 ? 
-                    <AutoComplete style={{width: 200}} size='small' value={editRefund.partner} onChange={value => updatePartner(value)} />:
+                    <PartnerInput style={{width: 200}} size='small' value={editRefund.partner} onChange={value => updatePartner(value)} />:
                     editRefund.partner
                 }
             </Col>
@@ -137,13 +137,15 @@ function SalesRefundEditView(props) {
                 </Col>
         </Row>
 
-        <Table className='editTable' dataSource={editRefund.items} size='small' bordered style={{height: 400}} scroll={{x: 'max-content', y: 400 }} pagination={false} >
+        <Table className='editTable' dataSource={editRefund.items} size='small' bordered 
+        rowKey={record => record.orderItemId}
+        style={{height: 400}} scroll={{x: 'max-content', y: 400 }} pagination={false} >
             <Column align='center' width={30} render={(_, __, idx) => idx+1} />
             <Column title='材质' dataIndex='material' align='center' width={45} />
             <Column title='名称' dataIndex='name' align='center' width={80} />
             <Column title='规格' dataIndex='spec' align='center' width={60} />
             <Column title='数量' dataIndex='quantity' align='center' width={60} render={(_, row) => 
-                <InputNumber stringMode keyboard={false} size='small' controls={false} style={{width: '100%'}} value={row.quantity} onChange={value => updateRow(row.id, 'quantity', value)} />
+                <InputNumber min={0} stringMode keyboard={false} size='small' controls={false} style={{width: '100%'}} value={row.quantity} onChange={value => updateRow(row.id, 'quantity', value)} />
             } />
             <Column title='单位' dataIndex='unit' align='center' width={50} />
             <Column title='单价' dataIndex='price' align='center' width={70} />
