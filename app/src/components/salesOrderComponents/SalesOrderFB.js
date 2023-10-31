@@ -113,6 +113,7 @@ function SalesOrderFB(props) {
             return item
         });
         order.prepayment = order.prepayment || '0'
+        order.payment = order.payment || '0'
         const nIncomplete = order.items.filter(item => !isSalesOrderItemComplete(item)).length;
         var isRepeat = false;
         for (const item1 of order.items) {

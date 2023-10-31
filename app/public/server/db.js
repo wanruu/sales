@@ -32,111 +32,38 @@ const product = `CREATE TABLE IF NOT EXISTS product(
     PRIMARY KEY(material, name, spec)
 );`
 
-// sales: order & refund
-const salesOrderItem = `CREATE TABLE IF NOT EXISTS salesOrderItem(
+
+const invoiceItem = `CREATE TABLE IF NOT EXISTS invoiceItem(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    productId TEXT,
+    productId TEXT NOT NULL,
     price TEXT NOT NULL,
     discount INTEGER NOT NULL,
     quantity TEXT NOT NULL,
+    weight TEXT,
     originalAmount TEXT NOT NULL,
     amount TEXT NOT NULL,
     remark TEXT,
     delivered INTEGER,
-    orderId INTEGER,
-    FOREIGN KEY(orderId) REFERENCES salesOrder(id) ON DELETE CASCADE,
+    invoiceId TEXT NOT NULL,
+    FOREIGN KEY(invoiceId) REFERENCES invoice(id) ON DELETE CASCADE,
     FOREIGN KEY(productId) REFERENCES product(id) ON DELETE CASCADE
 );`
 
-const salesOrder = `CREATE TABLE IF NOT EXISTS salesOrder(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+const invoice = `CREATE TABLE IF NOT EXISTS invoice(
+    id TEXT PRIMARY KEY,
+    type INTEGER NOT NULL,
     partner TEXT NOT NULL,
     date TEXT NOT NULL,
     amount TEXT NOT NULL,
     prepayment TEXT NOT NULL,
     payment TEXT NOT NULL,
-    FOREIGN KEY(partner) REFERENCES partner(name)
-);`
-
-const salesRefundItem = `CREATE TABLE IF NOT EXISTS salesRefundItem(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    orderItemId INTEGER,
-    quantity TEXT NOT NULL,
-    originalAmount TEXT NOT NULL,
-    amount TEXT NOT NULL,
-    remark TEXT,
-    delivered INTEGER,
-    refundId INTEGER,
-    FOREIGN KEY(refundId) REFERENCES salesRefund(id) ON DELETE CASCADE,
-    FOREIGN KEY(orderItemId) REFERENCES salesOrderItem(id) ON DELETE CASCADE
-);`
-
-const salesRefund = `CREATE TABLE IF NOT EXISTS salesRefund(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    partner TEXT NOT NULL,
-    date TEXT NOT NULL,
-    amount TEXT NOT NULL,
-    payment TEXT NOT NULL,
-    FOREIGN KEY(partner) REFERENCES partner(name)
-);`
-
-
-// purchase 
-const purchaseOrderItem = `CREATE TABLE IF NOT EXISTS purchaseOrderItem(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    productId TEXT,
-    price TEXT NOT NULL,
-    discount INTEGER NOT NULL,
-    quantity TEXT NOT NULL,
-    weight TEXT NOT NULL,
-    originalAmount TEXT NOT NULL,
-    amount TEXT NOT NULL,
-    remark TEXT,
-    delivered INTEGER,
-    orderId INTEGER,
-    FOREIGN KEY(orderId) REFERENCES purchaseOrder(id) ON DELETE CASCADE,
-    FOREIGN KEY(productId) REFERENCES product(id) ON DELETE CASCADE
-);`
-
-const purchaseOrder = `CREATE TABLE IF NOT EXISTS purchaseOrder(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    partner TEXT NOT NULL,
-    date TEXT NOT NULL,
-    amount TEXT NOT NULL,
-    payment TEXT NOT NULL,
-    FOREIGN KEY(partner) REFERENCES partner(name)
-);`
-
-const purchaseRefundItem = `CREATE TABLE IF NOT EXISTS purchaseRefundItem(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    orderItemId INTEGER,
-    quantity TEXT NOT NULL,
-    weight TEXT NOT NULL,
-    originalAmount TEXT NOT NULL,
-    amount TEXT NOT NULL,
-    remark TEXT,
-    delivered INTEGER,
-    refundId INTEGER,
-    FOREIGN KEY(refundId) REFERENCES purchaseRefund(id) ON DELETE CASCADE,
-    FOREIGN KEY(orderItemId) REFERENCES purchaseOrder(id) ON DELETE CASCADE
-);`
-
-const purchaseRefund = `CREATE TABLE IF NOT EXISTS purchaseRefund(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    partner TEXT NOT NULL,
-    date TEXT NOT NULL,
-    amount TEXT NOT NULL,
-    payment TEXT NOT NULL,
-    FOREIGN KEY(partner) REFERENCES partner(name)
+    relatedId TEXT,
+    FOREIGN KEY(partner) REFERENCES partner(name) ON DELETE CASCADE
 );`
 
 
 const creations = [ 
-    partner, product, 
-    salesOrderItem, salesOrder, 
-    salesRefundItem, salesRefund,
-    purchaseOrderItem, purchaseOrder,
-    purchaseRefundItem, purchaseRefund
+    partner, product, invoice, invoiceItem
 ]
 
 // create tables

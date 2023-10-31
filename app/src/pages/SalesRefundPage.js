@@ -91,7 +91,7 @@ function SalesRefundPage() {
         <Table dataSource={salesRefunds}  size='small'
         rowKey={record => record.id} bordered
         pagination={{defaultPageSize: 50, pageSizeOptions: [50, 100], showQuickJumper: true, showSizeChanger: true}}>
-            <Column render={(_,__,idx) => idx+1} align='center' />
+            <Column title='序号' render={(_,__,idx) => idx+1} align='center' />
             <Column title='单号' dataIndex='id' align='center' render={id => id.toString().padStart(6, '0')} />
             <Column title='日期' dataIndex='date' align='center' />
             <Column title='客户' dataIndex='partner' align='center' />

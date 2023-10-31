@@ -1,10 +1,16 @@
-import { useState, useEffect } from 'react'
-import React from 'react'
-import { Layout, theme } from 'antd'
+import React, { useState, useEffect } from 'react'
+import { Layout, theme, Menu } from 'antd'
+import {
+    SettingOutlined,
+    PlusCircleOutlined,
+    MinusCircleOutlined,
+    BankOutlined,
+    UserOutlined
+} from '@ant-design/icons'
+
 
 const { Header, Content, Footer, Sider } = Layout
 
-import MyMenu from './components/common/MyMenu.js'
 import SalesOrderPage from './pages/SalesOrderPage.js'
 import SettingPage from './pages/SettingPage.js';
 import ProductPage from './pages/ProductPage.js'
@@ -15,6 +21,7 @@ import SalesRefundPage from './pages/SalesRefundPage.js'
 function App() {
     const [menuKey, setMenuKey] = useState('salesOrder')
     const { token: { colorBgContainer }, } = theme.useToken()
+    
     const pages = {
         'salesOrder': <SalesOrderPage />,
         'salesRefund': <SalesRefundPage />,
@@ -23,12 +30,38 @@ function App() {
         'product': <ProductPage />,
         'partner': <PartnerPage />,
         'settings': <SettingPage />,
-    };
+    }
+
+    // ------------------ Menu
+    const getMenuItem = (label, key, icon, children, type) => {
+        return { key, icon, children, label, type }
+    }
+    const menuItems = [
+        getMenuItem('清单', 'order', <PlusCircleOutlined />, [
+            getMenuItem('销售清单', 'salesOrder'),
+            getMenuItem('采购清单', 'purchaseOrder')
+        ]),
+        getMenuItem('退货单', 'refund', <MinusCircleOutlined />, [
+            getMenuItem('销售退货', 'salesRefund'),
+            getMenuItem('采购退货', 'purchaseRefund')
+        ]),
+        getMenuItem('产品', 'product', <BankOutlined />),
+        getMenuItem('交易对象', 'partner', <UserOutlined />),
+        // getMenuItem('统计数据', 'stats', <BarChartOutlined />, [
+        //     getMenuItem('摘要', 'sales'),
+        //     getMenuItem('客户结算', 'customrs'),
+        //     getMenuItem('产品数据', 'products'),
+        // ]),
+        getMenuItem('设置', 'settings', <SettingOutlined />),
+    ]
+    // ------------------
 
     return (
         <Layout hasSider style={{ background: colorBgContainer }}>
             <Sider style={{ overflow: 'auto', height: '100vh', position: 'fixed', left: 0, top: 0, bottom: 0, background: colorBgContainer }}>
-                <MyMenu setSelectedMenuKey={key => setMenuKey(key)} defaultKey={menuKey} />
+                <Menu items={menuItems} mode='inline' defaultSelectedKeys={['salesOrder']}
+                    defaultOpenKeys={['order', 'refund']} onSelect={({ key }) => setMenuKey(key)}
+                />
             </Sider>
             <Layout className="site-layout" style={{ marginLeft: 200, }}>
                 {/* <Header style={{ padding: 0, background: colorBgContainer }} >

@@ -1,6 +1,5 @@
 import Axios from 'axios'
-import {Button, Space, AutoComplete, Select, Badge
-} from "antd";
+import { AutoComplete, Select, } from "antd";
 import React, { useEffect, useState,  } from "react";
 
 
@@ -34,6 +33,7 @@ export function PartnerInput(props) {
         onSearch={load}
     />
 }
+
 
 export function ProductInput(props) {
     const [options, setOptions] = useState([])

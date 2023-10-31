@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, lazy } from "react";
+import React, { useEffect, useState, useRef, } from "react";
 import Axios from 'axios'
 import { Space, Button } from "antd";
 import { useReactToPrint } from "react-to-print";

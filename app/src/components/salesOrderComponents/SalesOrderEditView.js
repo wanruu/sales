@@ -223,7 +223,7 @@ function SalesOrderEditView(props) {
                 size='small' value={editOrder.date} onChange={value => updateDate(value)}/>
             </Col>
             <Col span={8} align='right'>
-                <FieldNumberOutlined /> {props.id.toString().padStart(6, '0')}
+                <FieldNumberOutlined /> {props.id}
             </Col>
         </Row>
         <Table className='editTable' dataSource={editOrder.items} size='small' bordered style={{height: 400}} 

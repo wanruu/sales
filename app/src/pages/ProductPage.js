@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Table, Input, Space, DatePicker, Button, Modal, Row, Col, Form, InputNumber, message } from "antd";
+import { Table, Input, Space, Button, Modal, Form, InputNumber, message } from "antd";
 import  Axios  from "axios";
 import { ExclamationCircleFilled } from '@ant-design/icons';
 
@@ -23,7 +23,6 @@ function ProductPage() {
     const [products, setProducts] = useState([]);
     const [editProduct, setEditProduct] = useState(emptyProduct())
     const [messageApi, contextHolder] = message.useMessage();
-    const [deleteProductId, setDeleteProductId] = useState(undefined)
 
     const updateEdit = (field, value) => {
         const p = JSON.parse(JSON.stringify(editProduct))
@@ -130,7 +129,7 @@ function ProductPage() {
 
         <Table dataSource={products} size='small' bordered rowKey={record => record.id}
         pagination={{ defaultPageSize: 50, showSizeChanger: true, pageSizeOptions: [50, 100], showQuickJumper: true }} >
-            <Column align='center' render={(_, __, idx) => idx+1} />
+            <Column title='序号' align='center' render={(_, __, idx) => idx+1} />
             <Column title='材质' dataIndex='material' align='center' sorter={(a, b) => a.material > b.material ? 1 : (a.material === b.material ? 0 : -1)} render={(_, record, idx) => 
                 record.editing === true ? <Input /> : record.material
             } />

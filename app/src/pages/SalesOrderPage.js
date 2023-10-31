@@ -26,12 +26,9 @@ function SalesOrderPage() {
             method: 'get',
             baseURL: baseURL(),
             url: 'salesOrder',
-            params: {  },
             'Content-Type': 'application/json',
         }).then(res => {
-            if (res.status === 200) {
-                setSalesOrders(res.data)
-            } 
+            setSalesOrders(res.data)
         }).catch(_ => {
             
         });
@@ -44,13 +41,9 @@ function SalesOrderPage() {
             url: `salesOrder/id/${orderId}`,
             params: {  },
             'Content-Type': 'application/json',
-        }).then(res => {
-            if (res.status === 200) {
-                load()
-                messageApi.open({ type: 'success', content: '删除成功', });
-            } else {
-                messageApi.open({ type: 'error', content: '删除失败', });
-            }
+        }).then(_ => {
+            load()
+            messageApi.open({ type: 'success', content: '删除成功', });
         }).catch(_ => {
             messageApi.open({ type: 'error', content: '删除失败', });
         }); 
@@ -87,15 +80,11 @@ function SalesOrderPage() {
 
         <Table dataSource={salesOrders} bordered size='small' rowKey={record => record.id}
         pagination={{defaultPageSize: 50, pageSizeOptions: [50, 100], showQuickJumper: true, showSizeChanger: true}}>
-            <Column align='center' render={(_, __, idx) => idx+1} />
-            <Column title='单号' dataIndex='id' align='center' render={id => 
-                `${id}`.padStart(6, '0')
-            } />
+            <Column title='序号' align='center' render={(_, __, idx) => idx+1} />
+            <Column title='单号' dataIndex='id' align='center' />
             <Column title='日期' dataIndex='date' align='center' />
             <Column title='客户' dataIndex='partner' align='center' />
-            <Column title='金额' dataIndex='amount' align='center' render={amount => 
-                `${amount}`
-            } />
+            <Column title='金额' dataIndex='amount' align='center' />
             <Column title='已付金额' align='center' render={(_, row) => {
                 const amount = Decimal(row.payment).plus(row.prepayment)
                 const color = amount.equals(Decimal(row.amount)) ? 'black' : 'red'
