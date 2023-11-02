@@ -8,54 +8,15 @@ const db = require("../db")
 
 
 router.get('/', async (req, res) => {
-    const products = await new Promise((resolve, reject) => {
-        db.all(`SELECT * FROM product`, (err, products) => {
-            if (err) { reject(err) }
-            resolve(products)
-        })
-    }).catch(err => {
-        console.error(err)
-        res.status(500).end()
-        return
+    const query = `SELECT * FROM product`
+    db.all(query, (err, products) => {
+        if (err) {
+            console.error(err)
+            res.status(500).send(err)
+            return
+        }
+        res.send(products)
     })
-    products.forEach(p => {
-        p.salesOrders = []; p.salesRefunds = []; p.purchaseOrders = []; p.purchaseRefunds = []
-    })
-    // sales orders
-    await new Promise((resolve, reject) => {
-        db.all(`SELECT i.orderId, p.id AS productId FROM product AS p, salesOrderItem AS i WHERE i.productId=p.id`, (err, salesOrders) => {
-            if (err) { reject(err) }
-            salesOrders.forEach(order => {
-                const p = products.find(p => p.id === order.productId)
-                p.salesOrders.push(order)
-            });
-            resolve()
-        })
-    }).catch(err => {
-        console.error(err)
-        res.status(500).end()
-        return
-    })
-    // sales refunds
-    await new Promise((resolve, reject) => {
-        const query = `SELECT ri.refundId, p.id AS productId 
-        FROM product AS p, salesOrderItem AS oi, salesRefundItem AS ri WHERE oi.productId=p.id AND oi.id=ri.orderItemId`
-        db.all(query, (err, salesRefunds) => {
-            if (err) { reject(err) }
-            salesRefunds.forEach(refund => {
-                const p = products.find(p => p.id === refund.productId)
-                p.salesRefunds.push(refund)
-            });
-            resolve()
-        })
-    }).catch(err => {
-        console.error(err)
-        res.status(500).end()
-        return
-    })
-    // TODO: purchase order
-    // TODO: purchase refund
-    res.send(products)
 })
 
 
@@ -65,7 +26,7 @@ router.get('/unit/:material/:name/:spec', (req, res) => {
     db.all(query, (err, rows) => {
         if (err) {
             console.error(err)
-            res.status(500).send()
+            res.status(500).send(err)
             return
         }
         const unit = rows.length === 0 ? undefined : rows[0].unit
@@ -75,10 +36,10 @@ router.get('/unit/:material/:name/:spec', (req, res) => {
 
 
 router.delete('/id/:id', (req, res) => {
-    db.run(`DELETE from product WHERE id="${req.params.id}"`, err => {
+    db.run(`DELETE FROM product WHERE id="${req.params.id}"`, err => {
         if (err) {
             console.error(err)
-            res.status(500).send()
+            res.status(500).send(err)
             return
         }
         res.end()
@@ -96,9 +57,9 @@ router.put('/id/:id', (req, res) => {
         if (err && err.errno === 19) { 
             res.send({ changes: 0, prompt: '产品重复' } ) 
             return
-        } else if (err) {
-            console.error(err)
-            res.status(500).end()
+        }
+        if (err) {
+            res.status(500).end(err)
             return
         }
         res.send({ changes: 1 })
@@ -112,7 +73,7 @@ router.post('/', (req, res) => {
     db.run(query, err => {
         if (err) {
             console.error(err)
-            res.status(500).end()
+            res.status(500).send(err)
             return
         }
         res.end()

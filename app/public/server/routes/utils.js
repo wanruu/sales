@@ -2,7 +2,7 @@ const db = require("../db")
 const Decimal = require('decimal.js');
 const crypto = require('crypto')
 
-
+// ----- constant -----
 const INVOICE_TYPE_2_INT = {
     'salesOrder': 0,
     'salesRefund': 1,
@@ -53,6 +53,7 @@ const updateProductQuantityById = (id, quantityChange) => {
     })
 }
 
+
 const updateProductQuantityByInfo = (material, name, spec, unit, quantityChange) => {
     return new Promise((resolve, reject) => {
         db.all(`SELECT * FROM product WHERE material="${material}" AND name="${name}" AND spec="${spec}";`, (err, products) => {
@@ -63,7 +64,7 @@ const updateProductQuantityByInfo = (material, name, spec, unit, quantityChange)
                 VALUES ("${crypto.randomUUID()}", "${material}", "${name}", "${spec}", "${unit}", "${quantityChange}")`
             } else {
                 const newQuantity = Decimal(products[0].quantity).plus(quantityChange).toString()
-                query = `UPDATE product SET quantity="${newQuantity}" WHERE id="${products[0].id}"`
+                query = `UPDATE product SET unit="${unit}", quantity="${newQuantity}" WHERE id="${products[0].id}"`
             }
             db.run(query, err => {
                 if (err) { reject(err) }
@@ -73,25 +74,11 @@ const updateProductQuantityByInfo = (material, name, spec, unit, quantityChange)
     })
 }
 
-const updateSalesRefundAmount = async (refundId) => {
-    const selectAllItems = `SELECT i.amount 
-    FROM salesRefund AS r, salesRefundItem AS i 
-    WHERE r.id=${refundId} AND r.id=i.refundId`
-    return await new Promise((resolve, reject) => {
-        db.all(selectAllItems, (err, items) => {
-            if (err) { reject(err) }
-            const amount = items.reduce((previous, current) => {
-                return previous.plus(current.amount)
-            }, Decimal(0)).toString()
-            resolve(amount)
-        })
-    }).catch(err => {
-        console.error(err)
-    })
-}
 
-
-// oper: INSERT / INSERT OR REPLACE / INSERT OR IGNORE
+/*
+    Insert partner. (Used when new partner was submitted)
+    params oper: INSERT / INSERT OR REPLACE / INSERT OR IGNORE
+ */
 const updatePartner = (oper, name, phone, address) => {
     const query = `${oper} INTO partner (name, phone, address) VALUES ("${name}", "${phone}", "${address}");`
     return new Promise((resolve, reject) => { 
@@ -102,7 +89,9 @@ const updatePartner = (oper, name, phone, address) => {
     })
 }
 
-
+/*
+    Calculate new quantity by invoice type.
+ */
 const calQuanByInvoiceType = (original, change, invoiceType, reversed) => {
     if (invoiceType === 'salesOrder' || invoiceType === 'purchaseRefund') {
         if (!reversed) {
@@ -116,13 +105,16 @@ const calQuanByInvoiceType = (original, change, invoiceType, reversed) => {
     return Decimal(original).plus(change)
 }
 
-
+/*
+    Insert product if not existing when new order is created.
+    return: product dictionary array
+ */
 const updateProductByInvoiceItems = async (items, invoiceType) => {
     // 1. find if product is in database
     const productDictArray = await Promise.all(
-        items.map(async item => {
+        items.map(item => {
             const selectQuery = `SELECT * FROM product WHERE material="${item.material}" AND name="${item.name}" AND spec="${item.spec}";`
-            return await new Promise((resolve, reject) => {
+            return new Promise((resolve, reject) => {
                 db.all(selectQuery, (err, products) => {
                     const productId = err || products.length === 0 ? crypto.randomUUID() : products[0].id
                     const originalQuan = err || products.length === 0 ? 0 : products[0].quantity
@@ -133,34 +125,51 @@ const updateProductByInvoiceItems = async (items, invoiceType) => {
                         spec: item.spec,
                         unit: item.unit,
                         quantity: calQuanByInvoiceType(originalQuan, item.quantity, invoiceType, false).toString(),
-                        info: item
+                        info: item,
+                        isNew: err || products.length === 0
                     })
                 })
             })
         })
     )
-    // 2. update product
-    const productFieldnames = ['id', 'material', 'name', 'spec', 'unit', 'quantity']
-    const { query, flatData } = formatInsert('INSERT OR REPLACE', 'product', productDictArray, productFieldnames)
-    return new Promise((resolve, reject) => { 
-        db.run(query, flatData, err => {
-            if (err) { reject(err) }
-            resolve(productDictArray)
+    // 2. insert product (not existing)
+    const newProducts = productDictArray.filter(p => p.isNew)
+    if (newProducts.length > 0) {
+        const productFieldnames = ['id', 'material', 'name', 'spec', 'unit', 'quantity']
+        const { query, flatData } = formatInsert('INSERT', 'product', newProducts, productFieldnames)
+        await new Promise((resolve, reject) => { 
+            db.run(query, flatData, err => {
+                if (err) { reject(err) }
+                resolve()
+            })
         })
-    })
+    }
+    // 3. update product (existing)
+    const oldProducts = productDictArray.filter(p => !p.isNew)
+    await Promise.all(oldProducts.map(p => {
+        return new Promise((resolve, reject) => {
+            const query = `UPDATE product 
+            SET material="${p.material}", name="${p.name}", spec="${p.spec}", unit="${p.unit}", quantity="${p.quantity}" WHERE id="${p.id}"`
+            db.run(query, err => {
+                if (err) { reject(err) }
+                resolve()
+            })
+        })
+    }))
+    return productDictArray
 }
 
 
-const getNextInvoiceId = (date, invoiceType) => {
+const getNextInvoiceId = (date, invoicePrefix) => {
     const match = (/(\d{4})-(\d{2})-(\d{2})/g).exec(date);
-    const prefix = match[1] + match[2] + match[3];
+    const prefix = invoicePrefix + match[1] + match[2] + match[3];
     return new Promise((resolve, reject) => {
-        const query = `SELECT MAX(id) id FROM invoice WHERE id LIKE "${prefix}%" AND type=${INVOICE_TYPE_2_INT[invoiceType]};`
+        const query = `SELECT MAX(id) id FROM invoice WHERE id LIKE "${prefix}%";`
         db.each(query, (err, row) => {
             if (err) { reject(err) }
             const invoiceId = row.id === null ?
                 prefix + '0001' :
-                prefix + (parseInt(row.id.slice(8)) + 1).toString().padStart(4, '0');
+                prefix + (parseInt(row.id.slice(prefix.length)) + 1).toString().padStart(4, '0');
             resolve(invoiceId)
         })
     })
@@ -168,11 +177,14 @@ const getNextInvoiceId = (date, invoiceType) => {
 
 
 exports.formatInsert = formatInsert
+exports.calQuanByInvoiceType = calQuanByInvoiceType
+
 exports.updateProductQuantityById = updateProductQuantityById
 exports.updateProductQuantityByInfo = updateProductQuantityByInfo
-exports.updateSalesRefundAmount = updateSalesRefundAmount
 exports.updatePartner = updatePartner
 exports.updateProductByInvoiceItems = updateProductByInvoiceItems
+
 exports.getNextInvoiceId = getNextInvoiceId
+
 exports.INVOICE_TYPE_2_INT = INVOICE_TYPE_2_INT
 exports.INT_2_INVOICE_TYPE = INT_2_INVOICE_TYPE

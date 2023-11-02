@@ -1,5 +1,4 @@
-import React from "react";
-import { useEffect, useState, } from "react";
+import React, { useEffect, useState, } from "react";
 import { Table, Modal, Button, message, Input, DatePicker, Col, InputNumber, 
     Row, FloatButton, Space, Popover, Divider 
 } from "antd";
@@ -21,7 +20,6 @@ function SalesRefundFB(props) {
     const [isSelectionModalOpen, setSelectionModalOpen] = useState(false)
     const [editRefund, setEditRefund] = useState(emptySalesRefund())
     const [draftRefunds, setDraftRefunds] = useState([])
-    const [isUploading, setIsUploading] = useState(false)
     const [messageApi, contextHolder] = message.useMessage();
 
 
@@ -92,7 +90,6 @@ function SalesRefundFB(props) {
 
     // upload refund
     const upload = () => {
-        setIsUploading(true)
         // clean data
         const refund = dcSalesRefund(editRefund);
         refund.date = refund.date.format(dateFormat);
@@ -100,8 +97,9 @@ function SalesRefundFB(props) {
             item.quantity = item.quantity || '0'
             return item
         });
+        refund.amount = refund.amount.toString()
         refund.payment = refund.payment || '0'
-        
+        refund.orderId = refund.items[0].invoiceId
         Axios({
             method: 'post',
             baseURL: baseURL(),
@@ -116,10 +114,8 @@ function SalesRefundFB(props) {
                 props.refresh()
             }
             messageApi.open({ type: 'success', content: '保存成功', });
-            setIsUploading(false)
         }).catch(_ => {
             messageApi.open({ type: 'error', content: '保存失败', });
-            setIsUploading(false)
         });
     }
 
@@ -149,7 +145,7 @@ function SalesRefundFB(props) {
         <Modal title='新建销售退货' open={isNewRefundModalOpen} width={1000} centered onCancel={hideNewRefundModal} footer={
             <Space>
                 <Button onClick={saveDraft}>保存草稿</Button>
-                <Button onClick={upload} type='primary' loading={isUploading} disabled={editRefund.items.length===0}>保存</Button>
+                <Button onClick={upload} type='primary' disabled={editRefund.items.length===0}>保存</Button>
             </Space>
         }>
             <Row style={{ marginTop: '20px', marginBottom: '15px' }}>

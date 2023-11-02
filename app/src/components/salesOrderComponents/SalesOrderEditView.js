@@ -1,14 +1,15 @@
 import Axios from 'axios'
-import { Table, Modal, Button, Space, message, DatePicker, 
-    Select, Col, Row, InputNumber, Input, Divider, Badge, 
+import { Table, Button, message, DatePicker, Col, Row, InputNumber, Input, Divider, Badge, 
 } from "antd";
-import React, { useEffect, useState,  } from "react";
+import React, { useEffect, useState, } from "react";
 import { Decimal } from 'decimal.js';
-const { Column } = Table
 import { FieldNumberOutlined, EditOutlined, } from '@ant-design/icons';
 
 
-import { baseURL, dateFormat, unitOptions } from "../../utils/config";
+const { Column } = Table
+
+
+import { baseURL, dateFormat } from "../../utils/config";
 import { emptySalesOrder, dcSalesOrder, calTotalAmount, calItemAmount, emptySalesOrderItem, 
     isSalesOrderItemEmpty, isSalesOrderItemComplete 
 } from "../../utils/salesOrderUtils";
@@ -30,8 +31,8 @@ function SalesOrderEditView(props) {
         }).then(res => {
             setOrder(res.data);
             setEditOrder(dcSalesOrder(res.data));
-        }).catch(err => { });
-    } 
+        }).catch(err => { })
+    }
 
     useEffect(() => {
         const newEditOrder = dcSalesOrder(editOrder)
@@ -74,11 +75,11 @@ function SalesOrderEditView(props) {
         const ifUpdateAmount = ['quantity', 'unit', 'price', 'discount'].includes(field)
         if (ifUpdateAmount) {
             const { originalAmount, amount } = calItemAmount(newEditOrder.items[idx])
-            newEditOrder.items[idx].originalAmount = originalAmount.toString()
-            newEditOrder.items[idx].amount = amount.toString()
+            newEditOrder.items[idx].originalAmount = originalAmount
+            newEditOrder.items[idx].amount = amount
         }
         if (ifUpdateAmount) {
-            newEditOrder.amount = calTotalAmount(newEditOrder.items).toString()
+            newEditOrder.amount = calTotalAmount(newEditOrder.items)
         }
         setEditOrder(newEditOrder)
     }
@@ -117,54 +118,6 @@ function SalesOrderEditView(props) {
     }
     
     // ----- upload data -----
-    const getUploadData = () => {
-        const readyItems = editOrder.items.filter(item => !isSalesOrderItemEmpty(item)) // include deleted
-        // ------------------
-        const salesOrderChange = {}
-        if (editOrder.partner !== order.partner) {
-            salesOrderChange.partner = editOrder.partner
-        }
-        if (editOrder.date.format(dateFormat) !== order.date) {
-            salesOrderChange.date = editOrder.date.format(dateFormat)
-        }
-        if (editOrder.amount !== order.amount) {
-            salesOrderChange.amount = editOrder.amount
-        }
-        if (editOrder.prepayment !== order.prepayment) {
-            salesOrderChange.prepayment = editOrder.prepayment
-        }
-        if (editOrder.payment !== order.payment) {
-            salesOrderChange.payment = editOrder.payment
-        }
-        // ------------------
-        const deleteOrderItems = readyItems.filter(item => item.deleted === true).map(item => { 
-            return {
-                id: item.id, productId: item.productId, quantity: item.quantity
-            }
-        })
-        // ------------------
-        const newOrderItems = readyItems.slice(order.items.length, editOrder.items.length)
-        // ------------------
-        const updatedOrderItems = readyItems.slice(0, order.items.length).filter((item, idx, _) => {
-            if (item.deleted === true) { return false }
-            return ['material', 'name', 'spec', 'price', 'discount', 'quantity', 'originalAmount', 'amount', 'remark'].reduce((pre, cur) => {
-               return item[cur] != order.items[idx][cur] || pre
-            }, false)  // 有改变true，无改变false
-        }).map(item => Object.assign(item, { 
-            originalQuantity: order.items.find(i => i.id === item.id).quantity
-        }))
-        // ------------------
-        const updatedSalesRefundItems = []  // [{refundId,id,originalAmount,amount}]
-        // TODO
-        return { 
-            salesOrderChange: salesOrderChange,
-            deleteOrderItems: deleteOrderItems,
-            newOrderItems: newOrderItems,
-            updatedOrderItems: updatedOrderItems,
-            updatedSalesRefundItems: updatedSalesRefundItems,
-        }
-    }
-
     const upload = () => {
         // check data
         const nIncomplete = editOrder.items.filter(item => !isSalesOrderItemComplete(item) && !isSalesOrderItemEmpty(item)).length;
@@ -180,6 +133,10 @@ function SalesOrderEditView(props) {
                 break;
             }
         }
+        // data
+        const order = dcSalesOrder(editOrder)
+        order.date = order.date.format(dateFormat)
+        order.items = order.items.filter(item => !isSalesOrderItemEmpty(item) && !item.deleted)
         if (editOrder.partner === '') {
             messageApi.open({ type: 'error', content: '收货单位不得为空', });
         } else if (nIncomplete > 0) {
@@ -191,24 +148,19 @@ function SalesOrderEditView(props) {
                 method: 'put',
                 baseURL: baseURL(),
                 url: `salesOrder/id/${order.id}`,
-                data: getUploadData(),
+                data: order,
                 'Content-Type': 'application/json',
             }).then(res => {
-                if (res.status === 200) {
-                    messageApi.open({ type: 'success', content: '保存成功', });
-                    load()
-                    if (props.refresh !== undefined) {
-                        props.refresh()
-                    }
-                } else {
-                    messageApi.open({ type: 'error', content: '保存失败', });
+                messageApi.open({ type: 'success', content: '保存成功', });
+                load()
+                if (props.refresh !== undefined) {
+                    props.refresh()
                 }
             }).catch(_ => {
                 messageApi.open({ type: 'error', content: '保存失败', });
             });
         }
     }
-
 
     return (<>
         {contextHolder}
@@ -222,13 +174,11 @@ function SalesOrderEditView(props) {
                 日期：<DatePicker status={editOrder.date.format(dateFormat) !== order.date ? 'warning' : ''}
                 size='small' value={editOrder.date} onChange={value => updateDate(value)}/>
             </Col>
-            <Col span={8} align='right'>
-                <FieldNumberOutlined /> {props.id}
-            </Col>
+            <Col span={8} align='right'><FieldNumberOutlined /> {props.id}</Col>
         </Row>
+
         <Table className='editTable' dataSource={editOrder.items} size='small' bordered style={{height: 400}} 
-        rowKey={record => record.id}
-        scroll={{x: 'max-content', y: 400 }} pagination={false}>
+            rowKey={record => record.id} scroll={{x: 'max-content', y: 400 }} pagination={false}>
             <Column align='center' width={30} render={(_, row, idx) => {
                 if (row.deleted === true) {
                     return ''
@@ -288,28 +238,22 @@ function SalesOrderEditView(props) {
                 onChange={e => updateRow(idx, 'remark', e.target.value)} />
             } />
             <Column title='操作' align='center' width={80} render={(_, row, idx) => 
-                <Space.Compact size='small'>
-                    {idx < order.items.length ?
-                        <Button type='link' style={{fontSize: '12px'}} disabled={row.refundIds===undefined}>退货单</Button> : null
-                    }
-                    {editOrder.items[idx].deleted === true ?
-                        <Button type='link' style={{fontSize: '12px'}} onClick={_ => recoverItem(idx)}>恢复</Button>:
-                        <Button type='link' danger style={{fontSize: '12px'}} onClick={_ => removeItem(idx)}>删除</Button>
-                    }
-                </Space.Compact>
+                editOrder.items[idx].deleted === true ?
+                    <Button size='small' type='link' style={{fontSize: '12px'}} onClick={_ => recoverItem(idx)}>恢复</Button>:
+                    <Button size='small' type='link' danger style={{fontSize: '12px'}} onClick={_ => removeItem(idx)}>删除</Button>
             } />
         </Table>
         <Divider />
         <Row>
             <Col span={8}>总计：{editOrder.amount.toString()}</Col>
-            <Col span={8}>
-                预付款：<InputNumber size='small' keyboard={false} stringMode controls={false} style={{width: '90%', maxWidth: '150px'}} 
+            <Col span={8} align='center'>
+                预付款：<InputNumber size='small' keyboard={false} stringMode controls={false} 
                     status={order.prepayment === editOrder.prepayment ? '' : 'warning'}
                     value={editOrder.prepayment} onChange={value => updatePrepayment(value)}
                 />
             </Col>
-            <Col span={8}>
-                付款：<InputNumber size='small' keyboard={false} stringMode controls={false} style={{width: '90%', maxWidth: '150px'}} 
+            <Col span={8} align='right'>
+                付款：<InputNumber size='small' keyboard={false} stringMode controls={false} 
                     status={order.payment === editOrder.payment ? '' : 'warning'}
                     placeholder={`应付 ${calPayment()}`}
                     value={editOrder.payment} onChange={value => updatePayment(value)}

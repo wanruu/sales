@@ -4,14 +4,19 @@ const crypto = require('crypto')
 const Decimal = require('decimal.js');
 
 const db = require("../db")
-const { formatInsert, updateProductQuantityByInfo, updateSalesRefundAmount, updateProductQuantityById,
-    getNextInvoiceId,
+const { formatInsert, updateProductQuantityByInfo, updateProductQuantityById,
+    getNextInvoiceId, updateProductByInvoiceItems,calQuanByInvoiceType,
     INVOICE_TYPE_2_INT
 } = require('./utils.js');
 
 
+const prefix = 'XT'
+const typeStr = 'salesRefund'
+const typeInt = INVOICE_TYPE_2_INT.salesRefund
+
+
 router.get('/', (req, res) => {
-    const query = `SELECT * FROM invoice WHERE type=${INVOICE_TYPE_2_INT.salesRefund}`
+    const query = `SELECT * FROM invoice WHERE type=${typeInt}`
     db.all(query, (err, rows) => {
         if (err) {
             console.error(err)
@@ -23,36 +28,30 @@ router.get('/', (req, res) => {
 })
 
 
-// router.get('/id/:id', (req, res) => {
-//     db.each(`SELECT * FROM salesRefund WHERE id=${req.params.id}`, (err, refund) => {
-//         if (err) {
-//             console.error(err)
-//             res.status(500).send()
-//             return
-//         }
-//         const query = `SELECT ri.id, p.id AS productId, oi.id AS orderItemId, p.material, p.name, p.spec, p.unit, oi.price, oi.discount, 
-//         ri.quantity, ri.originalAmount, ri.amount, ri.remark, ri.delivered 
-//         FROM salesRefundItem ri, salesOrderItem oi, product p
-//         WHERE ${req.params.id}=ri.refundId AND ri.orderItemId=oi.id AND oi.productId=p.id`
-//         db.all(query, (err, items) => {
-//             if (err) {
-//                 console.error(err)
-//                 res.status(500).send()
-//                 return
-//             }
-//             res.send(Object.assign(refund, { items: items }))
-//         })
-//     })
-// })
+router.get('/id/:id', (req, res) => {
+    const refundId = req.params.id
+    db.each(`SELECT * FROM invoice WHERE id="${refundId}"`, (err, refund) => {
+        if (err) {
+            console.error(err)
+            res.status(500).send(err)
+            return
+        }
+        const query = `SELECT ii.id, productId, material, name, spec, unit, p.quantity AS remainingQuantity, 
+        price, discount, ii.quantity, originalAmount, amount, remark, delivered 
+        FROM invoiceItem ii, product p
+        WHERE ii.invoiceId="${refundId}" AND ii.productId=p.id`
+        db.all(query, (err, items) => {
+            if (err) {
+                console.error(err)
+                res.status(500).send(err)
+                return
+            }
+            res.send(Object.assign(refund, { items: items }))
+        })
+    })
+})
 
-// id TEXT PRIMARY KEY,
-// type INTEGER NOT NULL,
-// partner TEXT NOT NULL,
-// date TEXT NOT NULL,
-// amount TEXT NOT NULL,
-// prepayment TEXT NOT NULL,
-// payment TEXT NOT NULL,
-// relatedId TEXT,
+
 
 router.post('/', async (req, res) => {
     // ---------- data ----------
@@ -61,10 +60,11 @@ router.post('/', async (req, res) => {
     const amount = req.body.amount
     const prepayment = req.body.prepayment || '0'
     const payment = req.body.payment || '0'
-    const items = req.body.items || []
+    const items = req.body.items
+    const orderId = req.body.orderId
 
     // ---------- validate ----------
-    if (partner === undefined || date === undefined || amount === undefined) {
+    if (partner === undefined || date === undefined || amount === undefined || orderId === undefined || items.length === 0) {
         res.status(400).send('Insufficient data')
         return
     }
@@ -72,87 +72,116 @@ router.post('/', async (req, res) => {
         res.status(400).send('Wrong data format, use MMMM-YY-DD')
         return
     }
-    console.log(items)
 
-    // // insert salesRefund
-    // const refundId = await getNextInvoiceId(req.body.date, 'salesRefund')
+    // 1. update products
+    var productDictArray = await updateProductByInvoiceItems(items, typeStr).catch(err => {
+        console.error(err)
+        res.status(500).send(err)
+    })
+    
+    
+    // 2. insert salesRefund
+    const refundId = await getNextInvoiceId(req.body.date, prefix).catch(err => {
+        console.error(err)
+        res.status(500).send(err)
+    })
+    const refundInsert = `INSERT INTO invoice (id, type, partner, date, amount, prepayment, payment) VALUES 
+    ("${refundId}", ${typeInt}, "${partner}", "${date}", "${amount}", "${prepayment}", "${payment}")`
+    await new Promise((resolve, reject) => {
+        db.run(refundInsert, err => {
+            if (err) { reject(err) }
+            resolve()
+        })
+    }).catch(err => {
+        console.error(err)
+        res.status(500).send(err)
+    })
 
-    // const q1 = `INSERT INTO invoice (id, type, partner, date, amount, prepayment, payment) 
-    // VALUES ("${refundId}", ${INVOICE_TYPE_2_INT.salesRefund}, "${partner}", "${date}", "${amount}", "${prepayment}", "${payment}")`
-    // db.run(q1, function(err) {
-    //     if (err) {
-    //         console.error(err)
-    //         res.status(500).send(err)
-    //         return
-    //     }
-    //     const items = items.map(item => {
-    //         return {
-    //             orderItemId: item.orderItemId,
-    //             quantity: item.quantity,
-    //             originalAmount: item.originalAmount,
-    //             amount: item.amount,
-    //             remark: item.remark,
-    //             delivered: 0,
-    //             refundId: this.lastID
-    //         }
-    //     })
-    //     req.body.items.forEach(item => {
-    //         updateProductQuantityByInfo(item.material, item.name, item.spec, item.unit, item.quantity)
-    //     })
-    //     const { query, flatData } = formatInsert('INSERT', 'salesRefundItem', items, [])
-    //     db.run(query, flatData, (err) => {
-    //         if (err) {
-    //             console.error(err)
-    //             res.status(500).send()
-    //             return
-    //         }
-            res.send()
-    //     })
-    // })
+    // 3. insert invoice relation
+    await new Promise((resolve, reject) => {
+        db.run(`INSERT INTO invoiceRelation(orderId, refundId) VALUES ("${orderId}", "${refundId}")`, err => {
+            if (err) { reject(err) }
+            resolve()
+        })
+    }).catch(err => {
+        console.error(err)
+        res.status(500).send(err)
+    })
+
+    // 4. insert salesRefundItem
+    const refundItemDictArray = productDictArray.map(productDict => {
+        return {
+            productId: productDict.id,
+            price: productDict.info.price,
+            discount: productDict.info.discount,
+            quantity: productDict.info.quantity,
+            originalAmount: productDict.info.originalAmount,
+            amount: productDict.info.amount,
+            remark: productDict.info.remark,
+            delivered: 0,
+            invoiceId: refundId
+        }
+    })
+    const { query, flatData } = formatInsert('INSERT', 'invoiceItem', refundItemDictArray, [])
+    await new Promise((resolve, reject) => { 
+        db.run(query, flatData, err => {
+            if (err) { reject(err) }
+            resolve()
+        })
+    }).catch(err => {
+        console.error(err)
+        res.status(500).send(err)
+    })
+    
+    // 5. return
+    res.end()
 })
 
 
-// router.delete('/id/:id', async (req, res) => {
-//     const id = req.params.id  // str
-//     if (id === undefined) {
-//         res.status(400).send('Insufficient data')
-//         return
-//     }
-//     // 1. get product
-//     const productSelect = `SELECT productId,  ri.id AS itemId, p.quantity AS originalQuantity, ri.quantity changeQuantity 
-//     FROM salesOrderItem AS oi, product AS p, salesRefundItem AS ri 
-//     WHERE ri.refundId=${id} AND ri.orderItemId=oi.id AND oi.productId=p.id;`
-//     const products = await new Promise((resolve, reject) => { 
-//         db.all(productSelect, (err, products) => {
-//             if (err) {
-//                 reject(err)
-//             } 
-//             resolve(products)
-//         })
-//     }).catch(err => {
-//         console.error(err)
-//         res.status(500).send()
-//     })
+router.delete('/id/:id', async (req, res) => {
+    const refundId = req.params.id  // str
+    if (refundId === undefined) {
+        res.status(400).send('Insufficient data')
+        return
+    }
 
-//     // ------- START TO UPDATE -------
-//     db.serialize(() => {
-//         // update product quantity
-//         products.forEach(row => {
-//             const newQuantity = Decimal(row.changeQuantity).minus(row.originalQuantity).toString()
-//             const updateQuantity = `UPDATE product SET quantity="${newQuantity}" WHERE id="${row.productId}";`
-//             db.run(updateQuantity)
-//         })
-//         // delete salesOrder
-//         db.run(`DELETE FROM salesRefund WHERE id=${id};`, err => {
-//             if (err) {
-//                 console.error(err)
-//                 res.status(500).send()
-//                 return
-//             }
-//             res.send()
-//         })
-//     })
-// })
+    // 1. update product quantity
+    const refundItems = await new Promise((resolve, reject) => {
+        const query = `SELECT p.id AS productId, p.quantity AS originalQuantity, ii.quantity  
+        FROM invoice i, invoiceItem ii, product p 
+        WHERE i.id="${refundId}" AND i.id=ii.invoiceId AND ii.productId=p.id`
+        db.all(query, (err, items) => {
+            if (err) { reject(err) }
+            resolve(items)
+        })
+    }).catch(err => {
+        console.error(err)
+        res.status(500).send(err)
+    })
+    refundItems.forEach(async item => {
+        const newQuan = calQuanByInvoiceType(item.originalQuantity, item.quantity, typeStr, true).toString()
+        const query = `UPDATE product SET quantity="${newQuan}" WHERE id="${item.productId}"`
+        await new Promise((resolve, reject) => {
+            db.run(query, err => {
+                if (err) { reject(err) }
+                resolve()
+            })
+        }).catch(err => {
+            console.error(err)
+            res.status(500).send(err)
+        })
+    })
+
+    // 2. delete sales refund
+    db.run(`DELETE FROM invoice WHERE id="${refundId}"`, err => {
+        if (err) {
+            console.error(err)
+            res.status(500).send(err)
+            return
+        }
+        res.end()
+    })
+})
 
 
 

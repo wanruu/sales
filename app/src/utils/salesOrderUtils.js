@@ -8,8 +8,8 @@ export const emptySalesOrderItem = () => {
     return { 
         id: uuid(),
         material: '', name: '', spec: '', 
-        quantity: null, unit: '', price: null, originalAmount: Decimal(0), 
-        discount: 100, amount: Decimal(0),
+        quantity: null, unit: '', price: null, originalAmount: '0', 
+        discount: 100, amount: '0',
         remark: '', 
     };
 };
@@ -30,7 +30,7 @@ export const emptySalesOrder = (itemsNum=1) => {
         partner: '',
         date: dayjs(),
         draftTime: undefined,
-        amount: Decimal(0),
+        amount: '0',
         prepayment: '',
         payment: '',
         // items: [...Array(parseInt(invoiceSettings.defaultEditRowNum())).keys()].map(_ => emptySalesOrderItem()),
@@ -80,5 +80,5 @@ export const calItemAmount = (itemDict) => {
     return { originalAmount: originalAmount.toFixed(2, Decimal.ROUND_HALF_UP), amount: amount.toFixed(2, Decimal.ROUND_HALF_UP)}
 }
 export const calTotalAmount = (items) => {
-    return items.reduce((previous, current) => previous.plus(current.amount), new Decimal(0))
+    return items.reduce((previous, current) => previous.plus(current.amount), new Decimal(0)).toString()
 }

@@ -57,13 +57,19 @@ const invoice = `CREATE TABLE IF NOT EXISTS invoice(
     amount TEXT NOT NULL,
     prepayment TEXT NOT NULL,
     payment TEXT NOT NULL,
-    relatedId TEXT,
     FOREIGN KEY(partner) REFERENCES partner(name) ON DELETE CASCADE
+);`
+
+const invoiceRelation = `CREATE TABLE IF NOT EXISTS invoiceRelation(
+    orderId TEXT NOT NULL,
+    refundId TEXT NOT NULL,
+    FOREIGN KEY(orderId) REFERENCES invoice(id) ON DELETE CASCADE,
+    FOREIGN KEY(refundId) REFERENCES invoice(id) ON DELETE CASCADE
 );`
 
 
 const creations = [ 
-    partner, product, invoice, invoiceItem
+    partner, product, invoice, invoiceItem, invoiceRelation
 ]
 
 // create tables

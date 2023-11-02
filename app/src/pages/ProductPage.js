@@ -10,18 +10,10 @@ import { baseURL } from "../utils/config";
 import { UnitInput } from "../components/common/PromptInput";
 
 
-const emptyProduct = () => {
-    return {
-        material: '',
-        name: '',
-        spec: '',
-        quantity: '0'
-    }
-}
 
 function ProductPage() {
     const [products, setProducts] = useState([]);
-    const [editProduct, setEditProduct] = useState(emptyProduct())
+    const [editProduct, setEditProduct] = useState(undefined)
     const [messageApi, contextHolder] = message.useMessage();
 
     const updateEdit = (field, value) => {
@@ -31,29 +23,26 @@ function ProductPage() {
     }
 
     const getStatus = (field) => {
+        if (editProduct === undefined) {
+            return ''
+        }
         const product = products.find(p => p.id === editProduct.id)
         return (product !== undefined && product[field] === editProduct[field]) ? '' : 'warning'
     }
 
     const load = () => {
+        setProducts([])
         Axios({
             method: 'get',
             baseURL: baseURL(),
             url: '/product',
-            params: { },
             'Content-Type': 'application/json',
         }).then(res => {
-            if (res.status === 200) {
-                setProducts(res.data)
-            } else {
-                // TODO
-            }
-        }).catch(_ => {
-            // TODO
-        });
-    };
+            setProducts(res.data)
+        }).catch(_ => { })
+    }
     const upload = () => {
-        const p = editProduct
+        const p = JSON.parse(JSON.stringify(editProduct))
         p.quantity = p.quantity || '0'
         Axios({
             method: 'put',
@@ -65,7 +54,7 @@ function ProductPage() {
             if (res.data.changes === 1) {
                 messageApi.open({ type: 'success', content: '保存成功', });
                 load()
-                setEditProduct(emptyProduct())
+                setEditProduct(undefined)
             } else {
                 messageApi.open({ type: 'error', content: `保存失败：${res.data.prompt}`, });
             }
@@ -99,59 +88,58 @@ function ProductPage() {
         });
     }
     
-
     useEffect(() => {
         load()
     }, [])
 
     return (<>
         {contextHolder}
-        <Modal open={editProduct.id !== undefined} onCancel={_ => setEditProduct(emptyProduct())} title='编辑产品' footer={null} >
+        <Modal open={editProduct !== undefined} onCancel={_ => setEditProduct(undefined)} title='编辑产品' footer={null} >
             <Form>
                 <Form.Item label='材质'>
-                    <Input value={editProduct.material} onChange={e => updateEdit('material', e.target.value)} status={getStatus('material')} />
+                    <Input value={editProduct === undefined ? '' : editProduct.material} 
+                        onChange={e => updateEdit('material', e.target.value)} status={getStatus('material')} />
                 </Form.Item>
                 <Form.Item label='名称'>
-                    <Input value={editProduct.name} onChange={e => updateEdit('name', e.target.value)} status={getStatus('name')} />
+                    <Input value={editProduct === undefined ? '' : editProduct.name} 
+                        onChange={e => updateEdit('name', e.target.value)} status={getStatus('name')} />
                 </Form.Item>
                 <Form.Item label='规格'>
-                    <Input value={editProduct.spec} onChange={e => updateEdit('spec', e.target.value)} status={getStatus('spec')} />
+                    <Input value={editProduct === undefined ? '' : editProduct.spec} 
+                        onChange={e => updateEdit('spec', e.target.value)} status={getStatus('spec')} />
                 </Form.Item>
                 <Form.Item label='数量'>
                     <Space>
-                        <InputNumber value={editProduct.quantity} onChange={val => updateEdit('quantity', val)} stringMode status={getStatus('quantity')} />
-                        <UnitInput size='medium' style={{width: '80px'}} value={editProduct.unit} onChange={val => updateEdit('unit', val)} status={getStatus('unit')} />
+                        <InputNumber value={editProduct === undefined ? '' : editProduct.quantity} 
+                            onChange={val => updateEdit('quantity', val)} stringMode status={getStatus('quantity')} />
+                        <UnitInput size='medium' style={{width: '80px'}} status={getStatus('unit')}
+                            value={editProduct === undefined ? '' : editProduct.unit} onChange={val => updateEdit('unit', val)} />
                     </Space>
                 </Form.Item>
-                <Button type='primary' onClick={upload} disabled={editProduct.material===''||editProduct.name===''||editProduct.spec===''||editProduct.unit===''}>保存</Button>
+                <Button type='primary' onClick={upload} 
+                    disabled={editProduct===undefined||editProduct.material===''||editProduct.name===''||editProduct.spec===''||editProduct.unit===''}>保存</Button>
             </Form>
         </Modal>
 
         <Table dataSource={products} size='small' bordered rowKey={record => record.id}
         pagination={{ defaultPageSize: 50, showSizeChanger: true, pageSizeOptions: [50, 100], showQuickJumper: true }} >
             <Column title='序号' align='center' render={(_, __, idx) => idx+1} />
-            <Column title='材质' dataIndex='material' align='center' sorter={(a, b) => a.material > b.material ? 1 : (a.material === b.material ? 0 : -1)} render={(_, record, idx) => 
-                record.editing === true ? <Input /> : record.material
-            } />
-            <Column title='名称' dataIndex='name' align='center' sorter={(a, b) => a.name > b.name ? 1 : (a.name === b.name ? 0 : -1)} />
-            <Column title='规格' dataIndex='spec' align='center' sorter={(a, b) => a.spec > b.spec ? 1 : (a.spec === b.spec ? 0 : -1)} />
+            <Column title='材质' dataIndex='material' align='center' />
+            <Column title='名称' dataIndex='name' align='center' />
+            <Column title='规格' dataIndex='spec' align='center' />
             <Column title='库存' dataIndex='quantity' align='center' render={quantity => 
                 <span style={{color: quantity[0] == '-' ? 'red': 'black'}}>{quantity}</span>
             } />
             <Column title='单位' dataIndex='unit' align='center' />
-            <Column title='销售单' dataIndex='salesOrders' align='center' render={salesOrders => salesOrders.length} />
-            <Column title='销售退货' dataIndex='salesRefunds' align='center' render={salesRefunds => salesRefunds.length} />
-            <Column title='采购单' dataIndex='purchaseOrders' align='center' render={purchaseOrders => purchaseOrders.length} />
-            <Column title='采购退货' dataIndex='purchaseRefunds' align='center' render={purchaseRefunds => purchaseRefunds.length} />
             <Column title='操作' align='center' render={(_, record) => (
                 <Space.Compact size='small'>
                     <Button type='link' onClick={_ => setEditProduct(record)}>编辑</Button>
-                    <Button type='link' danger onClick={_ => showDeleteConfirm(record.id)} 
-                    disabled={record.salesOrders.length!==0||record.salesRefunds.length!==0||record.purchaseOrders.length!==0||record.purchaseRefunds.length!==0}>删除</Button>
+                    {/* <Button type='link' danger onClick={_ => showDeleteConfirm(record.id)} 
+                    disabled={record.salesOrders.length!==0||record.salesRefunds.length!==0||record.purchaseOrders.length!==0||record.purchaseRefunds.length!==0}>删除</Button> */}
                 </Space.Compact>
             )} />
         </Table>
-    </>);
+    </>)
 }
 
 export default ProductPage

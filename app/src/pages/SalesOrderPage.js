@@ -53,7 +53,7 @@ function SalesOrderPage() {
         confirm({
             title: `是否删除销售清单 ${orderId.toString().padStart(6, '0')}?`,
             icon: <ExclamationCircleFilled />,
-            content: '确认删除后不可撤销。同时仓库中产品的库存会相应增加，挂钩的销售退货条目会被删除（不影响退货清单中其他条目）',
+            content: '确认删除后不可撤销，同时仓库中产品的库存会相应增加',
             okText: '删除',
             okType: 'danger',
             cancelText: '取消',
@@ -73,15 +73,18 @@ function SalesOrderPage() {
         onCancel={_ => setPreviewOrderId(undefined)} footer={null}>
             <SalesOrderPreview id={previewOrderId} refresh={load} />
         </Modal>
+
         <Modal title='编辑销售清单' open={editOrderId !== undefined} width={900} destroyOnClose 
-        onCancel={_ => setEditOrderId(undefined)} footer={null}>
+            onCancel={_ => setEditOrderId(undefined)} footer={null}>
             <SalesOrderEditView id={editOrderId} refresh={load}/>
         </Modal>
 
         <Table dataSource={salesOrders} bordered size='small' rowKey={record => record.id}
         pagination={{defaultPageSize: 50, pageSizeOptions: [50, 100], showQuickJumper: true, showSizeChanger: true}}>
             <Column title='序号' align='center' render={(_, __, idx) => idx+1} />
-            <Column title='单号' dataIndex='id' align='center' />
+            <Column title='单号' dataIndex='id' align='center' render={id => 
+                <a onClick={_ => setEditOrderId(id)}>{id}</a>
+            } />
             <Column title='日期' dataIndex='date' align='center' />
             <Column title='客户' dataIndex='partner' align='center' />
             <Column title='金额' dataIndex='amount' align='center' />
@@ -93,7 +96,6 @@ function SalesOrderPage() {
             }} />
             <Column title='操作' align='center' render={(_, row) => (
                 <Space.Compact size='small'>
-                    <Button type='link' onClick={_ => setEditOrderId(row.id)}>编辑</Button>
                     <Button type='link' onClick={_ => setPreviewOrderId(row.id)}>预览</Button>
                     <Button type='link' onClick={_ => showDeleteConfirm(row.id)} danger>删除</Button>
                 </Space.Compact>

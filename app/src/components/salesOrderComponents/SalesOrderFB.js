@@ -1,7 +1,6 @@
-import React from "react";
-import { useEffect, useState, } from "react";
-import { Table, Modal, Button, message, Input, AutoComplete, DatePicker, Col, InputNumber, 
-    Row, FloatButton, Space, Popover, Select, Divider 
+import React, { useEffect, useState, } from "react";
+import { Table, Modal, Button, message, Input, DatePicker, Col, InputNumber, 
+    Row, FloatButton, Space, Popover, Divider 
 } from "antd";
 import { PlusOutlined, InboxOutlined, } from '@ant-design/icons'
 import { Decimal } from 'decimal.js';
@@ -14,7 +13,7 @@ import { emptySalesOrder, dcSalesOrder, isSalesOrderItemEmpty, emptySalesOrderIt
     isSalesOrderItemComplete, calItemAmount, calTotalAmount
 } from '../../utils/salesOrderUtils'
 import { PartnerInput, ProductInput, UnitInput } from "../common/PromptInput";
-import { baseURL, unitOptions, dateFormat } from "../../utils/config";
+import { baseURL, dateFormat } from "../../utils/config";
 import "../common/InvoiceEdit.css"
 
 
@@ -194,7 +193,7 @@ function SalesOrderFB(props) {
         }>
             <Row style={{ marginTop: '20px', marginBottom: '15px' }}>
                 <Col span={12}>客户：<PartnerInput style={{width: 200}} size='small' value={editOrder.partner} onChange={value => updatePartner(value)} /></Col>
-                <Col span={12}>日期：<DatePicker size='small' value={editOrder.date} onChange={value => updateDate(value)}/></Col>
+                <Col span={12} align='right'>日期：<DatePicker size='small' value={editOrder.date} onChange={value => updateDate(value)}/></Col>
             </Row>
 
             <Table className='editTable' dataSource={editOrder.items} size='small' bordered style={{height: 400}} 

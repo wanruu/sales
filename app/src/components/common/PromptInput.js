@@ -82,12 +82,10 @@ export function UnitInput(props) {
             url: `product/unit/${props.material}/${props.name}/${props.spec}`,
             'Content-Type': 'application/json',
         }).then(res => {
-            if (res.status === 200) {
-                const _unit = res.data.unit
-                setUnit(_unit)
-                if (_unit !== undefined) {
-                    props.onChange(_unit)
-                }
+            const _unit = res.data.unit
+            setUnit(_unit)
+            if (_unit !== undefined) {
+                props.onChange(_unit)
             }
         }).catch(err => {
             console.error(err)
@@ -105,8 +103,8 @@ export function UnitInput(props) {
         load()
     }, [props.material, props.name, props.spec])
 
-    return <Select size={props.size || 'small'} options={unitOptions} id='unitInput' disabled={props.disabled || false}
+    return unit === undefined ? <Select size={props.size || 'small'} options={unitOptions} id='unitInput' disabled={props.disabled || false}
         align={props.align || 'center'} style={props.style || {}} value={props.value} 
         onChange={props.onChange} status={getStatus()}
-    />
+    /> : unit
 }

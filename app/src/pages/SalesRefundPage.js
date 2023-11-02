@@ -42,7 +42,7 @@ function SalesRefundPage() {
         confirm({
             title: `是否删除销售退款单 ${refundId.toString().padStart(6, '0')}?`,
             icon: <ExclamationCircleFilled />,
-            content: '确认删除后不可撤销。同时仓库中产品的库存会相应减少',
+            content: '确认删除后不可撤销，同时仓库中产品的库存会相应减少',
             okText: '删除',
             okType: 'danger',
             cancelText: '取消',
@@ -92,7 +92,9 @@ function SalesRefundPage() {
         rowKey={record => record.id} bordered
         pagination={{defaultPageSize: 50, pageSizeOptions: [50, 100], showQuickJumper: true, showSizeChanger: true}}>
             <Column title='序号' render={(_,__,idx) => idx+1} align='center' />
-            <Column title='单号' dataIndex='id' align='center' render={id => id.toString().padStart(6, '0')} />
+            <Column title='单号' dataIndex='id' align='center' render={id =>
+                <a onClick={_ => setEditRefundId(id)}>{id}</a>
+            } />
             <Column title='日期' dataIndex='date' align='center' />
             <Column title='客户' dataIndex='partner' align='center' />
             <Column title='金额' dataIndex='amount' align='center' />
@@ -103,7 +105,6 @@ function SalesRefundPage() {
             }} />
             <Column title='操作' align='center' render={(_, row) => 
                 <Space.Compact size='small'>
-                    <Button type='link' onClick={_ => setEditRefundId(row.id)}>编辑</Button>
                     <Button type='link' onClick={_ => setPreviewRefundId(row.id)}>预览</Button>
                     <Button type='link' onClick={_ => showDeleteConfirm(row.id)} danger>删除</Button>
                 </Space.Compact>

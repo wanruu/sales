@@ -19,7 +19,6 @@ function PartnerPage() {
             method: 'get',
             baseURL: baseURL(),
             url: '/partner',
-            params: { },
             'Content-Type': 'application/json',
         }).then(res => {
             setPartners(res.data)
@@ -37,15 +36,15 @@ function PartnerPage() {
             messageApi.open({ type: 'success', content: '删除成功', });
             load()
         }).catch(err => {
-            messageApi.open({ type: 'error', content: `删除失败：${err}`, });
+            messageApi.open({ type: 'error', content: '删除失败', });
         });
     }
 
     const showDeleteConfirm = (name) => {
         confirm({
-            title: `是否删交易对象: ${name}?`,
+            title: `是否删交易对象“${name}”?`,
             icon: <ExclamationCircleFilled />,
-            content: '确认删除后不可撤销',
+            content: '确认删除后不可撤销，其名下单据将同时删除',
             okText: '删除',
             okType: 'danger',
             cancelText: '取消',
@@ -61,11 +60,15 @@ function PartnerPage() {
             data: editPartner,
             'Content-Type': 'application/json',
         }).then(res => {
-            messageApi.open({ type: 'success', content: '保存成功', });
-            load()
-            setEditPartner(undefined)
+            if (res.data.changes === 1) {
+                messageApi.open({ type: 'success', content: '保存成功', });
+                load()
+                setEditPartner(undefined)
+            } else {
+                messageApi.open({ type: 'error', content: `保存失败: ${res.data.prompt}`, });
+            }
         }).catch(err => {
-            messageApi.open({ type: 'error', content: `保存失败：${err}`, });
+            messageApi.open({ type: 'error', content: '保存失败', });
         });
     }
 
