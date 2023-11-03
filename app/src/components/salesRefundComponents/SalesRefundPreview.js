@@ -25,11 +25,7 @@ function SalesRefundPreview(props) {
     }
 
     useEffect(() => {
-        if (props.salesRefund !== undefined) {
-            setSalesRefund(props.salesRefund)
-        } else if (props.id !== undefined) {
-            load()
-        }
+        load()
     }, [])
 
     // for print

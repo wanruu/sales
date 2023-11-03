@@ -74,18 +74,14 @@ function PreviewTitle(props) {
     }
 
     if (invoiceSettings.titleStyle() === 'inline') {
-        return <div className='flexVCenter' style={{ fontSize: `${invoiceSettings.titleFontSize()}px` }}>
-            {getTitle()}&nbsp;&nbsp;&nbsp;{getSubTitle()}
-        </div>
+        return <Space direction='vertical' style={{ width: '100%' }} align='center'>
+            <span style={{ fontSize: `${invoiceSettings.titleFontSize()}px` }}>{getTitle()}&nbsp;&nbsp;&nbsp;{getSubTitle()}</span>
+        </Space>
     }
-    return <>
-        <div className='flexVCenter' style={{ fontSize: `${invoiceSettings.titleFontSize()}px` }}>
-            {getTitle()}
-        </div>
-        <div className='flexVCenter' style={{ fontSize: `${invoiceSettings.titleFontSize()}px` }}>
-            {getSubTitle()}
-        </div>
-    </>
+    return <Space direction='vertical' style={{ width: '100%' }} align='center' size='10px'>
+        <span style={{ fontSize: `${invoiceSettings.titleFontSize()}px` }}>{getTitle()}</span>
+        <span style={{ fontSize: `${invoiceSettings.subtitleFontSize()}px` }}>{getSubTitle()}</span>
+    </Space>
 }
 
 function PreviewFooter() {
@@ -114,6 +110,77 @@ function PreviewFooter() {
     )
 }
 
+function PreviewHeader(props) {
+    const partnerTitle = () => {
+        return props.type === 'salesOrder' || props.type === 'salesRefund' ? '客户' : '供应商'
+    }
+    const addressTitle = () => {
+        return props.type === 'salesOrder' || props.type === 'purchaseRefund' ? '收货地址' : '发货地址'
+    }
+    const showNone = () => {
+        if (!invoiceSettings.showAddress() && !invoiceSettings.showPhone()) {
+            return true
+        }
+        if (invoiceSettings.showAddress() && props.invoice.address !== '') {
+            return false
+        }
+        if (props.invoice.phone !== '' && invoiceSettings.showPhone()) {
+            return false
+        }
+        return false
+    }
+    if (invoiceSettings.showAddress() && invoiceSettings.showPhone() && props.invoice.address !== '' && props.invoice.phone !== '') {
+        return <Space style={{ width: '100%' }} direction='vertical' size='10px'>
+            <Row>
+                <Col span={8} style={{ fontSize: `${invoiceSettings.fontSize()}px` }}>
+                    {partnerTitle()}：{props.invoice.partner}
+                </Col>
+                <Col span={8} style={{ fontSize: `${invoiceSettings.fontSize()}px` }} align='center'>
+                    日期：{props.invoice.date}
+                </Col>
+                <Col span={8} style={{ fontSize: `${invoiceSettings.fontSize()}px` }} align='right'>
+                    <FieldNumberOutlined/> {props.invoice.id}
+                </Col>
+            </Row>
+            <Row >
+                <Col span={7} style={{ fontSize: `${invoiceSettings.fontSize()}px` }} >
+                    电话：{props.invoice.phone}
+                </Col>
+                <Col span={17} style={{ fontSize: `${invoiceSettings.fontSize()}px` }} align='right'>
+                    {addressTitle()}：{props.invoice.address}
+                </Col>
+            </Row>
+        </Space>
+    } else if (showNone()) {
+        return <Row>
+            <Col span={8} style={{ fontSize: `${invoiceSettings.fontSize()}px` }}>
+                {partnerTitle()}：{props.invoice.partner}
+            </Col>
+            <Col span={8} style={{ fontSize: `${invoiceSettings.fontSize()}px` }} align='center'>
+                日期：{props.invoice.date}
+            </Col>
+            <Col span={8} style={{ fontSize: `${invoiceSettings.fontSize()}px` }} align='right'>
+                <FieldNumberOutlined/> {props.invoice.id}
+            </Col>
+        </Row>
+    }
+    return <Row align='middle'>
+        <Col span={8} style={{ fontSize: `${invoiceSettings.fontSize()}px` }}>
+            <span>{partnerTitle()}：{props.invoice.partner}</span><br/>
+            {props.invoice.address ? 
+                <span>{addressTitle()}：{props.invoice.address}</span> : 
+                <span>电话：{props.invoice.phone}</span>
+            }
+        </Col>
+        <Col span={8} style={{ fontSize: `${invoiceSettings.fontSize()}px` }} align='center'>
+            日期：{props.invoice.date}
+        </Col>
+        <Col span={8} style={{ fontSize: `${invoiceSettings.fontSize()}px` }} align='right'>
+            <FieldNumberOutlined/> {props.invoice.id}
+        </Col>
+    </Row>
+}
+
 export default function InvoicePreview(props) {
     return <div className='invoiceWrapper' style={{width: invoiceSettings.width() + 'px', height: invoiceSettings.height() + 'px'}}>
         <div className='invoiceContent' style={{ border: '1px solid lightgray', boxSizing: 'border-box' }}>
@@ -125,17 +192,7 @@ export default function InvoicePreview(props) {
             }}>
                 <Space direction='vertical' style={{ width: '100%' }}>
                     <PreviewTitle type={props.type} />
-                    <Row>
-                        <Col span={8} style={{ fontSize: invoiceSettings.fontSize() + 'px' }}>
-                            客户：{props.invoice.partner}
-                        </Col>
-                        <Col span={8} style={{ fontSize: invoiceSettings.fontSize() + 'px' }} align='center'>
-                            日期：{props.invoice.date}
-                        </Col>
-                        <Col span={8} style={{ fontSize: invoiceSettings.fontSize() + 'px'}} align='right'>
-                            <FieldNumberOutlined/> {props.invoice.id}
-                        </Col>
-                    </Row>
+                    <PreviewHeader invoice={props.invoice} type={props.type} />
                     <PreviewTable invoice={props.invoice} />
                     <PreviewFooter />
                 </Space>

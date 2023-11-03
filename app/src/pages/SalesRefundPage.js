@@ -23,6 +23,7 @@ function SalesRefundPage() {
 
 
     const load = () => {
+        setSalesRefunds([])
         Axios({
             method: 'get',
             baseURL: baseURL(),
@@ -30,12 +31,8 @@ function SalesRefundPage() {
             params: {  },
             'Content-Type': 'application/json',
         }).then(res => {
-            if (res.status === 200) {
-                setSalesRefunds(res.data)
-            }
-        }).catch(_ => {
-            
-        });
+            setSalesRefunds(res.data)
+        }).catch(_ => { });
     };
 
     const showDeleteConfirm = (refundId) => {
@@ -58,12 +55,8 @@ function SalesRefundPage() {
             params: {  },
             'Content-Type': 'application/json',
         }).then(res => {
-            if (res.status === 200) {
-                load()
-                messageApi.open({ type: 'success', content: '删除成功', });
-            } else {
-                messageApi.open({ type: 'error', content: '删除失败', });
-            }
+            load()
+            messageApi.open({ type: 'success', content: '删除成功', });
         }).catch(_ => {
             messageApi.open({ type: 'error', content: '删除失败', });
         }); 

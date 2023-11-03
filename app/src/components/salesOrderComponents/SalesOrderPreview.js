@@ -26,11 +26,7 @@ function SalesOrderPreview(props) {
     }
 
     useEffect(() => {
-        if (props.salesOrder !== undefined) {
-            setSalesOrder(props.salesOrder)
-        } else if (props.id !== undefined) {
-            load()
-        }
+        load()
     }, [])
 
     // for print

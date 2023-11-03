@@ -143,16 +143,12 @@ function SalesOrderFB(props) {
                 data: order,
                 'Content-Type': 'application/json',
             }).then(res => {
-                if (res.status === 200) {
-                    messageApi.open({ type: 'success', content: '保存成功', });
-                    setEditOrder(emptyInvoice(1))
-                    hideModal()
-                    removeDraft(order)
-                    if (props.refresh !== undefined) {
-                        props.refresh()
-                    }
-                } else {
-                    messageApi.open({ type: 'error', content: `${res.status}: 保存失败`, });
+                messageApi.open({ type: 'success', content: '保存成功', });
+                setEditOrder(emptyInvoice(1))
+                hideModal()
+                removeDraft(order)
+                if (props.refresh !== undefined) {
+                    props.refresh()
                 }
                 setIsUploading(false)
             }).catch(_ => {

@@ -5,16 +5,15 @@ import { dateFormat } from './config'
 
 export const initSalesRefundForPreview = (itemNum=1) => {
     return {
-        id: 999999,
+        id: `XT${dayjs().format('YYYYMMDD')}0001`,
         partner: '',
         date: dayjs().format(dateFormat),
         amount: '0',
-        payment: '',
+        phone: ' ',
+        address: ' ',
         items: [...Array(itemNum).keys()].map(_ => { return {
-            material: '', name: '', spec: '', 
-            quantity: '0', unit: '', price: '0', 
-            amount: '0',
-            remark: ''
+            material: '', name: '', spec: '', unit: '', 
+            quantity: '', price: '', amount: '', remark: ''
         }}),
     };
 }

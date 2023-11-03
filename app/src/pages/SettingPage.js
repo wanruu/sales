@@ -1,14 +1,13 @@
-import { Button, Input, Upload, InputNumber, Space, Select } from "antd";
+import { Button, Input, Upload, InputNumber, Space, Select, Checkbox } from "antd";
 import React, { useState, } from "react";
 import * as XLSX from 'xlsx';
 import Axios from 'axios';
-
+import { CheckOutlined } from '@ant-design/icons'
 
 import { baseURL, invoiceSettings } from "../utils/config";
 import { initSalesOrderForPreview } from "../utils/salesOrderUtils";
 import { initSalesRefundForPreview } from "../utils/salesRefundUtils";
-import SalesOrderPreview from "../components/salesOrderComponents/SalesOrderPreview";
-import SalesRefundPreview from "../components/salesRefundComponents/SalesRefundPreview";
+import InvoicePreview from "../components/common/InvoicePreview";
 
 const { TextArea } = Input;
 
@@ -29,6 +28,10 @@ function SettingPage() {
     const [purchaseOrderTitle, setPurchaseOrderTitle] = useState(invoiceSettings.purchaseOrderTitle())
     const [purchaseRefundTitle, setPurchaseRefundTitle] = useState(invoiceSettings.purchaseRefundTitle())
     const [titleStyle, setTitleStyle] = useState(invoiceSettings.titleStyle())
+    const [subtitleFontSize, setSubtitleFontSize] = useState(invoiceSettings.subtitleFontSize())
+
+    const [showPhone, setShowPhone] = useState(invoiceSettings.showPhone())
+    const [showAddress, setShowAddress] = useState(invoiceSettings.showAddress())
 
     const [footer, setFooter] = useState(invoiceSettings.footer())
     const [footerFontSize, setFooterFontSize] = useState(invoiceSettings.footerFontSize())
@@ -160,22 +163,39 @@ function SettingPage() {
             </Space>
 
             <h3>副标题及样式</h3>
+            <Space direction="vertical">
+                <Space wrap>
+                    <Input addonBefore='销售清单' value={salesOrderTitle} style={{width: '200px'}} onChange={e => {
+                        setSalesOrderTitle(e.target.value); localStorage.setItem('salesOrderTitle', e.target.value);
+                    }} />
+                    <Input addonBefore='采购清单' value={purchaseOrderTitle} style={{width: '200px'}} onChange={e => {
+                        setPurchaseOrderTitle(e.target.value); localStorage.setItem('purchaseOrderTitle', e.target.value);
+                    }} />
+                    <Input addonBefore='销售退款' value={salesRefundTitle} style={{width: '200px'}} onChange={e => {
+                        setSalesRefundTitle(e.target.value); localStorage.setItem('salesRefundTitle', e.target.value);
+                    }} />
+                    <Input addonBefore='采购退款' value={purchaseRefundTitle} style={{width: '200px'}} onChange={e => {
+                        setPurchaseRefundTitle(e.target.value); localStorage.setItem('purchaseRefundTitle', e.target.value);
+                    }} />
+                </Space>
+                <Space wrap>
+                    <Select value={titleStyle} options={[{label: '标题同行', value: 'inline'},{label: '另起一行', value: 'multi'}]} onChange={val => {
+                        setTitleStyle(val); localStorage.setItem('titleStyle', val);
+                    }}/>
+                    <InputNumber addonAfter='px' value={subtitleFontSize} style={{width: '100px'}} disabled={titleStyle==='inline'} onChange={val => {
+                        setSubtitleFontSize(val); localStorage.setItem('subtitleFontSize', val);
+                    } }/>
+                </Space>
+            </Space>
+
+            <h3>交易对象信息</h3>
             <Space wrap>
-                <Input addonBefore='销售清单' value={salesOrderTitle} style={{width: '200px'}} onChange={e => {
-                    setSalesOrderTitle(e.target.value); localStorage.setItem('salesOrderTitle', e.target.value);
-                }} />
-                <Input addonBefore='采购清单' value={purchaseOrderTitle} style={{width: '200px'}} onChange={e => {
-                    setPurchaseOrderTitle(e.target.value); localStorage.setItem('purchaseOrderTitle', e.target.value);
-                }} />
-                <Input addonBefore='销售退款' value={salesRefundTitle} style={{width: '200px'}} onChange={e => {
-                    setSalesRefundTitle(e.target.value); localStorage.setItem('salesRefundTitle', e.target.value);
-                }} />
-                <Input addonBefore='采购退款' value={purchaseRefundTitle} style={{width: '200px'}} onChange={e => {
-                    setPurchaseRefundTitle(e.target.value); localStorage.setItem('purchaseRefundTitle', e.target.value);
-                }} />
-                <Select value={titleStyle} options={[{label: '标题同行', value: 'inline'},{label: '另起一行', value: 'multi'}]} onChange={val => {
-                    setTitleStyle(val); localStorage.setItem('titleStyle', val);
-                }}/>
+                <Checkbox checked={showPhone} onChange={e => {
+                    setShowPhone(e.target.checked); localStorage.setItem('showPhone', e.target.checked); 
+                }} >显示电话 (如有)</Checkbox>
+                <Checkbox checked={showAddress} onChange={e => {
+                    setShowAddress(e.target.checked); localStorage.setItem('showAddress', e.target.checked); 
+                }} >显示地址 (如有)</Checkbox>
             </Space>
 
             <h3>脚注及字号</h3>
@@ -197,8 +217,8 @@ function SettingPage() {
                 </Space.Compact>
             </h3>
             
-            {previewType === 'salesOrder' ? <SalesOrderPreview salesOrder={initSalesOrderForPreview(10)} /> : ''}
-            {previewType === 'salesRefund' ? <SalesRefundPreview salesRefund={initSalesRefundForPreview(10)} /> : ''}
+            {previewType === 'salesOrder' ? <InvoicePreview invoice={initSalesOrderForPreview(10)} type='salesOrder' /> : ''}
+            {previewType === 'salesRefund' ? <InvoicePreview invoice={initSalesRefundForPreview(10)} type='salesRefund' /> : ''}
 
             {/* <h2>导入</h2>
             <Upload directory accept=".xlsx" customRequest={handleUpload}>

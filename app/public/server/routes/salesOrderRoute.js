@@ -255,7 +255,8 @@ router.get('/id/:id', (req, res) => {
         return
     }
 
-    db.each(`SELECT * FROM invoice i WHERE id="${orderId}"`, (err, order) => {
+    const selectOrder = `SELECT * FROM invoice, partner WHERE id="${orderId}" AND partner=name`
+    db.each(selectOrder, (err, order) => {
         if (err) {
             console.error(err)
             res.status(500).send(err)
@@ -276,8 +277,6 @@ router.get('/id/:id', (req, res) => {
         })
     })
 })
-
-
 
 router.delete('/id/:id', async (req, res) => {
     const orderId = req.params.id  // str

@@ -16,16 +16,15 @@ export const isSalesOrderItemComplete = (item) => {
 
 export const initSalesOrderForPreview = (itemNum=1) => {
     return {
-        id: 999999,
+        id: `XS${dayjs().format('YYYYMMDD')}0001`,
         partner: '',
+        phone: ' ',
+        address: ' ',
         date: dayjs().format(dateFormat),
         amount: '0',
-        prepayment: '',
         items: [...Array(itemNum).keys()].map(_ => { return {
-            material: '', name: '', spec: '', 
-            quantity: '0', unit: '', price: '0', 
-            amount: '0',
-            remark: ''
+            material: '', name: '', spec: '', unit: '',
+            quantity: '', price: '', amount: '', remark: ''
         }}),
     };
 }
