@@ -11,9 +11,10 @@ import { baseURL } from "../../utils/config";
 
 
 function SalesOrderPreview(props) {
-    const [salesOrder, setSalesOrder] = useState(initSalesOrderForPreview(1))
+    const [salesOrder, setSalesOrder] = useState(initSalesOrderForPreview(0))
 
     const load = () => {
+        setSalesOrder(initSalesOrderForPreview(0))
         Axios({
             method: 'get',
             baseURL: baseURL(),

@@ -18,12 +18,8 @@ export function PartnerInput(props) {
             url: `prompt/partner/name/${keyword}`,
             'Content-Type': 'application/json',
         }).then(res => {
-            if (res.status === 200) {
-                setOptions(res.data.map(i => { return { label: i, value: i } }))
-            }
-        }).catch(err => {
-            // console.error(err)
-        })
+            setOptions(res.data.map(i => { return { label: i, value: i } }))
+        }).catch(err => { })
     }
 
     return <AutoComplete size={props.size || 'small'} value={props.value} 
@@ -47,9 +43,7 @@ export function ProductInput(props) {
             url: `prompt/product/${props.field}/${keyword}`,
             'Content-Type': 'application/json',
         }).then(res => {
-            if (res.status === 200) {
-                setOptions(res.data.map(i => { return { label: i, value: i } }))
-            }
+            setOptions(res.data.map(i => { return { label: i, value: i } }))
         }).catch(err => {
             console.error(err)
         })

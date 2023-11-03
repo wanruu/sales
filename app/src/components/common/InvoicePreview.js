@@ -10,7 +10,7 @@ import { invoiceSettings } from '../../utils/config'
 function PreviewTable(props) {
     return (
         <div style={{ fontSize: invoiceSettings.fontSize() + 'px'}}>
-            <table style={{ width: "100%", height: '100%', }} className='previewTable' >
+            <table className='previewTable' style={{ width: "100%", height: '100%', }} >
                 <thead>
                     <tr>
                         <th style={{ width: '04.0%', }}>编号</th>
@@ -27,7 +27,7 @@ function PreviewTable(props) {
                 <tbody>
                     {
                         props.invoice.items.map((item, itemIdx) =>
-                            <tr key={itemIdx}>
+                            <tr key={item.id}>
                                 <td>{itemIdx+1}</td>
                                 <td>{item.material}</td>
                                 <td>{item.name}</td>
@@ -41,12 +41,12 @@ function PreviewTable(props) {
                         )
                     }
                     <tr>
-                        <td style={{ paddingTop: '2px' }}>合计</td>
+                        <td>合计</td>
                         <td style={{ textAlign: 'left' }} colSpan={6}>
-                            {digitUppercase(props.invoice.amount)}
+                            <span style={{ marginLeft: '3px' }}>{digitUppercase(props.invoice.amount)}</span>
                         </td>
                         <td style={{ textAlign: 'left' }} colSpan={2}>
-                            ¥ {props.invoice.amount}
+                            <span style={{ marginLeft: '3px' }}>¥ {props.invoice.amount}</span>
                         </td>
                     </tr>
                 </tbody>
@@ -102,8 +102,8 @@ function PreviewFooter() {
         return newArr
     }
 
-    return contents().map(arr => 
-        <Row>
+    return contents().map((arr, idx) => 
+        <Row key={idx}>
             <Col span={12} style={{ fontSize: `${invoiceSettings.footerFontSize()}px` }}>
                 {arr[0].replace(/ /g, "\xa0")}
             </Col>

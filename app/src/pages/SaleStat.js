@@ -1,10 +1,9 @@
 import dayjs from "dayjs";
 import Axios from 'axios';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, Col, Row, Statistic, Radio } from 'antd';
 import CountUp from 'react-countup';
 import ReactEcharts from 'echarts-for-react';
-import React from 'react';
 
 import { dateFormat, baseURL } from '../config';
 

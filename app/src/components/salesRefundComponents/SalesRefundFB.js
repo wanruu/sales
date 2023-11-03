@@ -1,24 +1,22 @@
-import React, { useEffect, useState, } from "react";
+import React, { useState, } from "react";
 import { Table, Modal, Button, message, Input, DatePicker, Col, InputNumber, 
     Row, FloatButton, Space, Popover, Divider 
 } from "antd";
 import { PlusOutlined, InboxOutlined } from '@ant-design/icons'
-import { Decimal } from 'decimal.js';
 import dayjs from 'dayjs'
 import Axios from "axios";
 
 const { Column } = Table
 
+import { calItemAmount, calTotalAmount, dcInvoice, emptyInvoice } from '../../utils/invoiceUtils'
 import SalesRefundItemSelectView from "./SalesRefundItemSelectView";
-import { emptySalesRefund, calItemAmount, calTotalAmount, dcSalesRefund
-} from '../../utils/salesRefundUtils'
 import { baseURL, dateFormat } from "../../utils/config";
 
 
 function SalesRefundFB(props) {
     const [isNewRefundModalOpen, setIsNewRefundModalOpen] = useState(false)
     const [isSelectionModalOpen, setSelectionModalOpen] = useState(false)
-    const [editRefund, setEditRefund] = useState(emptySalesRefund())
+    const [editRefund, setEditRefund] = useState(emptyInvoice(0))
     const [draftRefunds, setDraftRefunds] = useState([])
     const [messageApi, contextHolder] = message.useMessage();
 
@@ -39,18 +37,18 @@ function SalesRefundFB(props) {
 
     // user editing
     const updateDate = (value) => {
-        const newRefund = dcSalesRefund(editRefund)
+        const newRefund = dcInvoice(editRefund)
         newRefund.date = value
         setEditRefund(newRefund)
     }
     const updatePayment = (value) => {
-        const newRefund = dcSalesRefund(editRefund)
+        const newRefund = dcInvoice(editRefund)
         newRefund.payment = value
         setEditRefund(newRefund)
     }
     const updateRow = (invoiceItemId, field, value) => {
         const ifUpdateAmount = field === 'quantity'
-        const newEditRefund = dcSalesRefund(editRefund)
+        const newEditRefund = dcInvoice(editRefund)
         newEditRefund.items = newEditRefund.items.map(item => {
             if (item.invoiceItemId === invoiceItemId) { item[field] = value }
             if (ifUpdateAmount) {
@@ -69,7 +67,7 @@ function SalesRefundFB(props) {
     // draft
     const saveDraft = () => {
         const isOldDraft = editRefund.draftTime !== undefined
-        const newRefund = dcSalesRefund(editRefund)
+        const newRefund = dcInvoice(editRefund)
         newRefund.draftTime = dayjs()
         var newDraftRefunds = draftRefunds
         if (isOldDraft) {
@@ -77,7 +75,7 @@ function SalesRefundFB(props) {
         }
         newDraftRefunds.unshift(newRefund)
         setDraftRefunds(newDraftRefunds)
-        setEditRefund(emptySalesRefund())
+        setEditRefund(emptyInvoice(0))
         hideNewRefundModal()
     }
     const removeDraft = (draft) => {
@@ -91,7 +89,7 @@ function SalesRefundFB(props) {
     // upload refund
     const upload = () => {
         // clean data
-        const refund = dcSalesRefund(editRefund);
+        const refund = dcInvoice(editRefund);
         refund.date = refund.date.format(dateFormat);
         refund.items = refund.items.map(item => {
             item.quantity = item.quantity || '0'
@@ -107,7 +105,7 @@ function SalesRefundFB(props) {
             data: refund,
             'Content-Type': 'application/json',
         }).then(res => {
-            setEditRefund(emptySalesRefund())
+            setEditRefund(emptyInvoice(0))
             hideNewRefundModal()
             removeDraft(refund)
             if (props.refresh !== undefined) {
@@ -182,7 +180,7 @@ function SalesRefundFB(props) {
                 } />
                 <Column title='操作' align="center" width={90} render={(_, __, idx) => 
                     <Button size='small' danger type='link' style={{fontSize: '12px'}} onClick={_ => {
-                        const r = dcSalesRefund(editRefund)
+                        const r = dcInvoice(editRefund)
                         r.items.splice(idx, 1)
                         r.amount = calTotalAmount(r.items)
                         if (r.items.length === 0) {

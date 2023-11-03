@@ -9,9 +9,8 @@ import Axios from "axios";
 
 const { Column } = Table
 
-import { emptySalesOrder, dcSalesOrder, isSalesOrderItemEmpty, emptySalesOrderItem, 
-    isSalesOrderItemComplete, calItemAmount, calTotalAmount
-} from '../../utils/salesOrderUtils'
+import { dcInvoice, calItemAmount, calTotalAmount, emptyInvoice, emptyInvoiceItem } from "../../utils/invoiceUtils";
+import { isSalesOrderItemEmpty, isSalesOrderItemComplete } from '../../utils/salesOrderUtils'
 import { PartnerInput, ProductInput, UnitInput } from "../common/PromptInput";
 import { baseURL, dateFormat } from "../../utils/config";
 import "../common/InvoiceEdit.css"
@@ -19,16 +18,16 @@ import "../common/InvoiceEdit.css"
 
 function SalesOrderFB(props) {
     const [isModalOpen, setIsModalOpen] = useState(false)
-    const [editOrder, setEditOrder] = useState(emptySalesOrder())
+    const [editOrder, setEditOrder] = useState(emptyInvoice(1))
     const [draftOrders, setDraftOrders] = useState([])
     const [isUploading, setIsUploading] = useState(false)
     const [messageApi, contextHolder] = message.useMessage();
 
 
     useEffect(() => {
-        const newEditOrder = dcSalesOrder(editOrder)
+        const newEditOrder = dcInvoice(editOrder)
         if (!isSalesOrderItemEmpty(editOrder.items.at(-1))) {
-            newEditOrder.items.push(emptySalesOrderItem())
+            newEditOrder.items.push(emptyInvoiceItem())
             setEditOrder(newEditOrder)
         } else if (editOrder.items.length >= 2 && isSalesOrderItemEmpty(editOrder.items.at(-2))) {
             newEditOrder.items.pop()
@@ -46,23 +45,23 @@ function SalesOrderFB(props) {
 
     // user editing
     const updatePartner = (value) => {
-        const newOrder = dcSalesOrder(editOrder)
+        const newOrder = dcInvoice(editOrder)
         newOrder.partner = value
         setEditOrder(newOrder)
     }
     const updateDate = (value) => {
-        const newOrder = dcSalesOrder(editOrder)
+        const newOrder = dcInvoice(editOrder)
         newOrder.date = value
         setEditOrder(newOrder)
     }
     const updatePrepayment = (value) => {
-        const newOrder = dcSalesOrder(editOrder)
+        const newOrder = dcInvoice(editOrder)
         newOrder.prepayment = value
         setEditOrder(newOrder)
     }
     const updateRow = (id, field, value) => {
         const ifUpdateAmount = ['quantity', 'unit', 'price', 'discount'].includes(field)
-        const newEditOrder = dcSalesOrder(editOrder)
+        const newEditOrder = dcInvoice(editOrder)
         newEditOrder.items = newEditOrder.items.map(item => {
             if (item.id === id) { item[field] = value }
             if (ifUpdateAmount) {
@@ -81,7 +80,7 @@ function SalesOrderFB(props) {
     // draft
     const saveDraft = () => {
         const isOldDraft = editOrder.draftTime !== undefined
-        const newOrder = dcSalesOrder(editOrder)
+        const newOrder = dcInvoice(editOrder)
         newOrder.draftTime = dayjs()
         var newDraftOrders = draftOrders
         if (isOldDraft) {
@@ -89,7 +88,7 @@ function SalesOrderFB(props) {
         }
         newDraftOrders.unshift(newOrder)
         setDraftOrders(newDraftOrders)
-        setEditOrder(emptySalesOrder())
+        setEditOrder(emptyInvoice(1))
         hideModal()
     }
     const removeDraft = (draft) => {
@@ -104,7 +103,7 @@ function SalesOrderFB(props) {
     const upload = () => {
         setIsUploading(true)
         // clean data
-        const order = dcSalesOrder(editOrder);
+        const order = dcInvoice(editOrder);
         order.date = order.date.format(dateFormat);
         order.items = order.items.filter(item => !isSalesOrderItemEmpty(item)).map(item => {
             item.quantity = (item.quantity || Decimal(0)).toString()
@@ -146,7 +145,7 @@ function SalesOrderFB(props) {
             }).then(res => {
                 if (res.status === 200) {
                     messageApi.open({ type: 'success', content: '保存成功', });
-                    setEditOrder(emptySalesOrder())
+                    setEditOrder(emptyInvoice(1))
                     hideModal()
                     removeDraft(order)
                     if (props.refresh !== undefined) {

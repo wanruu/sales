@@ -1,7 +1,6 @@
-import React from 'react'
+import React, { useEffect, useState, } from 'react'
 import Axios from 'axios'
 import { Table, Modal, Button, Space, message, } from "antd";
-import { useEffect, useState, } from "react";
 import { Decimal } from 'decimal.js';
 import { ExclamationCircleFilled } from '@ant-design/icons';
 

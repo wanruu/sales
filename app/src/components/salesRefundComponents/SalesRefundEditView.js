@@ -6,14 +6,14 @@ import dayjs from 'dayjs'
 
 const { Column } = Table
 
-import { emptySalesRefund, dcSalesRefund, calTotalAmount, calItemAmount } from '../../utils/salesRefundUtils'
+import { calItemAmount, calTotalAmount, emptyInvoice, dcInvoice } from '../../utils/invoiceUtils'
 import { baseURL, dateFormat } from '../../utils/config'
 import SalesRefundItemSelectView from "./SalesRefundItemSelectView";
 
 
 function SalesRefundEditView(props) {
-    const [refund, setRefund] = useState(emptySalesRefund())
-    const [editRefund, setEditRefund] = useState(emptySalesRefund())
+    const [refund, setRefund] = useState(emptyInvoice(0))
+    const [editRefund, setEditRefund] = useState(emptyInvoice(0))
     const [isSelectionModalOpen, setSelectionModalOpen] = useState(false)
     const [messageApi, contextHolder] = message.useMessage();
 
@@ -24,14 +24,13 @@ function SalesRefundEditView(props) {
             url: `salesRefund/id/${props.id}`,
             'Content-Type': 'application/json',
         }).then(res => {
-            console.log(res.data)
             setRefund(res.data);
-            setEditRefund(dcSalesRefund(res.data));
+            setEditRefund(dcInvoice(res.data));
         }).catch(err => { });
     }
 
     const upload = () => {
-        const data = dcSalesRefund(editRefund)
+        const data = dcInvoice(editRefund)
         data.date = data.date.format(dateFormat)
         data.items = data.items.map(item => {
             item.quantity = item.quantity || "0"
@@ -58,18 +57,18 @@ function SalesRefundEditView(props) {
 
     // update data
     const updateDate = (value) => {
-        const newRefund = dcSalesRefund(editRefund)
+        const newRefund = dcInvoice(editRefund)
         newRefund.date = value
         setEditRefund(newRefund)
     }
     const updatePayment = (value) => {
-        const newRefund = dcSalesRefund(editRefund)
+        const newRefund = dcInvoice(editRefund)
         newRefund.payment = value
         setEditRefund(newRefund)
     }
     const updateRow = (id, field, value) => {
         const ifUpdateAmount = field === 'quantity'
-        const newEditRefund = dcSalesRefund(editRefund)
+        const newEditRefund = dcInvoice(editRefund)
         newEditRefund.items = newEditRefund.items.map(item => {
             if (item.id === id) { item[field] = value }
             if (ifUpdateAmount) {
@@ -127,7 +126,7 @@ function SalesRefundEditView(props) {
             } />
             <Column title='操作' align="center" width={90} render={(_, __, idx) => 
                 <Button size='small' danger type='link' style={{fontSize: '12px'}} onClick={_ => {
-                    const r = dcSalesRefund(editRefund)
+                    const r = dcInvoice(editRefund)
                     r.items.splice(idx, 1)
                     r.amount = calTotalAmount(r.items)
                     if (r.items.length === 0) {

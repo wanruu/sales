@@ -1,6 +1,5 @@
 import Axios from 'axios'
-import { Table, Button, message, DatePicker, Col, Row, InputNumber, Input, Divider, Badge, 
-} from "antd";
+import { Table, Button, message, DatePicker, Col, Row, InputNumber, Input, Divider, Badge, } from "antd";
 import React, { useEffect, useState, } from "react";
 import { Decimal } from 'decimal.js';
 import { FieldNumberOutlined, EditOutlined, } from '@ant-design/icons';
@@ -10,16 +9,15 @@ const { Column } = Table
 
 
 import { baseURL, dateFormat } from "../../utils/config";
-import { emptySalesOrder, dcSalesOrder, calTotalAmount, calItemAmount, emptySalesOrderItem, 
-    isSalesOrderItemEmpty, isSalesOrderItemComplete 
-} from "../../utils/salesOrderUtils";
+import { dcInvoice, calItemAmount, calTotalAmount, emptyInvoice, emptyInvoiceItem } from '../../utils/invoiceUtils';
+import { isSalesOrderItemEmpty, isSalesOrderItemComplete } from "../../utils/salesOrderUtils";
 import { PartnerInput, ProductInput, UnitInput } from '../common/PromptInput';
 import "../common/InvoiceEdit.css"
 
 
 function SalesOrderEditView(props) {
-    const [order, setOrder] = useState(emptySalesOrder())
-    const [editOrder, setEditOrder] = useState(emptySalesOrder())
+    const [order, setOrder] = useState(emptyInvoice(1))
+    const [editOrder, setEditOrder] = useState(emptyInvoice(1))
     const [messageApi, contextHolder] = message.useMessage();
 
     const load = () => {
@@ -30,14 +28,14 @@ function SalesOrderEditView(props) {
             'Content-Type': 'application/json',
         }).then(res => {
             setOrder(res.data);
-            setEditOrder(dcSalesOrder(res.data));
+            setEditOrder(dcInvoice(res.data));
         }).catch(err => { })
     }
 
     useEffect(() => {
-        const newEditOrder = dcSalesOrder(editOrder)
+        const newEditOrder = dcInvoice(editOrder)
         if (editOrder.items.length === 0 || !isSalesOrderItemEmpty(editOrder.items.at(-1))) {
-            newEditOrder.items.push(emptySalesOrderItem())
+            newEditOrder.items.push(emptyInvoiceItem())
             setEditOrder(newEditOrder)
         } else if (editOrder.items.length >= 2 && isSalesOrderItemEmpty(editOrder.items.at(-2))) {
             newEditOrder.items.pop()
@@ -50,27 +48,27 @@ function SalesOrderEditView(props) {
     }, [])
 
     const updatePartner = (value) => {
-        const newOrder = dcSalesOrder(editOrder)
+        const newOrder = dcInvoice(editOrder)
         newOrder.partner = value
         setEditOrder(newOrder)
     }
     const updateDate = (value) => {
-        const newOrder = dcSalesOrder(editOrder)
+        const newOrder = dcInvoice(editOrder)
         newOrder.date = value
         setEditOrder(newOrder)
     }
     const updatePrepayment = (value) => {
-        const newOrder = dcSalesOrder(editOrder)
+        const newOrder = dcInvoice(editOrder)
         newOrder.prepayment = value
         setEditOrder(newOrder)
     }
     const updatePayment = (value) => {
-        const newOrder = dcSalesOrder(editOrder)
+        const newOrder = dcInvoice(editOrder)
         newOrder.payment = value
         setEditOrder(newOrder)
     }
     const updateRow = (idx, field, value) => {
-        const newEditOrder = dcSalesOrder(editOrder)
+        const newEditOrder = dcInvoice(editOrder)
         newEditOrder.items[idx][field] = value
         const ifUpdateAmount = ['quantity', 'unit', 'price', 'discount'].includes(field)
         if (ifUpdateAmount) {
@@ -101,7 +99,7 @@ function SalesOrderEditView(props) {
         return total.minus(prepayment).toString()
     }
     const removeItem = (rowIdx) => {
-        const newEditOrder = dcSalesOrder(editOrder)
+        const newEditOrder = dcInvoice(editOrder)
         if (rowIdx < order.items.length) {
             newEditOrder.items[rowIdx].deleted = true
         } else {
@@ -110,7 +108,7 @@ function SalesOrderEditView(props) {
         setEditOrder(newEditOrder)
     }
     const recoverItem = (rowIdx) => {
-        const newEditOrder = dcSalesOrder(editOrder)
+        const newEditOrder = dcInvoice(editOrder)
         if (rowIdx < order.items.length) {
             newEditOrder.items[rowIdx].deleted = false
         }
@@ -134,7 +132,7 @@ function SalesOrderEditView(props) {
             }
         }
         // data
-        const order = dcSalesOrder(editOrder)
+        const order = dcInvoice(editOrder)
         order.date = order.date.format(dateFormat)
         order.items = order.items.filter(item => !isSalesOrderItemEmpty(item) && !item.deleted)
         if (editOrder.partner === '') {

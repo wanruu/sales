@@ -6,7 +6,7 @@ import { Table, Space, Button, Row, Col, Divider } from 'antd'
 const { Column } = Table
 
 import { baseURL } from '../../utils/config'
-import { dcSalesRefund, calTotalAmount, } from '../../utils/salesRefundUtils'
+import { dcInvoice, calTotalAmount } from '../../utils/invoiceUtils'
 
 
 function SalesRefundItemSelectView(props) {
@@ -45,7 +45,7 @@ function SalesRefundItemSelectView(props) {
 
 
     const onSubmit = () => {
-        const newEditRefund = dcSalesRefund(props.editRefund)
+        const newEditRefund = dcInvoice(props.editRefund)
         newEditRefund.items = selectedItems.map(item => {
             const existingItem = props.editRefund.items.find(i => i.invoiceItemId === item.invoiceItemId)
             return existingItem !== undefined ? existingItem : item

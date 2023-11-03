@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import Axios from 'axios'
-import { Table, Space, Button, Row, Col, message, Modal } from 'antd'
+import { Table, Space, Button, message, Modal } from 'antd'
 import Decimal from 'decimal.js'
 import { ExclamationCircleFilled } from '@ant-design/icons';
 

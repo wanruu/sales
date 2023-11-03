@@ -1,6 +1,5 @@
 import { Button, Input, Upload, InputNumber, Space, Select } from "antd";
-import { useState, } from "react";
-import React from 'react';
+import React, { useState, } from "react";
 import * as XLSX from 'xlsx';
 import Axios from 'axios';
 
@@ -174,7 +173,7 @@ function SettingPage() {
                 <Input addonBefore='采购退款' value={purchaseRefundTitle} style={{width: '200px'}} onChange={e => {
                     setPurchaseRefundTitle(e.target.value); localStorage.setItem('purchaseRefundTitle', e.target.value);
                 }} />
-                <Select defaultValue='inline' options={[{label: '标题同行', value: 'inline'},{label: '另起一行', value: 'multi'}]} onChange={val => {
+                <Select value={titleStyle} options={[{label: '标题同行', value: 'inline'},{label: '另起一行', value: 'multi'}]} onChange={val => {
                     setTitleStyle(val); localStorage.setItem('titleStyle', val);
                 }}/>
             </Space>
