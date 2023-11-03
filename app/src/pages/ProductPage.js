@@ -134,8 +134,10 @@ function ProductPage() {
             <Column title='操作' align='center' render={(_, record) => (
                 <Space.Compact size='small'>
                     <Button type='link' onClick={_ => setEditProduct(record)}>编辑</Button>
-                    {/* <Button type='link' danger onClick={_ => showDeleteConfirm(record.id)} 
-                    disabled={record.salesOrders.length!==0||record.salesRefunds.length!==0||record.purchaseOrders.length!==0||record.purchaseRefunds.length!==0}>删除</Button> */}
+                    {record.hasInvoice ?
+                        <Button type='link'>查看</Button> :
+                        <Button type='link' danger onClick={_ => showDeleteConfirm(record.id)}>删除</Button>
+                    }
                 </Space.Compact>
             )} />
         </Table>

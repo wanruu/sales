@@ -8,14 +8,20 @@ const db = require("../db")
 
 
 router.get('/', async (req, res) => {
-    const query = `SELECT * FROM product`
+    const query = `SELECT p.id, p.material, p.name, p.spec, p.unit, p.quantity, COUNT(*) AS hasInvoice
+    FROM product AS p LEFT JOIN invoiceItem AS ii
+    ON p.id=ii.productId
+    GROUP BY p.id`
     db.all(query, (err, products) => {
         if (err) {
             console.error(err)
             res.status(500).send(err)
             return
         }
-        res.send(products)
+        res.send(products.map(p => {
+            p.hasInvoice = p.hasInvoice > 0
+            return p
+        }))
     })
 })
 

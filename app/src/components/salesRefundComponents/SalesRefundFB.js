@@ -203,7 +203,7 @@ function SalesRefundFB(props) {
             </Row>
         </Modal>
         <Modal title='选择销售单及产品' open={isSelectionModalOpen} width={1000} center onCancel={hideSelectionModal} footer={null} destroyOnClose>
-            <SalesRefundItemSelectView editRefund={editRefund} setEditRefund={setEditRefund} dismiss={hideSelectionModal}/>
+            <SalesRefundItemSelectView editRefund={editRefund} setEditRefund={setEditRefund} dismiss={hideSelectionModal} />
         </Modal>
     </>)
 }

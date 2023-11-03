@@ -1,14 +1,13 @@
-import React, { useEffect, useState, useRef, } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Axios from 'axios'
 import { Space, Button } from "antd";
 import { useReactToPrint } from "react-to-print";
-import { PrinterOutlined, FieldNumberOutlined } from '@ant-design/icons';
+import { PrinterOutlined } from '@ant-design/icons';
 
 
-import PreviewTable from "../common/PreviewTable";
+import InvoicePreview from "../common/InvoicePreview";
 import { initSalesOrderForPreview } from "../../utils/salesOrderUtils";
-import '../common/InvoicePreview.css'
-import { invoiceSettings, baseURL } from "../../utils/config";
+import { baseURL } from "../../utils/config";
 
 
 function SalesOrderPreview(props) {
@@ -40,52 +39,12 @@ function SalesOrderPreview(props) {
     });
 
 
-    return (
-    <Space direction="vertical" size="middle" style={{ display: 'flex', }}>
-        <Button onClick={handlePrint} icon={<PrinterOutlined/>}>打印</Button>
+    return <Space direction="vertical" size="middle" >
+        <Button onClick={handlePrint} icon={<PrinterOutlined/>} type='primary'>打印</Button>
         <div ref={componentRef}>
-            <div className='invoiceWrapper' style={{width: invoiceSettings.width() + 'px', height: invoiceSettings.height() + 'px'}}>
-                <div className='invoiceContent' style={{ border: '1px solid lightgray', boxSizing: 'border-box' }}>
-                    <div style={{
-                        paddingTop: invoiceSettings.vPadding() + 'px',
-                        paddingBottom: invoiceSettings.vPadding() + 'px',
-                        paddingLeft: invoiceSettings.hPadding() + 'px',
-                        paddingRight: invoiceSettings.hPadding() + 'px'
-                    }}>
-                        <Space direction='vertical' style={{ width: '100%' }}>
-                            {/* title */}
-                            <div className='flexVCenter' style={{ fontSize: invoiceSettings.titleFontSize() + 'px', }}>
-                                {invoiceSettings.title().replace(/ /g, "\xa0")}
-                                &nbsp;&nbsp;&nbsp;
-                                {invoiceSettings.salesOrderTitle().replace(/ /g, "\xa0")}
-                            </div>
-                            <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: 'center' }}>
-                                <div style={{ width: '36%', textAlign: 'left', fontSize: invoiceSettings.fontSize() + 'px' }}>
-                                    客户：{salesOrder.partner}
-                                </div>
-                                <div style={{ width: '35%', textAlign: 'left', fontSize: invoiceSettings.fontSize() + 'px' }}>
-                                    日期：{salesOrder.date}
-                                </div>
-                                <div style={{ width: '28%', textAlign: 'right', fontSize: invoiceSettings.fontSize() + 'px'}}>
-                                    <FieldNumberOutlined/> {`${salesOrder.id}`.padStart(6, '0')}
-                                </div>
-                            </div>
-                            <div style={{ fontSize: invoiceSettings.fontSize() + 'px'}}>
-                                <PreviewTable invoice={salesOrder} />
-                            </div>
-                            <div className='flexHCenter' style={{ fontSize: invoiceSettings.footnoteFontSize() + 'px', }}>
-                                <div>
-                                    {invoiceSettings.footnote().replace(/ /g, "\xa0").split('\n').map((line, idx) =>
-                                        <span key={idx}>{line}<br /></span>
-                                    )}
-                                </div>
-                            </div>
-                        </Space>
-                    </div>
-                </div>
-            </div>
+            <InvoicePreview invoice={salesOrder} type='salesOrder' />
         </div>
-    </Space>)
+    </Space>
 }
 
 

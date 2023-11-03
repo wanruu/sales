@@ -16,13 +16,12 @@ export const invoiceSettings = {
     purchaseOrderTitle: () => localStorage.getItem('purchaseOrderTitle') || '采购单',
     purchaseRefundTitle: () => localStorage.getItem('purchaseRefundTitle') || '采购退款单',
     titleFontSize: () => localStorage.getItem('titleFontSize') || 23,
-    footnote: () => localStorage.getItem('footnote') || '送货电话：13605772335/15858580989/13306773365                                            送货地址：浙江省温州市龙湾区紧固件市场8排34号\n' +
-        '工行：6222 0812 0301 2544 033（陈建挺）                                                           收货人(签字)：',
-    footnoteFontSize: () => localStorage.getItem('footnoteFontSize') || 12,
+    titleStyle: () => localStorage.getItem('titleStyle') || 'inline',
+    footer: () => localStorage.getItem('footer') || '送货电话：13605772335/15858580989/13306773365\n送货地址：浙江省温州市龙湾区紧固件市场8排34号\n工行：6222 0812 0301 2544 033（陈建挺）\n收货人(签字)：',
+    footerFontSize: () => localStorage.getItem('footerFontSize') || 12,
     fontSize: () => localStorage.getItem('fontSize') || 12,
     hPadding: () => localStorage.getItem('hPadding') || 28,
-    vPadding: () => localStorage.getItem('vPadding') || 25,
-    defaultEditRowNum: () => localStorage.getItem('defaultEditRowNum') || 10,
+    vPadding: () => localStorage.getItem('vPadding') || 25
 }
 
 export const unitOptions = [

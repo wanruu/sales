@@ -77,5 +77,5 @@ export const calItemAmount = (itemDict) => {
     return { originalAmount: originalAmount.toFixed(2, Decimal.ROUND_HALF_UP), amount: amount.toFixed(2, Decimal.ROUND_HALF_UP)}
 }
 export const calTotalAmount = (items) => {
-    return items.reduce((previous, current) => previous.plus(current.amount), new Decimal(0))
+    return items.reduce((previous, current) => previous.plus(current.amount), new Decimal(0)).toString()
 }

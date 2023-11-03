@@ -1,10 +1,10 @@
-import { Button, Input, Upload, InputNumber, Space } from "antd";
+import { Button, Input, Upload, InputNumber, Space, Select } from "antd";
 import { useState, } from "react";
 import React from 'react';
 import * as XLSX from 'xlsx';
 import Axios from 'axios';
 
-// import Invoice from "../components/Invoice.js";
+
 import { baseURL, invoiceSettings } from "../utils/config";
 import { initSalesOrderForPreview } from "../utils/salesOrderUtils";
 import { initSalesRefundForPreview } from "../utils/salesRefundUtils";
@@ -19,6 +19,9 @@ function SettingPage() {
     const [height, setHeight] = useState(invoiceSettings.height())
     const [fontSize, setFontSize] = useState(invoiceSettings.fontSize())
 
+    const [hPadding, setHPadding] = useState(invoiceSettings.hPadding())
+    const [vPadding, setVPadding] = useState(invoiceSettings.vPadding())
+
     const [title, setTitle] = useState(invoiceSettings.title())
     const [titleFontSize, setTitleFontSize] = useState(invoiceSettings.titleFontSize())
 
@@ -26,98 +29,12 @@ function SettingPage() {
     const [salesRefundTitle, setSalesRefundTitle] = useState(invoiceSettings.salesRefundTitle())
     const [purchaseOrderTitle, setPurchaseOrderTitle] = useState(invoiceSettings.purchaseOrderTitle())
     const [purchaseRefundTitle, setPurchaseRefundTitle] = useState(invoiceSettings.purchaseRefundTitle())
+    const [titleStyle, setTitleStyle] = useState(invoiceSettings.titleStyle())
 
-    const [footnote, setFootnote] = useState(invoiceSettings.footnote())
-    const [footnoteFontSize, setFootnoteFontSize] = useState(invoiceSettings.footnoteFontSize())
-
-    const [hPadding, setHPadding] = useState(invoiceSettings.hPadding())
-    const [vPadding, setVPadding] = useState(invoiceSettings.vPadding())
+    const [footer, setFooter] = useState(invoiceSettings.footer())
+    const [footerFontSize, setFooterFontSize] = useState(invoiceSettings.footerFontSize())
 
     const [previewType, setPreviewType] = useState('salesOrder');
-
-    const [defaultEditRowNum, setDefaultEditRowNum] = useState(invoiceSettings.defaultEditRowNum())
-    // const [syncServer, setSyncServer] = useState(localStorage.getItem('syncServer') || '');
-    // const [syncAccount, setSyncAccount] = useState(localStorage.getItem('syncAccount') || '');
-    // const [syncPassword, setSyncPassword] = useState(localStorage.getItem('syncPassword') || '');
-
-    // 尺寸
-    const onHeightChange = (value) => {
-        setHeight(value);
-        localStorage.setItem('height', value);
-    }
-    const onWidthChange = (value) => {
-        setWidth(value);
-        localStorage.setItem('width', value);
-    }
-    const onFontSizeChange = (value) => {
-        setFontSize(value);
-        localStorage.setItem('fontSize', value);
-    }
-
-    // 标题
-    const onTitleChange = (event) => {
-        setTitle(event.target.value);
-        localStorage.setItem('title', event.target.value);
-    }
-    const onTitleFontSizeChange = (value) => {
-        setTitleFontSize(value);
-        localStorage.setItem('titleFontSize', value);
-    }
-    const onSalesOrderTitleChange = (event) => {
-        setSalesOrderTitle(event.target.value);
-        localStorage.setItem('salesOrderTitle', event.target.value);
-    }
-    const onPurchaseOrderTitleChange = (event) => {
-        setPurchaseOrderTitle(event.target.value);
-        localStorage.setItem('purchaseOrderTitle', event.target.value);
-    }
-    const onSalesRefundTitleChange = (event) => {
-        setSalesRefundTitle(event.target.value);
-        localStorage.setItem('salesRefundTitle', event.target.value);
-    }
-    const onPurchaseRefundTitleChange = (event) => {
-        setPurchaseRefundTitle(event.target.value);
-        localStorage.setItem('purchaseRefundTitle', event.target.value);
-    }
-
-    // 脚注
-    const onFootnoteChange = (event) => {
-        setFootnote(event.target.value);
-        localStorage.setItem('footnote', event.target.value);
-    }
-    const onFootnoteFontSizeChange = (value) => {
-        setFootnoteFontSize(value);
-        localStorage.setItem('footnoteFontSize', value);
-    }
-
-    // margin
-    const onHPaddingChange = (value) => {
-        setHPadding(value);
-        localStorage.setItem('hPadding', value);
-    }
-
-    const onVPaddingChange = (value) => {
-        setVPadding(value);
-        localStorage.setItem('vPadding', value);
-    }
-
-    const onDefaultEditRowNumChange = (value) => {
-        setDefaultEditRowNum(value);
-        localStorage.setItem('defaultEditRowNum', value);
-    }
-
-    function onSyncServerChange(event) {
-        setSyncServer(event.target.value);
-        localStorage.setItem('syncServer', event.target.value);
-    }
-    function onSyncAccountChange(event) {
-        setSyncAccount(event.target.value);
-        localStorage.setItem('syncAccount', event.target.value);
-    }
-    function onSyncPasswordChange(event) {
-        setSyncPassword(event.target.value);
-        localStorage.setItem('syncPassword', event.target.value);
-    }
 
 
     const handleUpload = (options) => {
@@ -210,43 +127,67 @@ function SettingPage() {
         <div>
             <h2>清单外观</h2>
             
-            <h3>尺寸 & 字号</h3>
+            <h3>尺寸及字号</h3>
             <Space wrap>
-                <InputNumber style={{width: '130px'}} addonBefore="宽度" value={width} onChange={onWidthChange}/>x
-                <InputNumber style={{width: '130px'}} addonBefore="高度" value={height} onChange={onHeightChange} />
-                <InputNumber style={{width: '100px'}} addonAfter="px" value={fontSize} onChange={onFontSizeChange} />
+                <InputNumber style={{width: '130px'}} addonBefore="宽度" value={width} onChange={val => {
+                    setWidth(val); localStorage.setItem('width', val);
+                }} />
+                <InputNumber style={{width: '130px'}} addonBefore="高度" value={height} onChange={val => {
+                    setHeight(val); localStorage.setItem('height', val);
+                }} />
+                <InputNumber style={{width: '100px'}} addonAfter="px" value={fontSize} onChange={val => {
+                    setFontSize(val); localStorage.setItem('fontSize', val);
+                }} />
             </Space>
-            
-            <h3>标题</h3>
-            <Space>
-                <Input addonBefore='公司' value={title} onChange={onTitleChange} style={{width: '400px'}}/>
-                <InputNumber addonAfter='px' value={titleFontSize} onChange={onTitleFontSizeChange} style={{maxWidth: '100px'}}/>
-            </Space>
-            <br/><br/>
-            <Space>
-                <Input addonBefore='销售清单' value={salesOrderTitle} onChange={onSalesOrderTitleChange} style={{width: '200px'}}/>
-                <Input addonBefore='采购清单' value={purchaseOrderTitle} onChange={onPurchaseOrderTitleChange} style={{width: '200px'}}/>
-            </Space>
-            <br/><br/>
-            <Space>
-                <Input addonBefore='销售退款' value={salesRefundTitle} onChange={onSalesRefundTitleChange} style={{width: '200px'}}/>
-                <Input addonBefore='采购退款' value={purchaseRefundTitle} onChange={onPurchaseRefundTitleChange} style={{width: '200px'}}/>
-            </Space>
-            <h3>脚注</h3>
-            <Space direction="vertical">
-                <TextArea placeholder='脚注' autoSize value={footnote} onChange={onFootnoteChange} style={{width: '600px'}}/>
-                <InputNumber addonAfter='px' value={footnoteFontSize} onChange={onFootnoteFontSizeChange} style={{maxWidth: '100px'}}/>
-            </Space>
-
+    
             <h3>边距</h3>
             <Space wrap>
-                <InputNumber addonBefore="水平" value={hPadding} onChange={onHPaddingChange} />
-                <InputNumber addonBefore="垂直" value={vPadding} onChange={onVPaddingChange} />
+                <InputNumber addonBefore="水平" style={{width: '130px'}} value={hPadding} onChange={val => {
+                    setHPadding(val); localStorage.setItem('hPadding', val);
+                }} />
+                <InputNumber addonBefore="垂直" style={{width: '130px'}} value={vPadding} onChange={val => {
+                    setVPadding(val); localStorage.setItem('vPadding', val);
+                }} />
+            </Space>
+            
+            <h3>标题及字号</h3>
+            <Space wrap>
+                <Input value={title} style={{width: '300px'}} onChange={e => {
+                    setTitle(e.target.value); localStorage.setItem('title', e.target.value);
+                }} />
+                <InputNumber addonAfter='px' value={titleFontSize} style={{width: '100px'}} onChange={val => {
+                    setTitleFontSize(val); localStorage.setItem('titleFontSize', val);
+                } }/>
             </Space>
 
-            {/* <h3>开单设置</h3>
-            <InputNumber addonBefore='默认行数' value={defaultEditRowNum} onChange={onDefaultEditRowNumChange} style={{maxWidth: '200px'}}/> */}
+            <h3>副标题及样式</h3>
+            <Space wrap>
+                <Input addonBefore='销售清单' value={salesOrderTitle} style={{width: '200px'}} onChange={e => {
+                    setSalesOrderTitle(e.target.value); localStorage.setItem('salesOrderTitle', e.target.value);
+                }} />
+                <Input addonBefore='采购清单' value={purchaseOrderTitle} style={{width: '200px'}} onChange={e => {
+                    setPurchaseOrderTitle(e.target.value); localStorage.setItem('purchaseOrderTitle', e.target.value);
+                }} />
+                <Input addonBefore='销售退款' value={salesRefundTitle} style={{width: '200px'}} onChange={e => {
+                    setSalesRefundTitle(e.target.value); localStorage.setItem('salesRefundTitle', e.target.value);
+                }} />
+                <Input addonBefore='采购退款' value={purchaseRefundTitle} style={{width: '200px'}} onChange={e => {
+                    setPurchaseRefundTitle(e.target.value); localStorage.setItem('purchaseRefundTitle', e.target.value);
+                }} />
+                <Select defaultValue='inline' options={[{label: '标题同行', value: 'inline'},{label: '另起一行', value: 'multi'}]} onChange={val => {
+                    setTitleStyle(val); localStorage.setItem('titleStyle', val);
+                }}/>
+            </Space>
 
+            <h3>脚注及字号</h3>
+            <Space direction="vertical">
+                <TextArea placeholder='脚注' autoSize value={footer} style={{width: '600px'}} onChange={e => {
+                    setFooter(e.target.value); localStorage.setItem('footer', e.target.value); 
+                }} />
+                <InputNumber addonAfter='px' value={footerFontSize} style={{maxWidth: '100px'}} onChange={val => {
+                    setFooterFontSize(val); localStorage.setItem('footerFontSize', val);
+                }}/>
+            </Space>
             
             <h3>预览
                 <Space.Compact size="small" style={{color:'gray', fontWeight: 'normal', marginLeft: '10px'}}>
@@ -256,25 +197,9 @@ function SettingPage() {
                     <Button type='link' disabled={previewType==='purchaseRefund'} onClick={_ => setPreviewType('purchaseRefund')}>采购退款</Button>
                 </Space.Compact>
             </h3>
-            {/* <Button
-                type='link'
-                style={{ padding: 0 }}
-                onClick={() => setShowPreview(!showPreview)}
-            >
-                {showPreview ? '隐藏预览' : '显示预览'} <span style={{ color: 'gray' }}>&nbsp;(以打印页面为准)</span>
-            </Button> */}
+            
             {previewType === 'salesOrder' ? <SalesOrderPreview salesOrder={initSalesOrderForPreview(10)} /> : ''}
             {previewType === 'salesRefund' ? <SalesRefundPreview salesRefund={initSalesRefundForPreview(10)} /> : ''}
-
-            
-            {/* <h3>同步选项</h3>
-            <p>服务器地址</p>
-            <Input placeholder='服务器地址' value={syncServer} onChange={onSyncServerChange} style={{maxWidth: '400px'}}/>
-            <p>账户</p>
-            <Input placeholder='账户' value={syncAccount} onChange={onSyncAccountChange} style={{maxWidth: '400px'}} />
-            <p>密码</p>
-            <Input.Password placeholder='密码' value={syncPassword} onChange={onSyncPasswordChange} style={{maxWidth: '400px'}} />
-            <Button>同步</Button> */}
 
             {/* <h2>导入</h2>
             <Upload directory accept=".xlsx" customRequest={handleUpload}>
