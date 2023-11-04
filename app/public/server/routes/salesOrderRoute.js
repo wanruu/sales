@@ -1,12 +1,10 @@
 const express = require("express")
 const router = express.Router()
-const crypto = require('crypto')
-const Decimal = require('decimal.js');
+
 
 const db = require("../db")
 const { formatInsert, updatePartner, updateProductByInvoiceItems, getNextInvoiceId,
-    INVOICE_TYPE_2_INT, 
-    calQuanByInvoiceType
+    INVOICE_TYPE_2_INT, calQuanByInvoiceType
 } = require('./utils.js');
 
 
@@ -206,7 +204,9 @@ router.put('/id/:id', async (req, res) => {
 })
 
 router.get('/', (req, res) => {
-    const query = `SELECT * FROM invoice WHERE type=${typeInt}`
+    const query = `SELECT * 
+    FROM invoice AS i LEFT JOIN invoiceRelation AS r ON i.id=r.orderId
+    WHERE type=${typeInt}`
     db.all(query, (err, rows) => {
         if (err) {
             console.error(err)
@@ -225,7 +225,7 @@ router.get('/detailed', (req, res) => {
             return
         }
         
-        const query = `SELECT i.invoiceId, i.id AS invoiceItemId, 
+        const query = `SELECT i.invoiceId AS orderId, i.id AS orderItemId, 
         p.id AS productId, p.material, p.name, p.spec, p.unit, price, i.quantity, i.amount, discount, originalAmount, remark, delivered 
         FROM invoice o, invoiceItem i, product p 
         WHERE o.id=i.invoiceId AND p.id=productId AND o.type=${typeInt}`
@@ -236,7 +236,7 @@ router.get('/detailed', (req, res) => {
                 return
             }
             for (const item of items) {
-                const order = orders.find(order => order.id === item.invoiceId)
+                const order = orders.find(order => order.id === item.orderId)
                 if (order.items === undefined) {
                     order.items = [item]
                 } else {
@@ -299,7 +299,7 @@ router.delete('/id/:id', async (req, res) => {
         res.status(500).send(err)
     })
     orderItems.forEach(async item => {
-        const newQuan = calQuanByInvoiceType(item.originalQuantity, item.quantity, typeStr, false).toString()
+        const newQuan = calQuanByInvoiceType(item.originalQuantity, item.quantity, typeStr, true).toString()
         const query = `UPDATE product SET quantity="${newQuan}" WHERE id="${item.productId}"`
         await new Promise((resolve, reject) => {
             db.run(query, err => {

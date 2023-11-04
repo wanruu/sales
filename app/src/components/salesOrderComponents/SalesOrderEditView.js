@@ -213,7 +213,7 @@ function SalesOrderEditView(props) {
             } />
             <Column title='金额' dataIndex='originalAmount' align='center' width={80} render={(amount, _, idx) => {
                 if (getDisabled(idx)) {
-                    return <strike>{amount.toString()}</strike>
+                    return <strike>{amount}</strike>
                 }
                 return amount
             }} />
@@ -226,7 +226,7 @@ function SalesOrderEditView(props) {
             } />
             <Column title='折后价' dataIndex='amount' align='center' width={80} render={(amount, _, idx) => {
                 if (getDisabled(idx)) {
-                    return <strike>{amount.toString()}</strike>
+                    return <strike>{amount}</strike>
                 }
                 return amount
             }} />

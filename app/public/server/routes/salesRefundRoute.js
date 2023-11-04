@@ -1,14 +1,11 @@
 const express = require("express")
 const router = express.Router()
-const crypto = require('crypto')
-const Decimal = require('decimal.js');
+
 
 const db = require("../db")
-const { formatInsert, updateProductQuantityByInfo, updateProductQuantityById,
-    getNextInvoiceId, updateProductByInvoiceItems,calQuanByInvoiceType,
+const { formatInsert, getNextInvoiceId, updateProductByInvoiceItems,calQuanByInvoiceType,
     INVOICE_TYPE_2_INT
 } = require('./utils.js');
-const { resolve } = require("path");
 
 
 const prefix = 'XT'
@@ -17,7 +14,9 @@ const typeInt = INVOICE_TYPE_2_INT.salesRefund
 
 
 router.get('/', (req, res) => {
-    const query = `SELECT * FROM invoice WHERE type=${typeInt}`
+    const query = `SELECT * 
+    FROM invoice AS i LEFT JOIN invoiceRelation AS r ON i.id=r.refundId
+    WHERE type=${typeInt}`
     db.all(query, (err, rows) => {
         if (err) {
             console.error(err)
@@ -31,7 +30,10 @@ router.get('/', (req, res) => {
 
 router.get('/id/:id', (req, res) => {
     const refundId = req.params.id
-    db.each(`SELECT * FROM invoice WHERE id="${refundId}"`, (err, refund) => {
+    const selectRefund = `SELECT i.*, orderId, p.address, p.phone 
+    FROM invoice AS i, partner AS p, invoiceRelation AS r 
+    WHERE id="${refundId}" AND partner=name AND r.refundId=i.id`
+    db.each(selectRefund, (err, refund) => {
         if (err) {
             console.error(err)
             res.status(500).send(err)
@@ -51,7 +53,6 @@ router.get('/id/:id', (req, res) => {
         })
     })
 })
-
 
 
 router.post('/', async (req, res) => {
@@ -183,7 +184,6 @@ router.delete('/id/:id', async (req, res) => {
         res.end()
     })
 })
-
 
 
 router.put('/id/:id', async (req, res) => {

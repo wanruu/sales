@@ -6,7 +6,13 @@ const db = require("../db")
 
 
 router.get('/', (req, res) => {
-    const query = `SELECT * FROM partner`
+    const t = `SELECT p.name, COUNT(*) AS invoiceNum
+    FROM partner AS p, invoiceItem AS ii, invoice AS i 
+    WHERE p.name=i.partner AND ii.invoiceId=i.id 
+    GROUP BY p.name`
+
+    const query = `SELECT p.*, invoiceNum 
+    FROM partner AS p LEFT JOIN (${t}) AS t ON p.name=t.name`
     db.all(query, (err, rows) => {
         if (err) {
             console.error(err)

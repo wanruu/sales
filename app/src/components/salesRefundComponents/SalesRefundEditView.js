@@ -24,8 +24,10 @@ function SalesRefundEditView(props) {
             url: `salesRefund/id/${props.id}`,
             'Content-Type': 'application/json',
         }).then(res => {
-            setRefund(res.data);
-            setEditRefund(dcInvoice(res.data));
+            const r = res.data
+            r.items = r.items.map(item => Object.assign(item, { orderId: r.orderId }))
+            setRefund(r);
+            setEditRefund(dcInvoice(r));
         }).catch(err => { });
     }
 
@@ -37,7 +39,7 @@ function SalesRefundEditView(props) {
             return item
         })
         data.payment = data.payment || "0"
-        data.orderId = data.items[0].invoiceId
+        data.orderId = data.items[0].orderId
         Axios({
             method: 'put',
             baseURL: baseURL(),
@@ -138,7 +140,7 @@ function SalesRefundEditView(props) {
         </Table>
         <Divider />
         <Row>
-            <Col span={8}>总计：{editRefund.amount.toString()}</Col>
+            <Col span={8}>总计：{editRefund.amount}</Col>
             <Col span={8} align='center'>
                 付款：<InputNumber size='small' keyboard={false} stringMode controls={false}
                     value={editRefund.payment} onChange={value => updatePayment(value)}

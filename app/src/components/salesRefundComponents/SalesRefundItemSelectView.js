@@ -40,19 +40,19 @@ function SalesRefundItemSelectView(props) {
         onChange: (selectedRowKeys, selectedRows) => {
             setSelectedItems(selectedRows)
         },
-        selectedRowKeys: selectedItems.map(item => item.invoiceItemId),
+        selectedRowKeys: selectedItems.map(item => item.orderId + item.productId),
     };
 
 
     const onSubmit = () => {
         const newEditRefund = dcInvoice(props.editRefund)
         newEditRefund.items = selectedItems.map(item => {
-            const existingItem = props.editRefund.items.find(i => i.invoiceItemId === item.invoiceItemId)
+            const existingItem = props.editRefund.items.find(i => i.orderId === item.orderId && i.productId === item.productId)
             return existingItem !== undefined ? existingItem : item
         })
         newEditRefund.amount = calTotalAmount(newEditRefund.items)
         if (selectedItems.length > 0) {
-            newEditRefund.partner = salesOrders.find(o => o.id === selectedItems[0].invoiceId).partner
+            newEditRefund.partner = salesOrders.find(o => o.id === selectedItems[0].orderId).partner
         }
         props.setEditRefund(newEditRefund)
         props.dismiss()
@@ -96,7 +96,7 @@ function SalesRefundItemSelectView(props) {
         pagination={false} style={{height: 400}} scroll={{x: 'max-content', y: 400 }}
         expandable={{
             expandedRowRender: (record) => (
-                <Table dataSource={record.items} pagination={false} bordered rowKey={record => record.invoiceItemId} rowSelection={rowSelection}>
+                <Table dataSource={record.items} pagination={false} bordered rowKey={record => record.orderId + record.productId} rowSelection={rowSelection}>
                     <Column title='材质' dataIndex='material' align='center' />
                     <Column title='名称' dataIndex='name' align='center' />
                     <Column title='规格' dataIndex='spec' align='center' />
@@ -108,12 +108,12 @@ function SalesRefundItemSelectView(props) {
                 </Table>
             ),
             rowExpandable: (record) => record.items !== undefined,
-            defaultExpandedRowKeys: props.editRefund.items.length === 0 ? [] : [props.editRefund.items[0].invoiceId]
+            defaultExpandedRowKeys: props.editRefund.items.length === 0 ? [] : [props.editRefund.items[0].orderId]
         }}>
             <Column title='销售单号' dataIndex='id' width={180} 
                 filterSearch onFilter={(value, record) => record.id.includes(value)} filters={idFilters}
                 sorter={(a, b) =>  a.id > b.id} 
-            />
+            /> 
             <Column title='客户' dataIndex='partner' 
                 filterSearch onFilter={(value, record) => record.partner.includes(value)} filters={partnerFilters}
             />

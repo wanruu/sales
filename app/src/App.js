@@ -5,7 +5,8 @@ import {
     PlusCircleOutlined,
     MinusCircleOutlined,
     BankOutlined,
-    UserOutlined
+    UserOutlined,
+    BarChartOutlined
 } from '@ant-design/icons'
 
 
@@ -47,11 +48,7 @@ function App() {
         ]),
         getMenuItem('产品', 'product', <BankOutlined />),
         getMenuItem('交易对象', 'partner', <UserOutlined />),
-        // getMenuItem('统计数据', 'stats', <BarChartOutlined />, [
-        //     getMenuItem('摘要', 'sales'),
-        //     getMenuItem('客户结算', 'customrs'),
-        //     getMenuItem('产品数据', 'products'),
-        // ]),
+        getMenuItem('统计数据', 'stat', <BarChartOutlined />),
         getMenuItem('设置', 'settings', <SettingOutlined />),
     ]
     // ------------------
@@ -69,6 +66,11 @@ function App() {
                 </Header> */}
                 <Content style={{ overflow: 'initial', background: colorBgContainer }}>
                     <div style={{ paddingLeft: 18, paddingRight: 18, background: colorBgContainer }}>
+                        {/* <SalesOrderPage style={{ display: menuKey==='salesOrder' ? 'block' : 'none' }} />
+                        <SalesRefundPage style={{ display: menuKey==='salesRefund' ? 'block' : 'none' }} />
+                        <ProductPage style={{ display: menuKey==='product' ? 'block' : 'none' }} />
+                        <PartnerPage style={{ display: menuKey==='partner' ? 'block' : 'none' }} />
+                        <SettingPage style={{ display: menuKey==='settings' ? 'block' : 'none' }} /> */}
                         {pages[menuKey]}
                     </div>
                 </Content>

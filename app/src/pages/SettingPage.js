@@ -12,7 +12,7 @@ import InvoicePreview from "../components/common/InvoicePreview";
 const { TextArea } = Input;
 
 
-function SettingPage() {
+function SettingPage(props) {
     const [width, setWidth] = useState(invoiceSettings.width())
     const [height, setHeight] = useState(invoiceSettings.height())
     const [fontSize, setFontSize] = useState(invoiceSettings.fontSize())
@@ -84,7 +84,7 @@ function SettingPage() {
                 }
                 if (row['送货单号'] !== undefined) {
                     invoices.push({ 
-                        no: row['送货单号'].toString().padStart(6, '0'),
+                        no: row['送货单号'],
                         date: xlsxFormatDate(row['日期']),
                         customer: row['收货单位'],
                         isPaid: row['款项'] === '已收款',
@@ -126,7 +126,7 @@ function SettingPage() {
 
 
     return (
-        <div>
+        <div style={props.style || {}}>
             <h2>清单外观</h2>
             
             <h3>尺寸及字号</h3>

@@ -21,15 +21,9 @@ function SalesRefundFB(props) {
     const [messageApi, contextHolder] = message.useMessage();
 
 
-    // modal show/hide
-    const showNewRefundModal = () => {
-        setIsNewRefundModalOpen(true)
-    }
+    // modal hide
     const hideNewRefundModal = () => {
         setIsNewRefundModalOpen(false)
-    }
-    const showSelectionModal = () => {
-        setSelectionModalOpen(true)
     }
     const hideSelectionModal = () => {
         setSelectionModalOpen(false)
@@ -46,11 +40,11 @@ function SalesRefundFB(props) {
         newRefund.payment = value
         setEditRefund(newRefund)
     }
-    const updateRow = (invoiceItemId, field, value) => {
+    const updateRow = (orderItemId, field, value) => {
         const ifUpdateAmount = field === 'quantity'
         const newEditRefund = dcInvoice(editRefund)
         newEditRefund.items = newEditRefund.items.map(item => {
-            if (item.invoiceItemId === invoiceItemId) { item[field] = value }
+            if (item.orderItemId === orderItemId) { item[field] = value }
             if (ifUpdateAmount) {
                 const { originalAmount, amount } = calItemAmount(item)
                 item.originalAmount = originalAmount
@@ -95,9 +89,8 @@ function SalesRefundFB(props) {
             item.quantity = item.quantity || '0'
             return item
         });
-        refund.amount = refund.amount.toString()
         refund.payment = refund.payment || '0'
-        refund.orderId = refund.items[0].invoiceId
+        refund.orderId = refund.items[0].orderId
         Axios({
             method: 'post',
             baseURL: baseURL(),
@@ -138,7 +131,7 @@ function SalesRefundFB(props) {
             }} />
         </Popover>
         
-        <FloatButton icon={<PlusOutlined />} type='primary' onClick={showNewRefundModal} style={{ right: 24, }} />
+        <FloatButton icon={<PlusOutlined />} type='primary' onClick={_ => setIsNewRefundModalOpen(true)} style={{ right: 24, }} />
         
         <Modal title='新建销售退货' open={isNewRefundModalOpen} width={1000} centered onCancel={hideNewRefundModal} footer={
             <Space>
@@ -152,31 +145,27 @@ function SalesRefundFB(props) {
                 </Col>
                 <Col span={8} align='center'>日期：<DatePicker size='small' value={editRefund.date} onChange={value => updateDate(value)}/></Col>
                 <Col span={8} align='right'>
-                    <Button type='primary' onClick={showSelectionModal}>选择销售单及产品</Button>
+                    <Button type='primary' onClick={_ => setSelectionModalOpen(true)}>选择销售单及产品</Button>
                     </Col>
             </Row>
 
             <Table className='editTable' dataSource={editRefund.items} size='small' bordered style={{height: 400}} 
-            scroll={{x: 'max-content', y: 400 }} pagination={false} rowKey={r => r.invoiceItemId} >
+            scroll={{x: 'max-content', y: 400 }} pagination={false} rowKey={r => r.orderItemId} >
                 <Column align='center' width={30} render={(_, __, idx) => idx+1} />
                 <Column title='材质' dataIndex='material' align='center' width={45} />
                 <Column title='名称' dataIndex='name' align='center' width={80} />
                 <Column title='规格' dataIndex='spec' align='center' width={60} />
                 <Column title='数量' dataIndex='quantity' align='center' width={60} render={(_, row) => 
                     <InputNumber min={0} stringMode keyboard={false} size='small' controls={false} style={{width: '100%'}} 
-                    value={row.quantity} onChange={value => updateRow(row.invoiceItemId, 'quantity', value)} />
+                    value={row.quantity} onChange={value => updateRow(row.orderItemId, 'quantity', value)} />
                 } />
                 <Column title='单位' dataIndex='unit' align='center' width={50} />
                 <Column title='单价' dataIndex='price' align='center' width={70} />
-                <Column title='金额' dataIndex='originalAmount' align='center' width={80} render={originalAmount => 
-                    originalAmount.toString()
-                } />
+                <Column title='金额' dataIndex='originalAmount' align='center' width={80} />
                 <Column title='折扣' dataIndex='discount' align='center' width={50} />
-                <Column title='折后价' dataIndex='amount' align='center' width={80} render={amount => 
-                    amount.toString()
-                } />
+                <Column title='折后价' dataIndex='amount' align='center' width={80} />
                 <Column title='备注' dataIndex='remark' align='center' width={90} render={(_, row) => 
-                    <Input size='small' style={{width: '100%'}} value={row.remark} onChange={e => updateRow(row.invoiceItemId, 'remark', e.target.value)} />
+                    <Input size='small' style={{width: '100%'}} value={row.remark} onChange={e => updateRow(row.orderItemId, 'remark', e.target.value)} />
                 } />
                 <Column title='操作' align="center" width={90} render={(_, __, idx) => 
                     <Button size='small' danger type='link' style={{fontSize: '12px'}} onClick={_ => {
@@ -192,7 +181,7 @@ function SalesRefundFB(props) {
             </Table>
             <Divider />
             <Row>
-                <Col span={12}>总计：{editRefund.amount.toString()}</Col>
+                <Col span={12}>总计：{editRefund.amount}</Col>
                 <Col span={12}>
                     付款：<InputNumber size='small' keyboard={false} stringMode controls={false} style={{width: '90%', maxWidth: '150px'}} 
                         value={editRefund.payment} onChange={value => updatePayment(value)}
