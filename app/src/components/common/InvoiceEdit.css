@@ -1,14 +1,14 @@
 .draftTable table { 
-    font-size: 10px
+    font-size: 11px
 }
 
 .draftTable button { 
-    font-size: 10px
+    font-size: 11px !important;
 }
 
 .draftTable tbody td {
-    padding-top: 1px;
-    padding-bottom: 1px;
+    padding-top: 1px !important;
+    padding-bottom: 1px !important;
 }
 
 .editTable table {

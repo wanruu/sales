@@ -115,7 +115,7 @@ function SalesRefundFB(props) {
         <Popover title={`草稿箱 (${draftRefunds.length})`} placement="topLeft" zIndex={999} trigger='click' content={
             <Table className='draftTable' dataSource={draftRefunds} size='small' pagination={{pageSize: 5, size: 'small'}} hideOnSinglePage bordered>
                 <Column title='保存时间' dataIndex='draftTime' align='center' render={time => time.format('HH:mm:ss')} />
-                <Column title='收货单位' dataIndex='partner' align='center' />
+                <Column title='客户' dataIndex='partner' align='center' />
                 <Column title='产品数' dataIndex='items' align='center' render={items => items.length} />
                 <Column title='操作' align='center' render={(_, draft) => (
                     <Space.Compact size='small'>

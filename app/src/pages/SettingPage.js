@@ -1,8 +1,8 @@
-import { Button, Input, Upload, InputNumber, Space, Select, Checkbox } from "antd";
+import { Button, Input, Upload, InputNumber, Space, Select, Checkbox, Card, Form } from "antd";
 import React, { useState, } from "react";
 import * as XLSX from 'xlsx';
 import Axios from 'axios';
-import { CheckOutlined } from '@ant-design/icons'
+
 
 import { baseURL, invoiceSettings } from "../utils/config";
 import { initSalesOrderForPreview } from "../utils/salesOrderUtils";
@@ -10,7 +10,7 @@ import { initSalesRefundForPreview } from "../utils/salesRefundUtils";
 import InvoicePreview from "../components/common/InvoicePreview";
 
 const { TextArea } = Input;
-
+const { Item } = Form
 
 function SettingPage(props) {
     const [width, setWidth] = useState(invoiceSettings.width())
@@ -124,90 +124,104 @@ function SettingPage(props) {
         readFile(file);
     }
 
+    const ItemTitle = (text) => {
+        return <font style={{ fontWeight: 'bold', fontSize: '12pt' }}>{text}</font>
+    }
 
     return (
         <div style={props.style || {}}>
             <h2>清单外观</h2>
-            
-            <h3>尺寸及字号</h3>
-            <Space wrap>
-                <InputNumber style={{width: '130px'}} addonBefore="宽度" value={width} onChange={val => {
-                    setWidth(val); localStorage.setItem('width', val);
-                }} />
-                <InputNumber style={{width: '130px'}} addonBefore="高度" value={height} onChange={val => {
-                    setHeight(val); localStorage.setItem('height', val);
-                }} />
-                <InputNumber style={{width: '100px'}} addonAfter="px" value={fontSize} onChange={val => {
-                    setFontSize(val); localStorage.setItem('fontSize', val);
-                }} />
-            </Space>
-    
-            <h3>边距</h3>
-            <Space wrap>
-                <InputNumber addonBefore="水平" style={{width: '130px'}} value={hPadding} onChange={val => {
-                    setHPadding(val); localStorage.setItem('hPadding', val);
-                }} />
-                <InputNumber addonBefore="垂直" style={{width: '130px'}} value={vPadding} onChange={val => {
-                    setVPadding(val); localStorage.setItem('vPadding', val);
-                }} />
-            </Space>
-            
-            <h3>标题及字号</h3>
-            <Space wrap>
-                <Input value={title} style={{width: '300px'}} onChange={e => {
-                    setTitle(e.target.value); localStorage.setItem('title', e.target.value);
-                }} />
-                <InputNumber addonAfter='px' value={titleFontSize} style={{width: '100px'}} onChange={val => {
-                    setTitleFontSize(val); localStorage.setItem('titleFontSize', val);
-                } }/>
-            </Space>
+            <Card>
+                <Form layout='vertical' >
+                    <Item label={ItemTitle('尺寸及字号')}>
+                        <Space direction="vertical">
+                            <Space wrap>
+                                <InputNumber style={{ width: '150px' }} addonBefore="宽度" value={width} onChange={val => {
+                                    setWidth(val); localStorage.setItem('width', val);
+                                }} />
+                                <InputNumber style={{ width: '150px' }} addonBefore="高度" value={height} onChange={val => {
+                                    setHeight(val); localStorage.setItem('height', val);
+                                }} />
+                            </Space>
+                            <Space wrap>
+                                <InputNumber style={{ width: '150px' }} addonBefore="水平边距" value={hPadding} onChange={val => {
+                                    setHPadding(val); localStorage.setItem('hPadding', val);
+                                }} />
+                                <InputNumber style={{ width: '150px' }} addonBefore="垂直边距" value={vPadding} onChange={val => {
+                                    setVPadding(val); localStorage.setItem('vPadding', val);
+                                }} />
+                                <InputNumber style={{ width: '130px' }} addonBefore="字号" value={fontSize} onChange={val => {
+                                    setFontSize(val); localStorage.setItem('fontSize', val);
+                                }} />
+                            </Space>
+                        </Space>
+                    </Item>
 
-            <h3>副标题及样式</h3>
-            <Space direction="vertical">
-                <Space wrap>
-                    <Input addonBefore='销售清单' value={salesOrderTitle} style={{width: '200px'}} onChange={e => {
-                        setSalesOrderTitle(e.target.value); localStorage.setItem('salesOrderTitle', e.target.value);
-                    }} />
-                    <Input addonBefore='采购清单' value={purchaseOrderTitle} style={{width: '200px'}} onChange={e => {
-                        setPurchaseOrderTitle(e.target.value); localStorage.setItem('purchaseOrderTitle', e.target.value);
-                    }} />
-                    <Input addonBefore='销售退款' value={salesRefundTitle} style={{width: '200px'}} onChange={e => {
-                        setSalesRefundTitle(e.target.value); localStorage.setItem('salesRefundTitle', e.target.value);
-                    }} />
-                    <Input addonBefore='采购退款' value={purchaseRefundTitle} style={{width: '200px'}} onChange={e => {
-                        setPurchaseRefundTitle(e.target.value); localStorage.setItem('purchaseRefundTitle', e.target.value);
-                    }} />
-                </Space>
-                <Space wrap>
-                    <Select value={titleStyle} options={[{label: '标题同行', value: 'inline'},{label: '另起一行', value: 'multi'}]} onChange={val => {
-                        setTitleStyle(val); localStorage.setItem('titleStyle', val);
-                    }}/>
-                    <InputNumber addonAfter='px' value={subtitleFontSize} style={{width: '100px'}} disabled={titleStyle==='inline'} onChange={val => {
-                        setSubtitleFontSize(val); localStorage.setItem('subtitleFontSize', val);
-                    } }/>
-                </Space>
-            </Space>
+                    <Item label={ItemTitle('标题及字号')}>
+                        <Space wrap>
+                            <Input style={{ width: '310px' }} value={title} onChange={e => {
+                                setTitle(e.target.value); localStorage.setItem('title', e.target.value);
+                            }} />
+                            <InputNumber style={{ width: '130px' }} addonBefore="字号" value={titleFontSize} onChange={val => {
+                                setTitleFontSize(val); localStorage.setItem('titleFontSize', val);
+                            } }/>
+                        </Space>
+                    </Item>
+                    
+                    <Item label={ItemTitle('副标题及样式')}>
+                        <Space direction="vertical">
+                            <Space wrap>
+                                <Input style={{ width: '235px' }} addonBefore='销售清单' value={salesOrderTitle} onChange={e => {
+                                    setSalesOrderTitle(e.target.value); localStorage.setItem('salesOrderTitle', e.target.value);
+                                }} />
+                                <Input style={{ width: '235px' }} addonBefore='采购清单' value={purchaseOrderTitle} onChange={e => {
+                                    setPurchaseOrderTitle(e.target.value); localStorage.setItem('purchaseOrderTitle', e.target.value);
+                                }} />
+                                <Input style={{ width: '235px' }} addonBefore='销售退款' value={salesRefundTitle} onChange={e => {
+                                    setSalesRefundTitle(e.target.value); localStorage.setItem('salesRefundTitle', e.target.value);
+                                }} />
+                                <Input style={{ width: '235px' }} addonBefore='采购退款' value={purchaseRefundTitle} onChange={e => {
+                                    setPurchaseRefundTitle(e.target.value); localStorage.setItem('purchaseRefundTitle', e.target.value);
+                                }} />
+                            </Space>
+                            <Space wrap>
+                                <Select value={titleStyle} options={[{label: '标题同行', value: 'inline'},{label: '另起一行', value: 'multi'}]} onChange={val => {
+                                    setTitleStyle(val); localStorage.setItem('titleStyle', val);
+                                }} />
+                                <InputNumber style={{ width: '130px' }} addonBefore='字号' value={subtitleFontSize} disabled={titleStyle==='inline'} onChange={val => {
+                                    setSubtitleFontSize(val); localStorage.setItem('subtitleFontSize', val);
+                                }} />
+                            </Space>
+                        </Space>
+                    </Item>
 
-            <h3>交易对象信息</h3>
-            <Space wrap>
-                <Checkbox checked={showPhone} onChange={e => {
-                    setShowPhone(e.target.checked); localStorage.setItem('showPhone', e.target.checked); 
-                }} >显示电话 (如有)</Checkbox>
-                <Checkbox checked={showAddress} onChange={e => {
-                    setShowAddress(e.target.checked); localStorage.setItem('showAddress', e.target.checked); 
-                }} >显示地址 (如有)</Checkbox>
-            </Space>
+                    <Item label={ItemTitle('交易对象信息')}>
+                        <Space wrap>
+                            <Checkbox checked={showPhone} onChange={e => {
+                                setShowPhone(e.target.checked); localStorage.setItem('showPhone', e.target.checked); 
+                            }} >显示电话 (如有)</Checkbox>
+                            <Checkbox checked={showAddress} onChange={e => {
+                                setShowAddress(e.target.checked); localStorage.setItem('showAddress', e.target.checked); 
+                            }} >显示地址 (如有)</Checkbox>
+                        </Space>
+                    </Item>
+                    
+                    <Item label={ItemTitle('脚注及字号')}>
+                        <div style={{ color: 'gray', fontStyle: 'italic', fontSize: '9pt', marginBottom: '5px' }}>
+                            * 以回车键分行，每行脚注将依次列在单据脚注位置，单据脚注为两列。
+                        </div>
+                        <Space direction="vertical">
+                            <TextArea style={{ width: '600px' }} placeholder='脚注' autoSize value={footer} onChange={e => {
+                                setFooter(e.target.value); localStorage.setItem('footer', e.target.value); 
+                            }} />
+                            <InputNumber style={{ width: '130px' }} addonBefore='字号' value={footerFontSize} onChange={val => {
+                                setFooterFontSize(val); localStorage.setItem('footerFontSize', val);
+                            }} />
+                        </Space>
+                    </Item>
+                </Form>
+            </Card>
 
-            <h3>脚注及字号</h3>
-            <Space direction="vertical">
-                <TextArea placeholder='脚注' autoSize value={footer} style={{width: '600px'}} onChange={e => {
-                    setFooter(e.target.value); localStorage.setItem('footer', e.target.value); 
-                }} />
-                <InputNumber addonAfter='px' value={footerFontSize} style={{maxWidth: '100px'}} onChange={val => {
-                    setFooterFontSize(val); localStorage.setItem('footerFontSize', val);
-                }}/>
-            </Space>
-            
             <h3>预览
                 <Space.Compact size="small" style={{color:'gray', fontWeight: 'normal', marginLeft: '10px'}}>
                     <Button type='link' disabled={previewType==='salesOrder'} onClick={_ => setPreviewType('salesOrder')}>销售清单</Button>/

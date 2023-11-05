@@ -124,15 +124,20 @@ router.put('/id/:id', async (req, res) => {
 
 
 router.post('/', (req, res) => {
-    const query = `INSERT INTO product (id, material, name, spec, quantity) 
-    VALUES ("${crypto.randomUUID()}", "${req.body.material}", "${req.body.name}", "${req.body.spec}", "${req.body.quantity}")`
+    const query = `INSERT INTO product (id, material, name, spec, quantity, unit) 
+    VALUES ("${crypto.randomUUID()}", "${req.body.material}", "${req.body.name}", "${req.body.spec}", "${req.body.quantity}", "${req.body.unit}")`
     db.run(query, err => {
+        if (err && err.errno === 19) { 
+            console.error(err)
+            res.send({ changes: 0, prompt: '产品重复' })
+            return
+        }
         if (err) {
             console.error(err)
             res.status(500).send(err)
             return
         }
-        res.end()
+        res.send({ changes: 1 })
     })
 })
 

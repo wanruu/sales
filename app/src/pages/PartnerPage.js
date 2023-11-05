@@ -8,6 +8,7 @@ const { confirm } = Modal;
 const { Item } = Form
 
 import { baseURL } from '../utils/config'
+import PartnerEditView from '../components/partnerComponents/PartnerEditView';
 
 
 function FuncBar(props) {
@@ -31,7 +32,7 @@ function FuncBar(props) {
             </Item>
             <Item style={style}>
                 <Space>
-                    <Button icon={<PlusOutlined />} type='primary'>新增</Button>
+                    <Button icon={<PlusOutlined />} type='primary' onClick={props.create}>新增</Button>
                     <Button icon={<TableOutlined />}>导出</Button>
                     <Button icon={<ClearOutlined />} danger>批量清理</Button>
                 </Space>
@@ -47,6 +48,7 @@ function PartnerPage(props) {
 
     const [messageApi, contextHolder] = message.useMessage();
     const [editPartner, setEditPartner] = useState(undefined)
+    const [newPartner, setNewPartner] = useState(false)
     
     const load = () => {
         setPartners([])
@@ -56,7 +58,6 @@ function PartnerPage(props) {
             url: '/partner',
             'Content-Type': 'application/json',
         }).then(res => {
-            console.log(res.data)
             setPartners(res.data)
         }).catch(_ => { })
     }
@@ -87,32 +88,6 @@ function PartnerPage(props) {
         });
     }
 
-    const upload = () => {
-        Axios({
-            method: editPartner.originalName === undefined ? 'post' : 'put',
-            baseURL: baseURL(),
-            url: `/partner`,
-            data: editPartner,
-            'Content-Type': 'application/json',
-        }).then(res => {
-            if (res.data.changes === 1) {
-                messageApi.open({ type: 'success', content: '保存成功', });
-                load()
-                setEditPartner(undefined)
-            } else {
-                messageApi.open({ type: 'error', content: `保存失败: ${res.data.prompt}`, });
-            }
-        }).catch(err => {
-            messageApi.open({ type: 'error', content: '保存失败', });
-        });
-    }
-
-    const updateEditPartner = (field, value) => {
-        const p = JSON.parse(JSON.stringify(editPartner))
-        p[field] = value
-        setEditPartner(p)
-    }
-
     const filterPartners = () => {
         setFilteredPartners(partners.filter(o => 
             (filterConditions.name === '' || o.name.includes(filterConditions.name)) &&
@@ -133,24 +108,18 @@ function PartnerPage(props) {
     return (<div style={props.style || {}}>
         {contextHolder}
 
-        <Modal open={editPartner !== undefined} destroyOnClose
-            title={editPartner !== undefined && editPartner.originalName === undefined ? '新增交易对象' : '编辑交易对象'}
-            onCancel={_ => setEditPartner(undefined)}
-            onOk={upload} okText='保存' okButtonProps={{disabled: editPartner === undefined || editPartner.name === ''}}>
-            <Item label='姓名'>
-                <Input onChange={e => updateEditPartner('name', e.target.value)} value={editPartner === undefined ? '' : editPartner.name} />
-            </Item>
-            <Item label='电话'>
-                <Input onChange={e => updateEditPartner('phone', e.target.value)} value={editPartner === undefined ? '' : editPartner.phone} />
-            </Item>
-            <Item label='地址'>
-                <Input onChange={e => updateEditPartner('address', e.target.value)} value={editPartner === undefined ? '' : editPartner.address} />
-            </Item>
+        <Modal title='编辑交易对象' open={editPartner !== undefined} destroyOnClose onCancel={_ => setEditPartner(undefined)} footer={null}>
+            <PartnerEditView partner={editPartner} editPartner={editPartner} dismiss={_ => setEditPartner(undefined)} refresh={load}/>
+        </Modal>
+
+        <Modal title='新增交易对象' open={newPartner} destroyOnClose onCancel={_ => setNewPartner(false)} footer={null}>
+            <PartnerEditView editPartner={{name:'',address:'',phone:''}} dismiss={_ => setNewPartner(false)} refresh={load}/>
         </Modal>
 
         <br />
         <Space direction='vertical' style={{ width: '100%' }} >
-            <FuncBar filterConditions={filterConditions} setFilterConditions={setFilterConditions} />
+            <FuncBar filterConditions={filterConditions} setFilterConditions={setFilterConditions} create={_ => setNewPartner(true)} />
+
             <Table dataSource={filteredPartners} size='small' bordered rowKey={record => record.name}>
                 <Column title='序号' align='center' render={(_, __, idx) => idx+1} />
                 <Column title='姓名' dataIndex='name' align='center' />
@@ -158,7 +127,7 @@ function PartnerPage(props) {
                 <Column title='地址' dataIndex='address' align='center' />
                 <Column title='操作' align='center' render={(_, row) => 
                     <Space.Compact size='small'>
-                        <Button type='link' onClick={_ => setEditPartner(Object.assign(row, {originalName: row.name}))}>编辑</Button>
+                        <Button type='link' onClick={_ => setEditPartner(row)}>编辑</Button>
                         {row.invoiceNum > 0 ?
                             <Button type='link'>查看</Button> :
                             <Button type='link' danger onClick={_ => showDeleteConfirm(row.name)}>删除</Button>

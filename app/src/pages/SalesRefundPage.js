@@ -44,8 +44,8 @@ function SearchBar(props) {
             </Item>
             <Item style={style}>
                 <Space>
-                    <Button danger icon={<DeleteOutlined />}>批量删除</Button>
                     <Button icon={<TableOutlined />}>导出</Button>
+                    <Button danger icon={<DeleteOutlined />}>批量删除</Button>
                 </Space>
             </Item>
         </Row>

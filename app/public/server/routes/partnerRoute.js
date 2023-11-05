@@ -54,12 +54,12 @@ router.post('/', (req, res) => {
 })
 
 
-router.put('/', (req, res) => {
+router.put('/name/:name', (req, res) => {
     // ----- data -----
     const name = req.body.name
     const phone = req.body.phone
     const address = req.body.address
-    const originalName = req.body.originalName
+    const originalName = req.params.name
 
     if (name === originalName) {
         const query = `UPDATE partner SET phone="${phone}", address="${address}" WHERE name="${name}"`
