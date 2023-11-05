@@ -109,11 +109,11 @@ function PartnerPage(props) {
         {contextHolder}
 
         <Modal title='编辑交易对象' open={editPartner !== undefined} destroyOnClose onCancel={_ => setEditPartner(undefined)} footer={null}>
-            <PartnerEditView partner={editPartner} editPartner={editPartner} dismiss={_ => setEditPartner(undefined)} refresh={load}/>
+            <PartnerEditView partner={editPartner} dismiss={_ => setEditPartner(undefined)} refresh={load} messageApi={messageApi} />
         </Modal>
 
-        <Modal title='新增交易对象' open={newPartner} destroyOnClose onCancel={_ => setNewPartner(false)} footer={null}>
-            <PartnerEditView editPartner={{name:'',address:'',phone:''}} dismiss={_ => setNewPartner(false)} refresh={load}/>
+        <Modal title='新增交易对象' open={newPartner} destroyOnClose onCancel={_ => setNewPartner(false)} footer={null} >
+            <PartnerEditView dismiss={_ => setNewPartner(false)} refresh={load} messageApi={messageApi} />
         </Modal>
 
         <br />

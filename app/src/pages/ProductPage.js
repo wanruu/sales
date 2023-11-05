@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from "react";
-import { Table, Input, Space, Button, Modal, Form, message, Row, Card } from "antd";
-import  Axios  from "axios";
-import { ExclamationCircleFilled, TableOutlined, PlusOutlined, ClearOutlined } from '@ant-design/icons';
+import React, { useState, useEffect } from "react"
+import { Table, Input, Space, Button, Modal, Form, message, Row, Card } from "antd"
+import  Axios  from "axios"
+import { ExclamationCircleFilled, TableOutlined, PlusOutlined, ClearOutlined } from '@ant-design/icons'
 
 
-const { Column } = Table;
-const { confirm } = Modal;
+const { Column } = Table
+const { confirm } = Modal
 const { Item } = Form
 
-import { baseURL } from "../utils/config";
-import ProductEditView from "../components/productComponents/ProductEditView";
+import { baseURL } from "../utils/config"
+import ProductEditView from "../components/productComponents/ProductEditView"
 
 
 function FuncBar(props) {
@@ -43,14 +43,14 @@ function FuncBar(props) {
 
 
 function ProductPage(props) {
-    const [products, setProducts] = useState([]);
+    const [products, setProducts] = useState([])
     const [filteredProducts, setFilteredProducts] = useState([])
     const [filterConditions, setFilterConditions] = useState({material: '', name: '', spec: ''})
 
     const [newProduct, setNewProduct] = useState(false)
     const [editProduct, setEditProduct] = useState(undefined)
 
-    const [messageApi, contextHolder] = message.useMessage();
+    const [messageApi, contextHolder] = message.useMessage()
 
     const load = () => {
         setProducts([])
@@ -79,13 +79,13 @@ function ProductPage(props) {
                     url: `/product/id/${productId}`,
                     'Content-Type': 'application/json',
                 }).then(res => {
-                    messageApi.open({ type: 'success', content: '删除成功', });
+                    messageApi.open({ type: 'success', content: '删除成功' })
                     load()
                 }).catch(err => {
-                    messageApi.open({ type: 'error', content: `删除失败：${err}`, });
-                });
-            },
-        });
+                    messageApi.open({ type: 'error', content: '删除失败' })
+                })
+            }
+        })
     }
 
     const filterProducts = () => {
@@ -108,11 +108,11 @@ function ProductPage(props) {
     return (<div style={props.style || {}}>
         {contextHolder}
         <Modal open={editProduct !== undefined} onCancel={_ => setEditProduct(undefined)} title='编辑产品' footer={null} destroyOnClose>
-            <ProductEditView product={editProduct} editProduct={editProduct} dismiss={_ => setEditProduct(undefined)} refresh={load} />
+            <ProductEditView product={editProduct} dismiss={_ => setEditProduct(undefined)} refresh={load} messageApi={messageApi} />
         </Modal>
 
         <Modal open={newProduct} onCancel={_ => setNewProduct(false)} title='新建产品' footer={null} destroyOnClose>
-            <ProductEditView editProduct={{material:'',name:'',spec:'',quantity:'',unit:''}} dismiss={_ => setNewProduct(false)} refresh={load} />
+            <ProductEditView dismiss={_ => setNewProduct(false)} refresh={load} messageApi={messageApi} />
         </Modal>
 
         <br />
