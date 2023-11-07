@@ -24,8 +24,9 @@ router.get('/', (req, res) => {
 })
 
 
-router.delete('/:name', (req, res) => {
-    db.run(`DELETE FROM partner WHERE name="${req.params.name}"`, err => {
+router.delete('/', (req, res) => {
+    const names = (req.body.names || []).map(name => `"${name}"`).join(', ')
+    db.run(`DELETE FROM partner WHERE name IN (${names})`, err => {
         if (err) {
             console.error(err)
             res.status(500).send(err)

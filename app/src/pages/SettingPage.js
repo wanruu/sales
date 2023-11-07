@@ -207,7 +207,7 @@ function SettingPage(props) {
                             <font style={{ color: 'gray', fontStyle: 'italic', fontSize: '9pt' }}>
                                 * 以回车键分行，每行脚注将依次列在单据脚注位置，单据脚注为两列。
                             </font>
-                            <TextArea style={{ width: '600px' }} placeholder='脚注' autoSize value={footer} onChange={e => {
+                            <TextArea placeholder='脚注' autoSize value={footer} onChange={e => {
                                 setFooter(e.target.value); localStorage.setItem('footer', e.target.value); 
                             }} />
                             <InputNumber style={{ width: '130px' }} addonBefore='字号' value={footerFontSize} onChange={val => {

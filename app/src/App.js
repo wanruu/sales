@@ -66,11 +66,6 @@ function App() {
                 </Header> */}
                 <Content style={{ overflow: 'initial', background: colorBgContainer }}>
                     <div style={{ paddingLeft: 18, paddingRight: 18, background: colorBgContainer }}>
-                        {/* <SalesOrderPage style={{ display: menuKey==='salesOrder' ? 'block' : 'none' }} />
-                        <SalesRefundPage style={{ display: menuKey==='salesRefund' ? 'block' : 'none' }} />
-                        <ProductPage style={{ display: menuKey==='product' ? 'block' : 'none' }} />
-                        <PartnerPage style={{ display: menuKey==='partner' ? 'block' : 'none' }} />
-                        <SettingPage style={{ display: menuKey==='settings' ? 'block' : 'none' }} /> */}
                         {pages[menuKey]}
                     </div>
                 </Content>

@@ -51,9 +51,9 @@ export const calItemAmount = (itemDict) => {
     const originalAmount = quantity.times(price).times(unit)
     const amount = originalAmount.times(discount).dividedBy(100)
 
-    return { originalAmount: originalAmount.toFixed(2, Decimal.ROUND_HALF_UP), amount: amount.toFixed(2, Decimal.ROUND_HALF_UP)}
+    return { originalAmount: originalAmount.toString(), amount: amount.toString()}
 }
 
 export const calTotalAmount = (items) => {
-    return items.reduce((previous, current) => previous.plus(current.amount), Decimal(0)).toFixed(2, Decimal.ROUND_HALF_UP)
+    return items.reduce((previous, current) => previous.plus(current.amount), Decimal(0)).toString()
 }

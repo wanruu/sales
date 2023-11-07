@@ -47,8 +47,9 @@ router.get('/unit/:material/:name/:spec', (req, res) => {
 })
 
 
-router.delete('/id/:id', (req, res) => {
-    db.run(`DELETE FROM product WHERE id="${req.params.id}"`, err => {
+router.delete('/', (req, res) => {
+    const ids = req.body.ids.map(id => `"${id}"`).join(', ');
+    db.run(`DELETE FROM product WHERE id IN (${ids})`, err => {
         if (err) {
             console.error(err)
             res.status(500).send(err)
@@ -89,8 +90,8 @@ router.put('/id/:id', async (req, res) => {
             })
         })
         const invoiceItemsInfo = await Promise.all(items.map(item => {
-            const originalAmount = Decimal(item.quantity).times(item.price).times(unitCoeffDict[item.unit]).toFixed(2, Decimal.ROUND_HALF_UP)
-            const amount = Decimal(originalAmount).times(item.discount).dividedBy(100).toFixed(2, Decimal.ROUND_HALF_UP)
+            const originalAmount = Decimal(item.quantity).times(item.price).times(unitCoeffDict[item.unit]).toString()
+            const amount = Decimal(originalAmount).times(item.discount).dividedBy(100).toString()
             const amountChange = Decimal(amount).sub(item.amount).toString()
             return new Promise((resolve, reject) => {
                 db.run(`UPDATE invoiceItem SET originalAmount="${originalAmount}", amount="${amount}" WHERE id="${item.invoiceItemId}"`, err => {

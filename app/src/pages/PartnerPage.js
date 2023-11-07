@@ -1,57 +1,31 @@
 import React, { useState, useEffect } from 'react'
 import { Table, Button, Space, message, Modal, Form, Input, Card, Row } from 'antd'
 import Axios from 'axios'
-import { ExclamationCircleFilled, PlusOutlined, TableOutlined, ClearOutlined } from '@ant-design/icons';
+import { ExclamationCircleFilled, PlusOutlined, TableOutlined, ClearOutlined, SearchOutlined } from '@ant-design/icons'
 
 const { Column } = Table
-const { confirm } = Modal;
+const { confirm } = Modal
 const { Item } = Form
 
 import { baseURL } from '../utils/config'
-import PartnerEditView from '../components/partnerComponents/PartnerEditView';
+import PartnerEditView from '../components/partnerComponents/PartnerEditView'
+import { exportExcel } from '../utils/export'
 
 
-function FuncBar(props) {
-    const updateConditions = (field, value) => {
-        const conds = JSON.parse(JSON.stringify(props.filterConditions))
-        conds[field] = value
-        props.setFilterConditions(conds)
-    }
-    const style = { marginTop: '8px', marginBottom: '8px', marginLeft: '10px', marginRight: '10px' }
-    return <Card size='small'>
-        <Row>
-            <Item label='姓名' style={style}>
-                <Input allowClear placeholder='姓名' onChange={e => updateConditions('name', e.target.value)} />
-            </Item>
-            <Item label='电话' style={style}>
-                <Input allowClear placeholder='电话' onChange={e => updateConditions('phone', e.target.value)} />
-            </Item>
-            <Item label='地址' style={style}>
-                <Input allowClear placeholder='地址' 
-                    onChange={e => updateConditions('address', e.target.value)} style={{ width: '300px' }} />
-            </Item>
-            <Item style={style}>
-                <Space>
-                    <Button icon={<PlusOutlined />} type='primary' onClick={props.create}>新增</Button>
-                    <Button icon={<TableOutlined />}>导出</Button>
-                    <Button icon={<ClearOutlined />} danger>批量清理</Button>
-                </Space>
-            </Item>
-        </Row>
-    </Card>
-}
-
-function PartnerPage(props) {
+function PartnerPage() {
     const [partners, setPartners] = useState([])
     const [filteredPartners, setFilteredPartners] = useState([])
-    const [filterConditions, setFilterConditions] = useState({name: '', phone: '', address: ''})
+    const [form] = Form.useForm()
 
-    const [messageApi, contextHolder] = message.useMessage();
+    const [messageApi, contextHolder] = message.useMessage()
     const [editPartner, setEditPartner] = useState(undefined)
     const [newPartner, setNewPartner] = useState(false)
+    const itemStyle = { marginTop: '8px', marginBottom: '8px', marginLeft: '10px', marginRight: '10px' }
     
+    // load
     const load = () => {
         setPartners([])
+        setFilteredPartners([])
         Axios({
             method: 'get',
             baseURL: baseURL(),
@@ -59,53 +33,55 @@ function PartnerPage(props) {
             'Content-Type': 'application/json',
         }).then(res => {
             setPartners(res.data)
+            filterPartners(res.data)
         }).catch(_ => { })
     }
 
-    const deletePartner = (name) => {
-        Axios({
-            method: 'delete',
-            baseURL: baseURL(),
-            url: `/partner/${name}`,
-            'Content-Type': 'application/json',
-        }).then(res => {
-            messageApi.open({ type: 'success', content: '删除成功', });
-            load()
-        }).catch(err => {
-            messageApi.open({ type: 'error', content: '删除失败', });
-        });
-    }
-
-    const showDeleteConfirm = (name) => {
+    // delete partner
+    const showDeleteConfirm = (names) => {
+        const title = names.length === 1 ? `是否删除交易对象 “${names[0]}” ?` : `是否删除 ${names.length} 个交易对象?`
         confirm({
-            title: `是否删交易对象“${name}”?`,
-            icon: <ExclamationCircleFilled />,
+            title: title, icon: <ExclamationCircleFilled />,
             content: '确认删除后不可撤销',
-            okText: '删除',
-            okType: 'danger',
-            cancelText: '取消',
-            onOk() { deletePartner(name) },
-        });
+            okText: '删除', okType: 'danger', cancelText: '取消',
+            onOk() { 
+                Axios({
+                    method: 'delete',
+                    baseURL: baseURL(),
+                    url: `/partner`,
+                    data: { names: names },
+                    'Content-Type': 'application/json',
+                }).then(_ => {
+                    messageApi.open({ type: 'success', content: '删除成功' })
+                    load()
+                }).catch(_ => {
+                    messageApi.open({ type: 'error', content: '删除失败' })
+                })
+            }
+        })
     }
 
-    const filterPartners = () => {
-        setFilteredPartners(partners.filter(o => 
-            (filterConditions.name === '' || o.name.includes(filterConditions.name)) &&
-            (filterConditions.phone === '' || o.phone.includes(filterConditions.phone)) &&
-            (filterConditions.address === '' || o.address.includes(filterConditions.address))
+    // search (filter)
+    const filterPartners = (partners) => {
+        const conds = form.getFieldsValue()
+        setFilteredPartners(partners.filter(p => 
+            (!conds.name || p.name.includes(conds.name)) &&
+            (!conds.phone || p.phone.includes(conds.phone)) &&
+            (!conds.address || p.address.includes(conds.address))
         ))
     }
 
-    useEffect(() => {
-        load()
-    }, [])
+    // export
+    const exportPartners = () => {
+        const partners = filteredPartners.map(p => {
+            return { '姓名': p.name, '电话': p.phone, '地址': p.address }
+        })
+        exportExcel('交易对象', partners)
+    }
 
-    useEffect(() => {
-        filterPartners()
-    }, [partners, filterConditions])
+    useEffect(load, [])
 
-
-    return (<div style={props.style || {}}>
+    return <>
         {contextHolder}
 
         <Modal title='编辑交易对象' open={editPartner !== undefined} destroyOnClose onCancel={_ => setEditPartner(undefined)} footer={null}>
@@ -117,26 +93,39 @@ function PartnerPage(props) {
         </Modal>
 
         <br />
-        <Space direction='vertical' style={{ width: '100%' }} >
-            <FuncBar filterConditions={filterConditions} setFilterConditions={setFilterConditions} create={_ => setNewPartner(true)} />
+        <Space direction='vertical'>
+            {/* Function Box */}
+            <Card size='small'><Form form={form} onFinish={_ => filterPartners(partners)}><Row>
+                <Item label='姓名' name='name' style={itemStyle}><Input allowClear placeholder='姓名' /></Item>
+                <Item label='电话' name='phone' style={itemStyle}><Input allowClear placeholder='电话' /></Item>
+                <Item label='地址' name='address' style={itemStyle}><Input allowClear placeholder='地址' style={{ width: '300px' }} /></Item>
+                <Space style={itemStyle}>
+                    <Button icon={<SearchOutlined />} type='primary' htmlType='submit'>搜索</Button>
+                    <Button icon={<PlusOutlined />} onClick={_ => setNewPartner(true)}>新增对象</Button>
+                    <Button icon={<TableOutlined />} onClick={exportPartners} disabled={filteredPartners.length === 0}>批量导出</Button>
+                    <Button icon={<ClearOutlined />} danger disabled={filteredPartners.filter(p => !p.invoiceNum > 0).length === 0}
+                        onClick={_ => showDeleteConfirm(filteredPartners.filter(p => !p.invoiceNum > 0).map(p => p.name))}>批量清理</Button>
+                </Space>
+            </Row></Form></Card>
 
+            {/* Partner Table */}
             <Table dataSource={filteredPartners} size='small' bordered rowKey={record => record.name}>
                 <Column title='序号' align='center' render={(_, __, idx) => idx+1} />
                 <Column title='姓名' dataIndex='name' align='center' />
                 <Column title='电话' dataIndex='phone' align='center' />
                 <Column title='地址' dataIndex='address' align='center' />
-                <Column title='操作' align='center' render={(_, row) => 
+                <Column title='操作' align='center' render={(_, record) => 
                     <Space.Compact size='small'>
-                        <Button type='link' onClick={_ => setEditPartner(row)}>编辑</Button>
-                        {row.invoiceNum > 0 ?
+                        <Button type='link' onClick={_ => setEditPartner(record)}>编辑</Button>
+                        {record.invoiceNum > 0 ?
                             <Button type='link'>查看</Button> :
-                            <Button type='link' danger onClick={_ => showDeleteConfirm(row.name)}>删除</Button>
+                            <Button type='link' danger onClick={_ => showDeleteConfirm([record.name])}>删除</Button>
                         }
                     </Space.Compact>
                 } />
             </Table>
         </Space>
-    </div>)
+    </>
 }
 
 export default PartnerPage

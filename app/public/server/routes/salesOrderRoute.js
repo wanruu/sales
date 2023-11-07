@@ -278,18 +278,14 @@ router.get('/id/:id', (req, res) => {
     })
 })
 
-router.delete('/id/:id', async (req, res) => {
-    const orderId = req.params.id  // str
-    if (orderId === undefined) {
-        res.status(400).send('Insufficient data')
-        return
-    }
+router.delete('/', async (req, res) => {
+    const ids = (req.body.ids || []).map(id => `"${id}"`).join(', ');
 
     // 1. update product quantity
     const orderItems = await new Promise((resolve, reject) => {
         const query = `SELECT p.id AS productId, p.quantity AS originalQuantity, ii.quantity  
-        FROM invoice i, invoiceItem ii, product p 
-        WHERE i.id="${orderId}" AND i.id=ii.invoiceId AND ii.productId=p.id`
+            FROM invoice i, invoiceItem ii, product p 
+            WHERE i.id IN (${ids}) AND i.id=ii.invoiceId AND ii.productId=p.id`
         db.all(query, (err, items) => {
             if (err) { reject(err) }
             resolve(items)
@@ -298,9 +294,13 @@ router.delete('/id/:id', async (req, res) => {
         console.error(err)
         res.status(500).send(err)
     })
-    orderItems.forEach(async item => {
-        const newQuan = calQuanByInvoiceType(item.originalQuantity, item.quantity, typeStr, true).toString()
-        const query = `UPDATE product SET quantity="${newQuan}" WHERE id="${item.productId}"`
+    const newQuanDict = orderItems.reduce((pre, item) => {
+        const productId = item.productId
+        pre[productId] = calQuanByInvoiceType(pre[productId] || item.originalQuantity, item.quantity, typeStr, true).toString()
+        return pre
+    }, {})
+    Object.keys(newQuanDict).forEach(async productId => {
+        const query = `UPDATE product SET quantity="${newQuanDict[productId]}" WHERE id="${productId}"`
         await new Promise((resolve, reject) => {
             db.run(query, err => {
                 if (err) { reject(err) }
@@ -313,7 +313,7 @@ router.delete('/id/:id', async (req, res) => {
     })
 
     // 2. delete sales order
-    db.run(`DELETE FROM invoice WHERE id="${orderId}"`, err => {
+    db.run(`DELETE FROM invoice WHERE id IN (${ids})`, err => {
         if (err) {
             console.error(err)
             res.status(500).send(err)
@@ -322,5 +322,6 @@ router.delete('/id/:id', async (req, res) => {
         res.end()
     })
 })
+
 
 module.exports = router
