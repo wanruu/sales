@@ -9,7 +9,7 @@ import Decimal from 'decimal.js'
 export const getExportData = (columns, data) => {
     const exportColumns = columns.filter(col => col.export === true)
     const rows = data.map(o => {
-        const pairs = exportColumns.map(col => [col.title, o[col.dataIndex]])
+        const pairs = exportColumns.map(col => [col.title, col.onExport ? col.onExport(o[col.dataIndex]) : o[col.dataIndex]])
         return _.fromPairs(pairs)
     })
     const summary = _.fromPairs(exportColumns.map(col => {

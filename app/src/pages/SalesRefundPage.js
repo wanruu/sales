@@ -5,17 +5,15 @@ import Decimal from 'decimal.js'
 import { ExclamationCircleFilled, DeleteOutlined, TableOutlined, SearchOutlined } from '@ant-design/icons'
 
 
-const { Column } = Table
 const { confirm } = Modal
 const { Item } = Form
 const { RangePicker } = DatePicker
 
 
 import { baseURL, dateFormat } from '../utils/config'
+import { exportExcel, getExportData } from '../utils/export'
 import SalesRefundFB from '../components/salesRefundComponents/SalesRefundFB'
-import SalesRefundEditView from '../components/salesRefundComponents/SalesRefundEditView'
-import SalesRefundPreview from '../components/salesRefundComponents/SalesRefundPreview'
-import { exportExcel } from '../utils/export'
+import SalesRefundView from '../components/salesRefundComponents/SalesRefundView'
 
 
 function SalesRefundPage() {
@@ -23,7 +21,6 @@ function SalesRefundPage() {
     const [filteredSalesRefunds, setFilteredSalesRefunds] = useState([])
     const [form] = Form.useForm()
 
-    const [previewRefundId, setPreviewRefundId] = useState(undefined)
     const [editRefundId, setEditRefundId] = useState(undefined)
     const [messageApi, contextHolder] = message.useMessage()
     const itemStyle = { marginTop: '8px', marginBottom: '8px', marginLeft: '10px', marginRight: '10px' }
@@ -38,10 +35,31 @@ function SalesRefundPage() {
             url: 'salesRefund',
             'Content-Type': 'application/json',
         }).then(res => {
-            setSalesRefunds(res.data)
-            filterSalesRefunds(res.data)
+            const refunds = res.data.map(r => {
+                r.unpaid = Decimal(r.amount).minus(r.payment).toString()
+                return r
+            })
+            setSalesRefunds(refunds)
+            filterSalesRefunds(refunds)
         }).catch(_ => { })
     }
+    const pagination = { defaultPageSize: 50, pageSizeOptions: [50, 100], showQuickJumper: true, showSizeChanger: true }
+    const salesTableColumns = [
+        { title: '序号', align: 'center', render: (_, __, idx) => idx + 1 },
+        { title: '单号', dataIndex: 'id', align: 'center', export: true, render: id => <a onClick={_ => setEditRefundId(id)}>{id}</a> },
+        { title: '日期', dataIndex: 'date', align: 'center', export: true },
+        { title: '客户', dataIndex: 'partner', align: 'center', export: true },
+        { title: '金额', dataIndex: 'amount', align: 'center', export: true },
+        { title: '已付', dataIndex: 'payment', align: 'center', export: true },
+        { title: '未付', dataIndex: 'unpaid', align: 'center', export: true, render: unpaid => <span style={{ color: unpaid === '0' ? 'black' : 'red' }}>{unpaid}</span> },
+        { title: '配送情况', dataIndex: 'delivered', align: 'center', export: true },
+        { title: '关联销售单', dataIndex: 'orderId', align: 'center', export: true },
+        { title: '操作', align: 'center', render: (_, record) => 
+            <Space.Compact size='small'>
+                <Button type='link' onClick={_ => showDeleteConfirm([record.id])} danger>删除</Button>
+             </Space.Compact>
+        }
+    ]
 
     // delete
     const showDeleteConfirm = (refundIds) => {
@@ -81,18 +99,7 @@ function SalesRefundPage() {
 
     // export
     const exportSalesRefunds = () => {
-        const refunds = filteredSalesRefunds.map(f => {
-            return {
-                '单号': f.id,
-                '日期': f.date,
-                '客户': f.partner,
-                '金额': parseFloat(f.amount),
-                '预付款': parseFloat(f.prepayment),
-                '付款': parseFloat(f.payment),
-                '关联销售单': f.orderId,
-            }
-        })
-        exportExcel('销售退款单', refunds)
+        exportExcel('销售退款单', getExportData(salesTableColumns, filteredSalesRefunds))
     }
 
     useEffect(load, [])
@@ -101,14 +108,9 @@ function SalesRefundPage() {
         {contextHolder}
         <SalesRefundFB refresh={load} />
 
-        <Modal open={previewRefundId !== undefined} width={900} destroyOnClose 
-            onCancel={_ => setPreviewRefundId(undefined)} footer={null}>
-            <SalesRefundPreview id={previewRefundId} refresh={load} />
-        </Modal>
-
-        <Modal title='编辑销售退款单' open={editRefundId !== undefined} width={900} destroyOnClose 
-            onCancel={_ => setEditRefundId(undefined)} footer={null}>
-            <SalesRefundEditView id={editRefundId} refresh={load} />
+        <Modal title='销售退款单' open={editRefundId !== undefined} width={900} destroyOnClose 
+            onCancel={_ => setEditRefundId(undefined)} footer={null} maskClosable={false}>
+            <SalesRefundView id={editRefundId} refresh={load} messageApi={messageApi} />
         </Modal>
 
         <br />
@@ -127,28 +129,7 @@ function SalesRefundPage() {
             </Row></Form></Card>
 
             {/* Sales Refund Table */}
-            <Table dataSource={filteredSalesRefunds} size='small' rowKey={record => record.id} bordered
-                pagination={{defaultPageSize: 50, pageSizeOptions: [50, 100], showQuickJumper: true, showSizeChanger: true}}>
-                <Column title='序号' render={(_, __, idx) => idx+1} align='center' />
-                <Column title='单号' dataIndex='id' align='center' render={id =>
-                    <a onClick={_ => setEditRefundId(id)}>{id}</a>
-                } />
-                <Column title='日期' dataIndex='date' align='center' />
-                <Column title='客户' dataIndex='partner' align='center' />
-                <Column title='金额' dataIndex='amount' align='center' />
-                <Column title='已付金额' dataIndex='payment' align='center' render={(_, record) => {
-                    const amount = Decimal(record.payment)
-                    const color = amount.equals(Decimal(record.amount)) ? 'black' : 'red'
-                    return <span style={{color: color}}>{amount.toString()}</span>
-                }} />
-                <Column title='关联销售单' dataIndex='orderId' align='center' />
-                <Column title='操作' align='center' render={(_, record) => 
-                    <Space.Compact size='small'>
-                        <Button type='link' onClick={_ => setPreviewRefundId(record.id)}>预览</Button>
-                        <Button type='link' onClick={_ => showDeleteConfirm([record.id])} danger>删除</Button>
-                    </Space.Compact>
-                } />
-            </Table>
+            <Table dataSource={filteredSalesRefunds} size='small' rowKey={record => record.id} bordered columns={salesTableColumns} pagination={pagination} />
         </Space>
     </>
 }

@@ -270,7 +270,10 @@ router.get('/id/:id', (req, res) => {
         return
     }
 
-    const selectOrder = `SELECT * FROM invoice, partner WHERE id="${orderId}" AND partner=name`
+    const selectOrder = `SELECT i.*, p.*, r.refundId 
+        FROM invoice AS i, partner AS p
+        LEFT JOIN invoiceRelation AS r ON i.id=r.orderId 
+        WHERE id="${orderId}" AND partner=name`
     db.each(selectOrder, (err, order) => {
         if (err) {
             console.error(err)

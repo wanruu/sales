@@ -11,8 +11,6 @@ const { RangePicker } = DatePicker
 
 
 import SalesOrderFB from '../components/salesOrderComponents/SalesOrderFB'
-import SalesOrderPreview from '../components/salesOrderComponents/SalesOrderPreview'
-import SalesOrderEditView from '../components/salesOrderComponents/SalesOrderEditView'
 import { baseURL, dateFormat } from '../utils/config'
 import { exportExcel, getExportData } from '../utils/export'
 import SalesOrderView from '../components/salesOrderComponents/SalesOrderView'
@@ -23,8 +21,7 @@ function SalesOrderPage() {
     const [filteredSalesOrders, setFilteredSalesOrders] = useState([])
     const [form] = Form.useForm()
 
-    const [previewOrderId, setPreviewOrderId] = useState(undefined)
-    const [editOrderId, setEditOrderId] = useState(undefined)
+    const [selectedOrderId, setSelectedOrderId] = useState(undefined)
     const [messageApi, contextHolder] = message.useMessage()
     const itemStyle = { marginTop: '8px', marginBottom: '8px', marginLeft: '10px', marginRight: '10px' }
 
@@ -48,7 +45,7 @@ function SalesOrderPage() {
     }
     const orderTableColumns = [
         { title: '序号', align: 'center', render: (_, __, idx) => idx + 1 },
-        { title: '单号', dataIndex: 'id', align: 'center', export: true, summary: '总计', render: id => <a onClick={_ => setEditOrderId(id)}>{id}</a> },
+        { title: '单号', dataIndex: 'id', align: 'center', export: true, summary: '总计', render: id => <a onClick={_ => setSelectedOrderId(id)}>{id}</a> },
         { title: '日期', dataIndex: 'date', align: 'center', export: true },
         { title: '客户', dataIndex: 'partner', align: 'center', export: true },
         { title: '金额', dataIndex: 'amount', align: 'center', export: true, summary: 'sum' },
@@ -57,11 +54,10 @@ function SalesOrderPage() {
         { title: '已付', dataIndex: 'totalPayment', align: 'center', export: true, summary: 'sum', render: (totalPayment, record) => 
             <span style={{ color: Decimal(totalPayment).equals(record.amount) ? 'black' : 'red' }}>{totalPayment}</span>
         },
-        { title: '送货情况', dataIndex: 'delivered', align: 'center' },
+        { title: '配送情况', dataIndex: 'delivered', align: 'center', export: true },
         { title: '关联退货单', dataIndex: 'refundId', align: 'center' },
         { title: '操作', align: 'center', render: (_, record) => (
             <Space.Compact size='small'>
-                <Button type='link' onClick={_ => setPreviewOrderId(record.id)}>预览</Button>
                 <Button type='link' onClick={_ => showDeleteConfirm([record.id])} danger>删除</Button>
             </Space.Compact>
         ) }
@@ -115,15 +111,9 @@ function SalesOrderPage() {
         {contextHolder}
         <SalesOrderFB refresh={load} />
 
-        <Modal open={previewOrderId !== undefined} width={900} destroyOnClose 
-            onCancel={_ => setPreviewOrderId(undefined)} footer={null}>
-            <SalesOrderPreview id={previewOrderId} refresh={load} />
-        </Modal>
-
-        <Modal title='销售清单' open={editOrderId !== undefined} width={900} destroyOnClose 
-            onCancel={_ => setEditOrderId(undefined)} footer={null}>
-            {/* <SalesOrderEditView id={editOrderId} refresh={load} /> */}
-            <SalesOrderView id={editOrderId} refresh={load} messageApi={messageApi} />
+        <Modal title='销售清单' open={selectedOrderId !== undefined} width={900} destroyOnClose 
+            onCancel={_ => setSelectedOrderId(undefined)} footer={null} maskClosable={false}>
+            <SalesOrderView id={selectedOrderId} refresh={load} messageApi={messageApi} />
         </Modal>
 
         <br />

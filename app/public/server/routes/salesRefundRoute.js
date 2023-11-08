@@ -15,15 +15,29 @@ const typeInt = INVOICE_TYPE_2_INT.salesRefund
 
 router.get('/', (req, res) => {
     const query = `SELECT * 
-    FROM invoice AS i LEFT JOIN invoiceRelation AS r ON i.id=r.refundId
-    WHERE type=${typeInt}`
-    db.all(query, (err, rows) => {
+        FROM invoice AS i LEFT JOIN invoiceRelation AS r ON i.id=r.refundId
+        WHERE type=${typeInt}`
+    db.all(query, (err, refunds) => {
         if (err) {
             console.error(err)
             res.status(500).send(err)
             return
         }
-        res.send(rows)
+        // get delivered
+        const q = `SELECT invoiceId, COUNT(*) AS itemNum, SUM(delivered) AS deliveredNum FROM invoiceItem GROUP BY invoiceId`
+        db.all(q, (err, items) => {
+            if (err) {
+                console.error(err)
+                res.status(500).send()
+                return
+            }
+            items.forEach(item => {
+                const refund = refunds.find(refund => refund.id === item.invoiceId)
+                if (refund) 
+                    refund.delivered = item.itemNum === item.deliveredNum ? '全部配送' : (item.deliveredNum === 0 ? '未配送' : '部分配送')
+            })
+            res.send(refunds)
+        })
     })
 })
 
@@ -31,8 +45,8 @@ router.get('/', (req, res) => {
 router.get('/id/:id', (req, res) => {
     const refundId = req.params.id
     const selectRefund = `SELECT i.*, orderId, p.address, p.phone 
-    FROM invoice AS i, partner AS p, invoiceRelation AS r 
-    WHERE id="${refundId}" AND partner=name AND r.refundId=i.id`
+        FROM invoice AS i, partner AS p, invoiceRelation AS r 
+        WHERE id="${refundId}" AND partner=name AND r.refundId=i.id`
     db.each(selectRefund, (err, refund) => {
         if (err) {
             console.error(err)
@@ -120,7 +134,7 @@ router.post('/', async (req, res) => {
             originalAmount: productDict.info.originalAmount,
             amount: productDict.info.amount,
             remark: productDict.info.remark,
-            delivered: 0,
+            delivered: productDict.info.delivered,
             invoiceId: refundId
         }
     })
@@ -275,7 +289,7 @@ router.put('/id/:id', async (req, res) => {
             originalAmount: productDict.info.originalAmount,
             amount: productDict.info.amount,
             remark: productDict.info.remark,
-            delivered: 0,
+            delivered: productDict.info.delivered,
             invoiceId: refundId
         }
     })

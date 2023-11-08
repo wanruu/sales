@@ -20,7 +20,6 @@ function SalesOrderFB(props) {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [editOrder, setEditOrder] = useState(emptyInvoice(1))
     const [draftOrders, setDraftOrders] = useState([])
-    const [isUploading, setIsUploading] = useState(false)
     const [messageApi, contextHolder] = message.useMessage();
 
 
@@ -44,19 +43,9 @@ function SalesOrderFB(props) {
     }
 
     // user editing
-    const updatePartner = (value) => {
+    const updateOrder = (field, value) => {
         const newOrder = dcInvoice(editOrder)
-        newOrder.partner = value
-        setEditOrder(newOrder)
-    }
-    const updateDate = (value) => {
-        const newOrder = dcInvoice(editOrder)
-        newOrder.date = value
-        setEditOrder(newOrder)
-    }
-    const updatePrepayment = (value) => {
-        const newOrder = dcInvoice(editOrder)
-        newOrder.prepayment = value
+        newOrder[field] = value
         setEditOrder(newOrder)
     }
     const updateRow = (id, field, value) => {
@@ -101,7 +90,6 @@ function SalesOrderFB(props) {
 
     // upload order
     const upload = () => {
-        setIsUploading(true)
         // clean data
         const order = dcInvoice(editOrder);
         order.date = order.date.format(dateFormat);
@@ -128,13 +116,10 @@ function SalesOrderFB(props) {
         // check data
         if (order.partner === '') {
             messageApi.open({ type: 'error', content: '收货单位不得为空', });
-            setIsUploading(false)
         } else if (nIncomplete > 0) {
             messageApi.open({ type: 'error', content: '表格填写不完整', });
-            setIsUploading(false)
         } else if (isRepeat) {
             messageApi.open({ type: 'error', content: '产品材质、名称、规格不得重复', });
-            setIsUploading(false)
         } else {
             Axios({
                 method: 'post',
@@ -150,11 +135,9 @@ function SalesOrderFB(props) {
                 if (props.refresh !== undefined) {
                     props.refresh()
                 }
-                setIsUploading(false)
             }).catch(_ => {
                 messageApi.open({ type: 'error', content: '保存失败', });
-                setIsUploading(false)
-            });
+            })
         }
     }
 
@@ -183,12 +166,12 @@ function SalesOrderFB(props) {
         <Modal title='新建销售清单' open={isModalOpen} width={1000} centered onCancel={hideModal} footer={
             <Space>
                 <Button onClick={saveDraft}>保存草稿</Button>
-                <Button onClick={upload} type='primary' loading={isUploading}>保存</Button>
+                <Button onClick={upload} type='primary'>保存</Button>
             </Space>
         }>
             <Row style={{ marginTop: '20px', marginBottom: '15px' }}>
-                <Col span={12}>客户：<PartnerInput style={{width: 200}} size='small' value={editOrder.partner} onChange={value => updatePartner(value)} /></Col>
-                <Col span={12} align='right'>日期：<DatePicker size='small' value={editOrder.date} onChange={value => updateDate(value)}/></Col>
+                <Col span={12}>客户：<PartnerInput style={{width: 200}} size='small' value={editOrder.partner} onChange={value => updateOrder('partner', value)} /></Col>
+                <Col span={12} align='right'>日期：<DatePicker size='small' value={editOrder.date} onChange={value => updateOrder('date', value)}/></Col>
             </Row>
 
             <Table className='editTable' dataSource={editOrder.items} size='small' bordered style={{height: 400}} 
@@ -233,11 +216,14 @@ function SalesOrderFB(props) {
             </Table>
             <Divider />
             <Row>
-                <Col span={12}>总计：{editOrder.amount.toString()}</Col>
-                <Col span={12}>
-                    预付款：<InputNumber size='small' keyboard={false} stringMode controls={false} style={{width: '90%', maxWidth: '150px'}} 
-                        value={editOrder.prepayment} onChange={value => updatePrepayment(value)}
-                    />
+                <Col span={8}>总计：{editOrder.amount.toString()}</Col>
+                <Col span={8} align='center'>订金：
+                    <InputNumber size='small' keyboard={false} stringMode controls={false} style={{width: '90%', maxWidth: '150px'}} 
+                        value={editOrder.prepayment} onChange={value => updateOrder('prepayment', value)} />
+                </Col>
+                <Col span={8} align='right'>尾款：
+                    <InputNumber size='small' keyboard={false} stringMode controls={false} style={{width: '90%', maxWidth: '150px'}} 
+                        value={editOrder.payment} onChange={value => updateOrder('payment', value)} />
                 </Col>
             </Row>
         </Modal>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import Axios from 'axios'
 import { Table, Space, Button, Row, Col, Divider } from 'antd'
-
+import _ from 'lodash'
 
 const { Column } = Table
 
@@ -28,12 +28,10 @@ function SalesRefundItemSelectView(props) {
             }
             setSalesOrders(orders)
             updateFilters(orders, { id: null, partner: null })
-        }).catch(_ => { });
-    };
+        }).catch(_ => { })
+    }
 
-    useEffect(() => {
-        load()
-    }, [])
+    useEffect(load, [])
 
 
     const rowSelection = {
@@ -47,8 +45,8 @@ function SalesRefundItemSelectView(props) {
     const onSubmit = () => {
         const newEditRefund = dcInvoice(props.editRefund)
         newEditRefund.items = selectedItems.map(item => {
-            const existingItem = props.editRefund.items.find(i => i.orderId === item.orderId && i.productId === item.productId)
-            return existingItem !== undefined ? existingItem : item
+            const existingItem = props.editRefund.items.find(i => i.orderId === item.orderId && i.productId === item.productId) 
+            return existingItem || Object.assign(item, { delivered: false })
         })
         newEditRefund.amount = calTotalAmount(newEditRefund.items)
         if (selectedItems.length > 0) {

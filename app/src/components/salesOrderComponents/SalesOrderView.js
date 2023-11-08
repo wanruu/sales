@@ -1,14 +1,19 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import Axios from 'axios'
 import Decimal from 'decimal.js'
 import { Table, Button, DatePicker, Col, Row, InputNumber, Input, Divider, Space } from 'antd'
-import { FieldNumberOutlined, EditOutlined, PrinterOutlined, SaveOutlined, DeleteOutlined } from '@ant-design/icons'
+import { FieldNumberOutlined, EditOutlined, PrinterOutlined, SaveOutlined, DeleteOutlined, 
+    CloseOutlined, TableOutlined, RollbackOutlined
+} from '@ant-design/icons'
+import { useReactToPrint } from 'react-to-print'
 
 
 import { baseURL, dateFormat } from '../../utils/config'
 import { dcInvoice, calItemAmount, calTotalAmount, emptyInvoiceItem } from '../../utils/invoiceUtils'
 import { isSalesOrderItemEmpty, isSalesOrderItemComplete } from '../../utils/salesOrderUtils'
 import { PartnerInput, ProductInput, UnitInput, DeliveredInput } from '../common/PromptInput'
+import { getExportData, exportExcel } from '../../utils/export'
+import InvoicePreview from '../common/InvoicePreview'
 import '../common/InvoiceEdit.css'
 
 
@@ -17,7 +22,7 @@ import '../common/InvoiceEdit.css'
 */
 export default function SalesOrderView(props) {
     const [order, setOrder] = useState(undefined)
-    const [editing, setEditing] = useState(false)
+    const [mode, setMode] = useState('view')
 
     const load = () => {
         Axios({
@@ -33,7 +38,6 @@ export default function SalesOrderView(props) {
                 item.delivered = item.delivered === 1
                 return item
             })
-            console.log(newOrder)
             setOrder(newOrder)
         }).catch(_ => { })
     }
@@ -41,35 +45,41 @@ export default function SalesOrderView(props) {
     useEffect(load, [])
 
     return  <>
-        <div style={{ display: !editing ? 'none' : 'block' }}>
-            <EditView order={order} setEditing={setEditing} messageApi={props.messageApi} refresh={_ => { load(); props.refresh() }} /> 
+        <div style={{ display: mode === 'edit' ? 'block' : 'none' }}>
+            <EditView order={order} setMode={setMode} messageApi={props.messageApi} refresh={_ => { load(); props.refresh() }} /> 
         </div>
-        <div style={{ display: editing ? 'none' : 'block' }}>
-            <View order={order} setEditing={setEditing} />
+        <div style={{ display: mode === 'view' ? 'block' : 'none'}}>
+            <View order={order} setMode={setMode} />
+        </div>
+        <div style={{ display: mode === 'print' ? 'block' : 'none'}}>
+            <PrintView order={order} setMode={setMode} />
         </div>
     </>
 }
 
 /*
-    Required: order, setEditing
+    Required: order, setMode
 */
 function View(props) {
     const itemColumns = [
         { title: '', align: 'center', width: 30, render: (_, __, idx) => idx + 1 },
-        { title: '材质', dataIndex: 'material', align: 'center', width: 45 },
-        { title: '名称', dataIndex: 'name', align: 'center', width: 80 },
-        { title: '规格', dataIndex: 'spec', align: 'center', width: 60 },
-        { title: '数量', dataIndex: 'quantity', align: 'center', width: 60 },
-        { title: '单位', dataIndex: 'unit', align: 'center', width: 50 },
-        { title: '单价', dataIndex: 'price', align: 'center', width: 70 },
-        { title: '金额', dataIndex: 'originalAmount', align: 'center', width: 80 },
-        { title: '折扣', dataIndex: 'discount', align: 'center', width: 50, render: discount => `${discount}%` },
-        { title: '折后价', dataIndex: 'amount', align: 'center', width: 80 },
-        { title: '备注', dataIndex: 'remark', align: 'center', width: 90 },
-        { title: '配送', dataIndex: 'delivered', align: 'center', width: 70, fixed: 'right', render: delivered => 
-            <span style={{ color: delivered ? 'black' : 'red' }}>{delivered ? '已配送' : '未配送'}</span>
+        { title: '材质', dataIndex: 'material', align: 'center', width: 45, export: true, summary: '总计' },
+        { title: '名称', dataIndex: 'name', align: 'center', width: 80, export: true },
+        { title: '规格', dataIndex: 'spec', align: 'center', width: 60, export: true },
+        { title: '数量', dataIndex: 'quantity', align: 'center', width: 60, export: true },
+        { title: '单位', dataIndex: 'unit', align: 'center', width: 50, export: true },
+        { title: '单价', dataIndex: 'price', align: 'center', width: 70, export: true },
+        { title: '金额', dataIndex: 'originalAmount', align: 'center', width: 80, export: true, summary: 'sum' },
+        { title: '折扣', dataIndex: 'discount', align: 'center', width: 50, export: true, onExport: d => `${d}%`, render: discount => `${discount}%` },
+        { title: '折后价', dataIndex: 'amount', align: 'center', width: 80, export: true, summary: 'sum' },
+        { title: '备注', dataIndex: 'remark', align: 'center', width: 90, export: true },
+        { title: '配送', dataIndex: 'delivered', align: 'center', width: 70, fixed: 'right', export: true, onExport: d => d ? '已配送' : '未配送', 
+            render: delivered => <span style={{ color: delivered ? 'black' : 'red' }}>{delivered ? '已配送' : '未配送'}</span>
         }
     ]
+    const exportFile = () => {
+        exportExcel(`销售单${props.order.id}`, getExportData(itemColumns, props.order.items))
+    }
     return !props.order ? null : <>
         <Space direction='vertical' style={{ width: '100%', marginTop: '10px', marginBottom: '15px' }}>
             <Row style={{ justifyContent: 'space-between' }}>
@@ -93,16 +103,19 @@ function View(props) {
             rowKey={record => record.id} scroll={{x: 'max-content', y: 400 }} pagination={false} />
 
         <Divider />
-        <Space>
-            <Button icon={<PrinterOutlined/>}>打印预览</Button>
-            <Button icon={<EditOutlined/>} type='primary' onClick={_ => props.setEditing(true)}>编辑</Button>
-        </Space>  
+        <Col align='end'>
+            <Space>
+                <Button icon={<EditOutlined/>} type='primary' onClick={_ => props.setMode('edit')}>编辑</Button>
+                <Button icon={<TableOutlined/>} onClick={exportFile}>导出</Button>
+                <Button icon={<PrinterOutlined/>} onClick={_ => props.setMode('print')}>打印预览</Button>
+            </Space>
+        </Col>
     </>
 }
 
 
 /*
-    Required: order, setEditing, refresh, messageApi
+    Required: order, setMode, refresh, messageApi
 */
 function EditView(props) {
     const [order, setOrder] = useState(undefined)
@@ -215,7 +228,7 @@ function EditView(props) {
         }).then(_ => {
             props.messageApi.open({ type: 'success', content: '保存成功' })
             props.refresh()
-            props.setEditing(false)
+            props.setMode('view')
         }).catch(_ => {
             props.messageApi.open({ type: 'error', content: '保存失败' })
         })
@@ -238,7 +251,7 @@ function EditView(props) {
 
     return !order ? null : <>
         <Space direction='vertical' style={{ width: '100%', marginTop: '10px', marginBottom: '15px' }}>
-            <Row style={{ justifyContent: 'space-between' }}>
+            <Row>
                 <Col span={8}>客户：
                     <PartnerInput style={{ width: 120 }} size='small' value={order.partner} onChange={value => updateOrder('partner', value)}  />
                 </Col>
@@ -247,7 +260,7 @@ function EditView(props) {
                 </Col>
                 <Col span={8} align='right'><FieldNumberOutlined style={{ marginRight: '4px' }} />{order.id}</Col>
             </Row>
-            <Row style={{ justifyContent: 'space-between' }}>
+            <Row>
                 <Col span={8}>总金额：{order.amount}</Col>
                 <Col span={8} align='center'>订金：
                     <InputNumber value={order.prepayment} style={{ width: 120 }} size='small' keyboard={false} stringMode controls={false} 
@@ -268,9 +281,34 @@ function EditView(props) {
             rowKey={record => record.id} scroll={{x: 'max-content', y: 400 }} pagination={false} />
         <Divider />
 
-        <Space>
-            <Button onClick={_ => { initOrder(); props.setEditing(false) }}>取消</Button>
-            <Button icon={<SaveOutlined/>} type='primary' onClick={upload}>保存</Button>
-        </Space>
+        <Col align='end'>
+            <Space>
+                <Button icon={<SaveOutlined/>} type='primary' onClick={upload}>保存</Button>
+                <Button icon={<CloseOutlined/>} onClick={_ => { initOrder(); props.setMode('view') }}>取消</Button>
+            </Space>
+        </Col>
     </>
+}
+
+
+function PrintView(props) {
+    // for print
+    const componentRef = useRef(null)
+    const handlePrint = useReactToPrint({
+        content: () => componentRef.current,
+    })
+
+    return <Space direction='vertical' size='middle' style={{ width: '100%', marginTop: '10px', marginBottom: '10px' }}>
+            <Col align='middle' style={{ overflowX: 'auto', overflowY: 'clip' }}>
+                <div ref={componentRef} >
+                    {!props.order ? null : <InvoicePreview invoice={props.order} type='salesOrder' />}
+                </div>
+            </Col>
+            <Col align='end'>
+                <Space>
+                    <Button icon={<RollbackOutlined />} onClick={_ => props.setMode('view')}>返回</Button>
+                    <Button icon={<PrinterOutlined/>} onClick={handlePrint} type='primary'>打印</Button>
+                </Space>
+            </Col>
+    </Space>
 }

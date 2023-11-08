@@ -19,8 +19,9 @@ import PartnerPage from './pages/PartnerPage.js'
 import SalesRefundPage from './pages/SalesRefundPage.js'
 
 
+const defaultMenuKey = 'salesRefund'
 function App() {
-    const [menuKey, setMenuKey] = useState('salesOrder')
+    const [menuKey, setMenuKey] = useState(defaultMenuKey)
     const { token: { colorBgContainer }, } = theme.useToken()
     
     const pages = {
@@ -56,7 +57,7 @@ function App() {
     return (
         <Layout hasSider style={{ background: colorBgContainer }}>
             <Sider style={{ overflow: 'auto', height: '100vh', position: 'fixed', left: 0, top: 0, bottom: 0, background: colorBgContainer }}>
-                <Menu items={menuItems} mode='inline' defaultSelectedKeys={['salesOrder']}
+                <Menu items={menuItems} mode='inline' defaultSelectedKeys={[defaultMenuKey]}
                     defaultOpenKeys={['order', 'refund']} onSelect={({ key }) => setMenuKey(key)}
                 />
             </Sider>
