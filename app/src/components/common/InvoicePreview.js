@@ -6,7 +6,7 @@ import './InvoicePreview.css';
 import digitUppercase from '../../utils/digitUppercase';
 import { invoiceSettings } from '../../utils/config'
 
-
+/* type */
 function PreviewTable(props) {
     return (
         <div style={{ fontSize: invoiceSettings.fontSize() + 'px'}}>
@@ -55,6 +55,7 @@ function PreviewTable(props) {
     )
 }
 
+/* type */
 function PreviewTitle(props) {
     const getTitle = () => {
         return invoiceSettings.title().replace(/ /g, "\xa0")
@@ -110,6 +111,7 @@ function PreviewFooter() {
     )
 }
 
+/* invoice, type */
 function PreviewHeader(props) {
     const partnerTitle = () => {
         return props.type === 'salesOrder' || props.type === 'salesRefund' ? '客户' : '供应商'

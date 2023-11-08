@@ -15,6 +15,7 @@ import SalesOrderPreview from '../components/salesOrderComponents/SalesOrderPrev
 import SalesOrderEditView from '../components/salesOrderComponents/SalesOrderEditView'
 import { baseURL, dateFormat } from '../utils/config'
 import { exportExcel, getExportData } from '../utils/export'
+import SalesOrderView from '../components/salesOrderComponents/SalesOrderView'
 
 
 function SalesOrderPage() {
@@ -51,9 +52,9 @@ function SalesOrderPage() {
         { title: '日期', dataIndex: 'date', align: 'center', export: true },
         { title: '客户', dataIndex: 'partner', align: 'center', export: true },
         { title: '金额', dataIndex: 'amount', align: 'center', export: true, summary: 'sum' },
-        { title: '定金', dataIndex: 'prepayment', align: 'center', export: true, summary: 'sum' },
+        { title: '订金', dataIndex: 'prepayment', align: 'center', export: true, summary: 'sum' },
         { title: '尾款', dataIndex: 'payment', align: 'center', export: true, summary: 'sum' },
-        { title: '已付款', dataIndex: 'totalPayment', align: 'center', export: true, summary: 'sum', render: (totalPayment, record) => 
+        { title: '已付', dataIndex: 'totalPayment', align: 'center', export: true, summary: 'sum', render: (totalPayment, record) => 
             <span style={{ color: Decimal(totalPayment).equals(record.amount) ? 'black' : 'red' }}>{totalPayment}</span>
         },
         { title: '送货情况', dataIndex: 'delivered', align: 'center' },
@@ -119,9 +120,10 @@ function SalesOrderPage() {
             <SalesOrderPreview id={previewOrderId} refresh={load} />
         </Modal>
 
-        <Modal title='编辑销售清单' open={editOrderId !== undefined} width={900} destroyOnClose 
+        <Modal title='销售清单' open={editOrderId !== undefined} width={900} destroyOnClose 
             onCancel={_ => setEditOrderId(undefined)} footer={null}>
-            <SalesOrderEditView id={editOrderId} refresh={load} />
+            {/* <SalesOrderEditView id={editOrderId} refresh={load} /> */}
+            <SalesOrderView id={editOrderId} refresh={load} messageApi={messageApi} />
         </Modal>
 
         <br />

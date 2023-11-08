@@ -102,3 +102,9 @@ export function UnitInput(props) {
         onChange={props.onChange} status={getStatus()}
     /> : unit
 }
+
+export function DeliveredInput(props) {
+    return <Select size={props.size || 'small'} id='unitInput' options={[{ label: '未配送', value: false }, { label: '已配送', value: true }]} 
+        align={props.align || 'center'} value={props.value} onChange={props.onChange} style={props.style || {}}
+    />
+}

@@ -75,7 +75,7 @@ router.post('/', async (req, res) => {
                 originalAmount: productDict.info.originalAmount,
                 amount: productDict.info.amount,
                 remark: productDict.info.remark,
-                delivered: 0,
+                delivered: productDict.info.delivered,
                 invoiceId: orderId
             }
         })
@@ -184,7 +184,7 @@ router.put('/id/:id', async (req, res) => {
                 originalAmount: productDict.info.originalAmount,
                 amount: productDict.info.amount,
                 remark: productDict.info.remark,
-                delivered: 0,
+                delivered: productDict.info.delivered,
                 invoiceId: orderId
             }
         })
@@ -207,13 +207,28 @@ router.get('/', (req, res) => {
     const query = `SELECT * 
     FROM invoice AS i LEFT JOIN invoiceRelation AS r ON i.id=r.orderId
     WHERE type=${typeInt}`
-    db.all(query, (err, rows) => {
+    db.all(query, (err, orders) => {
         if (err) {
             console.error(err)
             res.status(500).send()
             return
         }
-        res.send(rows)
+        // get delivered
+        const q = `SELECT invoiceId, COUNT(*) AS itemNum, SUM(delivered) AS deliveredNum FROM invoiceItem GROUP BY invoiceId`
+        db.all(q, (err, items) => {
+            if (err) {
+                console.error(err)
+                res.status(500).send()
+                return
+            }
+            items.forEach(item => {
+                const order = orders.find(order => order.id === item.invoiceId)
+                if (order) {
+                    order.delivered = item.itemNum === item.deliveredNum ? '全部配送' : (item.deliveredNum === 0 ? '未配送' : '部分配送')
+                }
+            })
+            res.send(orders)
+        })
     })
 })
 
