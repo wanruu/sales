@@ -201,7 +201,7 @@ function View(props) {
         }
     ]
     const exportFile = () => {
-        exportExcel(`销售退款单${props.refund.id}`, getExportData(itemColumns, props.refund.items))
+        exportExcel(`销售退货单${props.refund.id}`, getExportData(itemColumns, props.refund.items))
     }
     return !props.refund ? null : <>
         <Space direction='vertical' style={{ width: '100%', marginTop: '10px', marginBottom: '15px' }}>
@@ -244,7 +244,7 @@ function PrintView(props) {
 
     return <Space direction='vertical' size='middle' style={{ width: '100%', marginTop: '10px', marginBottom: '10px' }}>
         <Col align='middle' style={{ overflowX: 'auto', overflowY: 'clip' }}>
-            <div ref={componentRef} >
+            <div ref={componentRef} > 
                 {!props.refund ? null : <InvoicePreview invoice={props.refund} type='salesRefund' />}
             </div>
         </Col>

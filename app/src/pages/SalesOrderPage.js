@@ -14,6 +14,7 @@ import SalesOrderFB from '../components/salesOrderComponents/SalesOrderFB'
 import { baseURL, dateFormat } from '../utils/config'
 import { exportExcel, getExportData } from '../utils/export'
 import SalesOrderView from '../components/salesOrderComponents/SalesOrderView'
+import SalesRefundView from '../components/salesRefundComponents/SalesRefundView'
 
 
 function SalesOrderPage() {
@@ -22,6 +23,7 @@ function SalesOrderPage() {
     const [form] = Form.useForm()
 
     const [selectedOrderId, setSelectedOrderId] = useState(undefined)
+    const [selectedRefundId, setSelectedRefundId] = useState(undefined)
     const [messageApi, contextHolder] = message.useMessage()
     const itemStyle = { marginTop: '8px', marginBottom: '8px', marginLeft: '10px', marginRight: '10px' }
 
@@ -55,7 +57,7 @@ function SalesOrderPage() {
             <span style={{ color: Decimal(totalPayment).equals(record.amount) ? 'black' : 'red' }}>{totalPayment}</span>
         },
         { title: '配送情况', dataIndex: 'delivered', align: 'center', export: true },
-        { title: '关联退货单', dataIndex: 'refundId', align: 'center' },
+        { title: '关联退货单', dataIndex: 'refundId', align: 'center', render: id => id ? <a onClick={_ => setSelectedRefundId(id)}>{id}</a> : null },
         { title: '操作', align: 'center', render: (_, record) => (
             <Space.Compact size='small'>
                 <Button type='link' onClick={_ => showDeleteConfirm([record.id])} danger>删除</Button>
@@ -114,6 +116,11 @@ function SalesOrderPage() {
         <Modal title='销售清单' open={selectedOrderId !== undefined} width={900} destroyOnClose 
             onCancel={_ => setSelectedOrderId(undefined)} footer={null} maskClosable={false}>
             <SalesOrderView id={selectedOrderId} refresh={load} messageApi={messageApi} />
+        </Modal>
+
+        <Modal title='销售退货单' open={selectedRefundId !== undefined} width={900} destroyOnClose 
+            onCancel={_ => setSelectedRefundId(undefined)} footer={null} maskClosable={false}>
+            <SalesRefundView id={selectedRefundId} refresh={load} messageApi={messageApi} />
         </Modal>
 
         <br />

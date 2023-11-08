@@ -9,7 +9,7 @@ import { invoiceSettings } from '../../utils/config'
 /* type */
 function PreviewTable(props) {
     return (
-        <div style={{ fontSize: invoiceSettings.fontSize() }}>
+        <div style={{ fontSize: invoiceSettings.fontSize()+'px' }}>
             <table className='previewTable' style={{ width: "100%", height: '100%', }} >
                 <thead>
                     <tr>
@@ -76,12 +76,12 @@ function PreviewTitle(props) {
 
     if (invoiceSettings.titleStyle() === 'inline') {
         return <Space direction='vertical' style={{ width: '100%' }} align='center'>
-            <span style={{ fontSize: invoiceSettings.titleFontSize() }}>{getTitle()}&nbsp;&nbsp;&nbsp;{getSubTitle()}</span>
+            <span style={{ fontSize: invoiceSettings.titleFontSize()+'px' }}>{getTitle()}&nbsp;&nbsp;&nbsp;{getSubTitle()}</span>
         </Space>
     }
-    return <Space direction='vertical' style={{ width: '100%' }} align='center' size='10px'>
-        <span style={{ fontSize: invoiceSettings.titleFontSize() }}>{getTitle()}</span>
-        <span style={{ fontSize: invoiceSettings.subtitleFontSize() }}>{getSubTitle()}</span>
+    return <Space direction='vertical' style={{ width: '100%' }} align='center' size={0}>
+        <span style={{ fontSize: invoiceSettings.titleFontSize()+'px' }}>{getTitle()}</span>
+        <span style={{ fontSize: invoiceSettings.subtitleFontSize()+'px' }}>{getSubTitle()}</span>
     </Space>
 }
 
@@ -101,10 +101,10 @@ function PreviewFooter() {
 
     return contents().map((arr, idx) => 
         <Row key={idx}>
-            <Col align='left' span={12} style={{ fontSize: invoiceSettings.footerFontSize() }}>
+            <Col align='left' span={12} style={{ fontSize: invoiceSettings.footerFontSize()+'px' }}>
                 {arr[0].replace(/ /g, "\xa0")}
             </Col>
-            {arr.length === 2 ? <Col align='left' span={12} style={{ fontSize: invoiceSettings.footerFontSize() }}>
+            {arr.length === 2 ? <Col align='left' span={12} style={{ fontSize: invoiceSettings.footerFontSize()+'px' }}>
                 {arr[1].replace(/ /g, "\xa0")}
             </Col> : ''}
         </Row>
@@ -134,62 +134,62 @@ function PreviewHeader(props) {
     if (invoiceSettings.showAddress() && invoiceSettings.showPhone() && props.invoice.address && props.invoice.phone) {
         return <Space style={{ width: '100%' }} direction='vertical' size='10px'>
             <Row>
-                <Col span={8} style={{ fontSize: invoiceSettings.fontSize() }} align='left'>
+                <Col span={8} style={{ fontSize: invoiceSettings.fontSize()+'px' }} align='left'>
                     {partnerTitle()}：{props.invoice.partner}
                 </Col>
-                <Col span={8} style={{ fontSize: invoiceSettings.fontSize() }} align='center'>
+                <Col span={8} style={{ fontSize: invoiceSettings.fontSize()+'px' }} align='center'>
                     日期：{props.invoice.date}
                 </Col>
-                <Col span={8} style={{ fontSize: invoiceSettings.fontSize() }} align='right'>
+                <Col span={8} style={{ fontSize: invoiceSettings.fontSize()+'px' }} align='right'>
                     <FieldNumberOutlined/> {props.invoice.id}
                 </Col>
             </Row>
             <Row >
-                <Col span={7} style={{ fontSize: invoiceSettings.fontSize() }} align='left'>
+                <Col span={7} style={{ fontSize: invoiceSettings.fontSize()+'px' }} align='left'>
                     电话：{props.invoice.phone}
                 </Col>
-                <Col span={17} style={{ fontSize: invoiceSettings.fontSize() }} align='right'>
+                <Col span={17} style={{ fontSize: invoiceSettings.fontSize()+'px' }} align='right'>
                     {addressTitle()}：{props.invoice.address}
                 </Col>
             </Row>
         </Space>
     } else if (showNone()) {
         return <Row>
-            <Col span={8} style={{ fontSize: invoiceSettings.fontSize() }} align='left'>
+            <Col span={8} style={{ fontSize: invoiceSettings.fontSize()+'px' }} align='left'>
                 {partnerTitle()}：{props.invoice.partner}
             </Col>
-            <Col span={8} style={{ fontSize: invoiceSettings.fontSize() }} align='center'>
+            <Col span={8} style={{ fontSize: invoiceSettings.fontSize()+'px' }} align='center'>
                 日期：{props.invoice.date}
             </Col>
-            <Col span={8} style={{ fontSize: invoiceSettings.fontSize() }} align='right'>
+            <Col span={8} style={{ fontSize: invoiceSettings.fontSize()+'px' }} align='right'>
                 <FieldNumberOutlined/> {props.invoice.id}
             </Col>
         </Row>
     }
     return <Row align='middle'>
-        <Col align='left' span={8} style={{ fontSize: invoiceSettings.fontSize() }}>
+        <Col align='left' span={8} style={{ fontSize: invoiceSettings.fontSize()+'px' }}>
             <span>{partnerTitle()}：{props.invoice.partner}</span><br/>
             {props.invoice.address ? 
                 <span>{addressTitle()}：{props.invoice.address}</span> : 
                 <span>电话：{props.invoice.phone}</span>
             }
         </Col>
-        <Col align='center' span={8} style={{ fontSize: invoiceSettings.fontSize() }}>
+        <Col align='center' span={8} style={{ fontSize: invoiceSettings.fontSize()+'px' }}>
             日期：{props.invoice.date}
         </Col>
-        <Col align='right' span={8} style={{ fontSize: invoiceSettings.fontSize() }}>
+        <Col align='right' span={8} style={{ fontSize: invoiceSettings.fontSize()+'px' }}>
             <FieldNumberOutlined/> {props.invoice.id}
         </Col>
     </Row>
 }
 
 export default function InvoicePreview(props) {
-    return <div className='invoiceWrapper' style={{ width: invoiceSettings.width(), height: invoiceSettings.height() }}>
+    return <div className='invoiceWrapper' style={{ width: invoiceSettings.width()+'px', height: invoiceSettings.height()+'px' }}>
         <div className='invoiceContent' style={{
-            paddingTop: invoiceSettings.vPadding(), paddingBottom: invoiceSettings.vPadding(),
-            paddingLeft: invoiceSettings.hPadding(), paddingRight: invoiceSettings.hPadding(),
+            paddingTop: invoiceSettings.vPadding()+'px', paddingBottom: invoiceSettings.vPadding()+'px',
+            paddingLeft: invoiceSettings.hPadding()+'px', paddingRight: invoiceSettings.hPadding()+'px',
         }}>
-            <Space direction='vertical' style={{ width: '100%' }}>
+            <Space direction='vertical' style={{ width: '100%' }} size={5}>
                 <PreviewTitle type={props.type} />
                 <PreviewHeader invoice={props.invoice} type={props.type} />
                 <PreviewTable invoice={props.invoice} />

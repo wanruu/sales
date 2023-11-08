@@ -13,13 +13,13 @@ import {
 const { Header, Content, Footer, Sider } = Layout
 
 import SalesOrderPage from './pages/SalesOrderPage.js'
-import SettingPage from './pages/SettingPage.js';
+import SettingPage from './pages/SettingPage.js'
 import ProductPage from './pages/ProductPage.js'
 import PartnerPage from './pages/PartnerPage.js'
 import SalesRefundPage from './pages/SalesRefundPage.js'
 
 
-const defaultMenuKey = 'salesRefund'
+const defaultMenuKey = 'salesOrder'
 function App() {
     const [menuKey, setMenuKey] = useState(defaultMenuKey)
     const { token: { colorBgContainer }, } = theme.useToken()

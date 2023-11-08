@@ -14,6 +14,7 @@ import { baseURL, dateFormat } from '../utils/config'
 import { exportExcel, getExportData } from '../utils/export'
 import SalesRefundFB from '../components/salesRefundComponents/SalesRefundFB'
 import SalesRefundView from '../components/salesRefundComponents/SalesRefundView'
+import SalesOrderView from '../components/salesOrderComponents/SalesOrderView'
 
 
 function SalesRefundPage() {
@@ -21,7 +22,9 @@ function SalesRefundPage() {
     const [filteredSalesRefunds, setFilteredSalesRefunds] = useState([])
     const [form] = Form.useForm()
 
-    const [editRefundId, setEditRefundId] = useState(undefined)
+    const [selectedRefundId, setSelectedRefundId] = useState(undefined)
+    const [selectedOrderId, setSelectedOrderId] = useState(undefined)
+
     const [messageApi, contextHolder] = message.useMessage()
     const itemStyle = { marginTop: '8px', marginBottom: '8px', marginLeft: '10px', marginRight: '10px' }
     
@@ -46,14 +49,14 @@ function SalesRefundPage() {
     const pagination = { defaultPageSize: 50, pageSizeOptions: [50, 100], showQuickJumper: true, showSizeChanger: true }
     const salesTableColumns = [
         { title: '序号', align: 'center', render: (_, __, idx) => idx + 1 },
-        { title: '单号', dataIndex: 'id', align: 'center', export: true, render: id => <a onClick={_ => setEditRefundId(id)}>{id}</a> },
+        { title: '单号', dataIndex: 'id', align: 'center', export: true, render: id => <a onClick={_ => setSelectedRefundId(id)}>{id}</a> },
         { title: '日期', dataIndex: 'date', align: 'center', export: true },
         { title: '客户', dataIndex: 'partner', align: 'center', export: true },
         { title: '金额', dataIndex: 'amount', align: 'center', export: true },
         { title: '已付', dataIndex: 'payment', align: 'center', export: true },
         { title: '未付', dataIndex: 'unpaid', align: 'center', export: true, render: unpaid => <span style={{ color: unpaid === '0' ? 'black' : 'red' }}>{unpaid}</span> },
         { title: '配送情况', dataIndex: 'delivered', align: 'center', export: true },
-        { title: '关联销售单', dataIndex: 'orderId', align: 'center', export: true },
+        { title: '关联销售单', dataIndex: 'orderId', align: 'center', export: true, render: id => <a onClick={_ => setSelectedOrderId(id)}>{id}</a> },
         { title: '操作', align: 'center', render: (_, record) => 
             <Space.Compact size='small'>
                 <Button type='link' onClick={_ => showDeleteConfirm([record.id])} danger>删除</Button>
@@ -63,7 +66,7 @@ function SalesRefundPage() {
 
     // delete
     const showDeleteConfirm = (refundIds) => {
-        const title = refundIds.length === 1 ? `是否删除销售退款单 ${refundIds[0]} ?` : `是否删除 ${refundIds.length} 张销售退款单?`
+        const title = refundIds.length === 1 ? `是否删除销售退货单 ${refundIds[0]} ?` : `是否删除 ${refundIds.length} 张销售退货单?`
         confirm({
             title: title, icon: <ExclamationCircleFilled />,
             content: '确认删除后不可撤销，同时仓库中产品的库存会相应减少',
@@ -99,7 +102,7 @@ function SalesRefundPage() {
 
     // export
     const exportSalesRefunds = () => {
-        exportExcel('销售退款单', getExportData(salesTableColumns, filteredSalesRefunds))
+        exportExcel('销售退货单', getExportData(salesTableColumns, filteredSalesRefunds))
     }
 
     useEffect(load, [])
@@ -108,9 +111,14 @@ function SalesRefundPage() {
         {contextHolder}
         <SalesRefundFB refresh={load} />
 
-        <Modal title='销售退款单' open={editRefundId !== undefined} width={900} destroyOnClose 
-            onCancel={_ => setEditRefundId(undefined)} footer={null} maskClosable={false}>
-            <SalesRefundView id={editRefundId} refresh={load} messageApi={messageApi} />
+        <Modal title='销售退货单' open={selectedRefundId !== undefined} width={900} destroyOnClose 
+            onCancel={_ => setSelectedRefundId(undefined)} footer={null} maskClosable={false}>
+            <SalesRefundView id={selectedRefundId} refresh={load} messageApi={messageApi} />
+        </Modal>
+
+        <Modal title='销售清单' open={selectedOrderId !== undefined} width={900} destroyOnClose 
+            onCancel={_ => setSelectedOrderId(undefined)} footer={null} maskClosable={false}>
+            <SalesOrderView id={selectedOrderId} refresh={load} messageApi={messageApi} />
         </Modal>
 
         <br />
