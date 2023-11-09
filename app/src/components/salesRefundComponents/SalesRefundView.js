@@ -1,19 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react'
 import Axios from 'axios'
 import Decimal from 'decimal.js'
-import { Table, Button, DatePicker, Col, Row, InputNumber, Input, Divider, Space, Modal } from 'antd'
-import { FieldNumberOutlined, EditOutlined, PrinterOutlined, SaveOutlined, DeleteOutlined, 
-    CloseOutlined, TableOutlined, RollbackOutlined
-} from '@ant-design/icons'
+import { Table, Button, Col, Row, Divider, Space } from 'antd'
+import { EditOutlined, PrinterOutlined, TableOutlined, RollbackOutlined } from '@ant-design/icons'
 import { useReactToPrint } from 'react-to-print'
 
 
-import { calItemAmount, calTotalAmount, dcInvoice } from '../../utils/invoiceUtils'
-import { baseURL, dateFormat } from '../../utils/config'
-import { DeliveredInput } from '../common/PromptInput'
+import { baseURL } from '../../utils/config'
 import { getExportData, exportExcel } from '../../utils/export'
-import SalesRefundItemSelectView from './SalesRefundItemSelectView'
 import InvoicePreview from '../common/InvoicePreview'
+import SalesRefundEditView from '../salesRefundComponents/SalesRefundEditView'
 
 
 /*
@@ -45,7 +41,7 @@ export default function SalesRefundView(props) {
 
     return <>
         <div style={{ display: mode === 'edit' ? 'block' : 'none' }}>
-            <EditView refund={refund} setMode={setMode} messageApi={props.messageApi} refresh={_ => { load(); props.refresh() }} /> 
+            <SalesRefundEditView refund={refund} dismiss={_ => setMode('view')} messageApi={props.messageApi} refresh={_ => { load(); props.refresh() }} /> 
         </div>
         <div style={{ display: mode === 'view' ? 'block' : 'none'}}>
             <View refund={refund} setMode={setMode} />
@@ -56,129 +52,6 @@ export default function SalesRefundView(props) {
     </>
 }
 
-/*
-    Required: refund, setMode, refresh, messageApi
-*/
-function EditView(props) {
-    const [refund, setRefund] = useState(undefined)
-    const [isSelectionModalOpen, setSelectionModalOpen] = useState(false)
-    
-    const initRefund = () => {
-        setRefund(props.refund ? dcInvoice(props.refund) : undefined)
-    }
-    const updateRow = (idx, field, value) => {
-        const newRefund = dcInvoice(refund)
-        newRefund.items[idx][field] = value
-        if ('quantity' === field) {
-            const { originalAmount, amount } = calItemAmount(newRefund.items[idx])
-            newRefund.items[idx].originalAmount = originalAmount
-            newRefund.items[idx].amount = amount
-            newRefund.amount = calTotalAmount(newRefund.items)
-        }
-        setRefund(newRefund)
-    }
-    const updateRefund= (field, value) => {
-        const newRefund = dcInvoice(refund)
-        newRefund[field] = value
-        setRefund(newRefund)
-    }
-    const itemColumns = [
-        { title: '', align: 'center', width: 30, render: (_, __, idx) => idx + 1 },
-        { title: '材质', dataIndex: 'material', align: 'center', width: 50 },
-        { title: '名称', dataIndex: 'name', align: 'center', width: 150 },
-        { title: '规格', dataIndex: 'spec', align: 'center', width: 70 },
-        { title: '数量', dataIndex: 'quantity', align: 'center', width: 70, render: (_, record, idx) => 
-            <InputNumber min={0} stringMode keyboard={false} size='small' controls={false} style={{width: '100%'}} 
-                value={record.quantity} onChange={value => updateRow(idx, 'quantity', value)} />
-        },
-        { title: '单位', dataIndex: 'unit', align: 'center', width: 50 },
-        { title: '单价', dataIndex: 'price', align: 'center', width: 70 },
-        { title: '金额', dataIndex: 'originalAmount', align: 'center', width: 80 },
-        { title: '折扣', dataIndex: 'discount', align: 'center', width: 50, render: d => `${d}%`},
-        { title: '折后价', dataIndex: 'amount', align: 'center', width: 80 },
-        { title: '备注', dataIndex: 'remark', align: 'center', width: 100, render: (_, record, idx) => 
-            <Input size='small' style={{ width: '100%' }} value={record.remark} onChange={e => updateRow(idx, 'remark', e.target.value)} />
-        },
-        { title: '配送', dataIndex: 'delivered', align: 'center', width: 60, fixed: 'right', render: (_, record, idx) => 
-            <DeliveredInput size='small' align='center' style={{ width: '100%' }} value={record.delivered} 
-                onChange={value => updateRow(idx, 'delivered', value)} />
-        },
-        { title: '', align: 'center', width: 30, fixed: 'right', render: (_, __, idx) => 
-            <Button type='link' size='small' danger onClick={_ => {
-                const newRefund = dcInvoice(refund)
-                newRefund.items.splice(idx, 1)
-                newRefund.amount = calTotalAmount(newRefund.items)
-                if (newRefund.items.length === 0) newRefund.partner = ''
-                setRefund(newRefund)
-            }}><DeleteOutlined /></Button>
-        }
-    ]
-    const upload = () => {
-        const newRefund = dcInvoice(refund)
-        newRefund.date = newRefund.date.format(dateFormat)
-        newRefund.items = newRefund.items.map(item => {
-            item.quantity = item.quantity || '0'
-            return item
-        })
-        newRefund.orderId = newRefund.items[0].orderId
-        Axios({
-            method: 'put',
-            baseURL: baseURL(),
-            url: `salesRefund/id/${refund.id}`,
-            data: newRefund,
-            'Content-Type': 'application/json',
-        }).then(_ => {
-            props.messageApi.open({ type: 'success', content: '保存成功' })
-            props.refresh()
-            props.setMode('view')
-        }).catch(_ => {
-            props.messageApi.open({ type: 'error', content: '保存失败' })
-        })
-    }
-
-    useEffect(initRefund, [props.refund])
-
-    return !refund ? null : <>
-        <Space direction='vertical' style={{ width: '100%', marginTop: '10px', marginBottom: '15px' }}>
-            <Row align='middle'>
-                <Col span={8}>客户：
-                    {refund.partner ? refund.partner : <span style={{color: 'gray'}}>(选择产品后自动显示)</span>}
-                </Col>
-                <Col span={8} align='center'>日期：
-                    <DatePicker size='small' value={refund.date} onChange={value => updateRefund('date', value)}/>
-                </Col>
-                <Col span={8} align='right'><FieldNumberOutlined style={{ marginRight: '4px' }} />{refund.id}</Col>
-            </Row>
-            <Row align='middle'>
-                <Col span={8}>总金额：{refund.amount}</Col>
-                <Col span={8} align='center'>付款：
-                    <InputNumber size='small' keyboard={false} stringMode controls={false} 
-                        placeholder={`应付 ${Decimal(refund.amount).minus(refund.prepayment || 0)}`}
-                        value={refund.payment} onChange={value => updateRefund('payment', value)} />
-                    <Button size='small' style={{marginLeft: '5px'}} icon={<EditOutlined />}
-                        onClick={_ => updateRefund('payment', Decimal(refund.amount).minus(refund.prepayment || 0).toString())} />
-                </Col>
-                <Col span={8} align='right'>
-                    <Button type='primary' onClick={_ => setSelectionModalOpen(true)}>选择销售单及产品</Button>
-                </Col>
-            </Row>
-        </Space>
-        <Table className='editTable' dataSource={refund.items} size='small' bordered pagination={false}
-            rowKey={r => r.invoiceItemId} style={{height: 400}} scroll={{x: 'max-content', y: 400 }} columns={itemColumns} />
-    
-        <Divider />
-        <Col align='end'>
-            <Space>
-                <Button icon={<SaveOutlined/>} type='primary' onClick={upload}>保存</Button>
-                <Button icon={<CloseOutlined/>} onClick={_ => { initRefund(); props.setMode('view') }}>取消</Button>
-            </Space>
-        </Col>
-
-        <Modal title='选择销售单及产品' open={isSelectionModalOpen} width={1000} center onCancel={_ => setSelectionModalOpen(false)} footer={null} destroyOnClose>
-            <SalesRefundItemSelectView editRefund={refund} setEditRefund={setRefund} dismiss={_ => setSelectionModalOpen(false)} />
-        </Modal>
-    </>
-}
 
 /*
     Required: refund, setMode

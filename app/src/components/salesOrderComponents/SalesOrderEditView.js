@@ -155,10 +155,10 @@ export default function SalesOrderEditView(props) {
             <Col style={{ width: '30%' }}>客户：
                 <PartnerInput style={{ width: 180 }} size='small' value={order.partner} onChange={value => updateOrder('partner', value)}  />
             </Col>
-            <Col style={{ width: '30%' }} align={props.order && props.order.id ? 'center' : 'right'}>日期：
+            <Col style={{ width: '30%' }} align={order.id ? 'center' : 'right'}>日期：
                 <DatePicker style={{ width: 150 }} size='small' value={order.date} onChange={value => updateOrder('date', value)} />
             </Col>
-            { props.order && props.order.id ? <Col style={{ width: '30%' }} align='right'><FieldNumberOutlined style={{ marginRight: '4px' }} />{order.id}</Col> : null }
+            { order.id ? <Col style={{ width: '30%' }} align='right'><FieldNumberOutlined style={{ marginRight: '4px' }} />{order.id}</Col> : null }
         </Row>
         <Row style={{ justifyContent: 'space-between' }}>
             <Col style={{ width: '30%' }}>总金额：{order.amount}</Col>
@@ -183,7 +183,7 @@ export default function SalesOrderEditView(props) {
         <Col align='end'>
             <Space>
                 <Button icon={<SaveOutlined/>} type='primary' onClick={upload}>保存</Button>
-                { props.order && props.order.id ? null : <Button icon={<InboxOutlined/>} onClick={_ => props.saveDraft(order)}>保存草稿</Button> }
+                { order.id ? null : <Button icon={<InboxOutlined/>} onClick={_ => props.saveDraft(order)}>保存草稿</Button> }
                 <Button icon={<CloseOutlined/>} onClick={_ => { initOrder(); props.dismiss() }}>取消</Button>
             </Space>
         </Col>
