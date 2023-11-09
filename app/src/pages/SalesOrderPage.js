@@ -139,10 +139,8 @@ function SalesOrderPage() {
             </Row></Form></Card>
 
             {/* Sales Order Table */}
-            <div style={{ width: '100%' }}>
-                <Table dataSource={filteredSalesOrders} bordered size='small' rowKey={record => record.id} 
-                    columns={orderTableColumns} pagination={pagination} />
-            </div>
+            <Table dataSource={filteredSalesOrders} bordered size='small' rowKey={record => record.id} 
+                columns={orderTableColumns} pagination={pagination} />
         </Space>
     </>
 }

@@ -21,8 +21,8 @@ router.post('/', async (req, res) => {
     const partner = req.body.partner
     const date = req.body.date
     const amount = req.body.amount
-    const prepayment = req.body.prepayment
-    const payment = req.body.payment
+    const prepayment = req.body.prepayment || '0'
+    const payment = req.body.payment || '0'
     const items = req.body.items || []
     
     // ---------- validate ----------
