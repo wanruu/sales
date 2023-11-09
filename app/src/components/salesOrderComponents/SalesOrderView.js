@@ -2,14 +2,13 @@ import React, { useEffect, useState, useRef } from 'react'
 import Axios from 'axios'
 import Decimal from 'decimal.js'
 import { Table, Button, Col, Row, Divider, Space } from 'antd'
-import { EditOutlined, PrinterOutlined, TableOutlined, RollbackOutlined
-} from '@ant-design/icons'
+import { EditOutlined, PrinterOutlined, TableOutlined, RollbackOutlined } from '@ant-design/icons'
 import { useReactToPrint } from 'react-to-print'
 
 
 import { baseURL } from '../../utils/config'
 import { getExportData, exportExcel } from '../../utils/export'
-import InvoicePreview from '../common/InvoicePreview'
+import InvoiceView from '../common/InvoiceView'
 import '../common/Invoice.css'
 import SalesOrderEditView from './SalesOrderEditView'
 
@@ -121,7 +120,7 @@ function PrintView(props) {
     return <Space direction='vertical' size='middle' style={{ width: '100%', marginTop: '10px', marginBottom: '10px' }}>
         <Col align='middle' style={{ overflowX: 'auto', overflowY: 'clip' }}>
             <div ref={componentRef} >
-                {!props.order ? null : <InvoicePreview invoice={props.order} type='salesOrder' />}
+                {!props.order ? null : <InvoiceView invoice={props.order} type='salesOrder' />}
             </div>
         </Col>
         <Col align='end'>

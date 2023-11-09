@@ -233,17 +233,21 @@ router.get('/', (req, res) => {
 })
 
 router.get('/detailed', (req, res) => {
-    db.all(`SELECT * FROM invoice WHERE type=${typeInt}`, (err, orders) => {
+    const refundId = req.query.refundId || null  // include
+    const selectOrder = `SELECT i.*, refundId 
+        FROM invoice AS i LEFT JOIN invoiceRelation AS r ON i.id=r.orderId
+        WHERE type=${typeInt} AND (refundId IS NULL OR refundId="${refundId}")`
+    db.all(selectOrder, (err, orders) => {
         if (err) {
             console.error(err)
             res.status(500).send(err)
             return
         }
-        
-        const query = `SELECT i.invoiceId AS orderId, i.id AS orderItemId, 
-        p.id AS productId, p.material, p.name, p.spec, p.unit, price, i.quantity, i.amount, discount, originalAmount, remark, delivered 
-        FROM invoice o, invoiceItem i, product p 
-        WHERE o.id=i.invoiceId AND p.id=productId AND o.type=${typeInt}`
+        const query = `SELECT i.id AS orderId,
+            p.id AS productId, p.material, p.name, p.spec, p.unit, 
+            ii.id AS orderItemId, ii.price, ii.quantity, ii.amount, ii.discount, ii.originalAmount, ii.remark, ii.delivered 
+            FROM invoice AS i, invoiceItem AS ii, product AS p 
+            WHERE i.id=ii.invoiceId AND p.id=ii.productId AND i.type=${typeInt}`
         db.all(query, (err, items) => {
             if (err) {
                 console.error(err)
@@ -252,10 +256,12 @@ router.get('/detailed', (req, res) => {
             }
             for (const item of items) {
                 const order = orders.find(order => order.id === item.orderId)
-                if (order.items === undefined) {
-                    order.items = [item]
-                } else {
-                    order.items.push(item)
+                if (order) {
+                    if (order.items === undefined) {
+                        order.items = [item]
+                    } else {
+                        order.items.push(item)
+                    }
                 }
             }
             res.send(orders)

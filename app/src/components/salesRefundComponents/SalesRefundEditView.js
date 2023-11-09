@@ -126,7 +126,7 @@ export default function SalesRefundEditView(props) {
         <Divider />
         <Col align='end'>
             <Space>
-                <Button icon={<SaveOutlined/>} type='primary' onClick={upload}>保存</Button>
+                <Button icon={<SaveOutlined/>} type='primary' onClick={upload} disabled={refund.partner === ''}>保存</Button>
                 { refund.id ? null : <Button icon={<InboxOutlined/>} onClick={_ => props.saveDraft(refund)}>保存草稿</Button> }
                 <Button icon={<CloseOutlined/>} onClick={_ => { initRefund(); props.dismiss() }}>取消</Button>
             </Space>

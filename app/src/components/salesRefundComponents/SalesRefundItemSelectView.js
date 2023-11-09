@@ -11,7 +11,7 @@ import { dcInvoice, calTotalAmount } from '../../utils/invoiceUtils'
 
 function SalesRefundItemSelectView(props) {
     const [salesOrders, setSalesOrders] = useState([])
-    const [selectedItems, setSelectedItems] = useState(props.editRefund.items);
+    const [selectedItems, setSelectedItems] = useState(props.editRefund.items)
     
 
     const load = () => {
@@ -20,12 +20,13 @@ function SalesRefundItemSelectView(props) {
             method: 'get',
             baseURL: baseURL(),
             url: 'salesOrder/detailed',
+            params: { refundId: props.editRefund.id },
             'Content-Type': 'application/json',
         }).then(res => {
             var orders = res.data
-            if (props.editRefund.partner !== '') {
-                orders = orders.filter(o => o.partner === props.editRefund.partner)
-            }
+            // if (props.editRefund.partner !== '') {
+            //     orders = orders.filter(o => o.partner === props.editRefund.partner)
+            // }
             setSalesOrders(orders)
             updateFilters(orders, { id: null, partner: null })
         }).catch(_ => { })
@@ -39,7 +40,7 @@ function SalesRefundItemSelectView(props) {
             setSelectedItems(selectedRows)
         },
         selectedRowKeys: selectedItems.map(item => item.orderId + item.productId),
-    };
+    }
 
 
     const onSubmit = () => {

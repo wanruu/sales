@@ -250,7 +250,7 @@ router.put('/id/:id', async (req, res) => {
 
     // 2. update refund info
     const updateRefund = `UPDATE invoice SET amount="${amount}", date="${date}", partner="${partner}", 
-    prepayment="${prepayment}", payment="${payment}"`
+    prepayment="${prepayment}", payment="${payment}" WHERE id="${refundId}"`
     await new Promise((resolve, reject) => {
         db.run(updateRefund, err => {
             if (err) { reject(err) }

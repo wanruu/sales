@@ -8,7 +8,7 @@ import { useReactToPrint } from 'react-to-print'
 
 import { baseURL } from '../../utils/config'
 import { getExportData, exportExcel } from '../../utils/export'
-import InvoicePreview from '../common/InvoicePreview'
+import InvoiceView from '../common/InvoiceView'
 import SalesRefundEditView from '../salesRefundComponents/SalesRefundEditView'
 
 
@@ -94,7 +94,7 @@ function View(props) {
         </Space>
 
         <Table dataSource={props.refund.items} columns={itemColumns} size='small' bordered style={{ height: 400 }} 
-            rowKey={record => record.id} scroll={{x: 'max-content', y: 400 }} pagination={false} />
+            rowKey={record => record.invoiceItemId} scroll={{x: 'max-content', y: 400 }} pagination={false} />
 
         <Divider />
         <Col align='end'>
@@ -118,7 +118,7 @@ function PrintView(props) {
     return <Space direction='vertical' size='middle' style={{ width: '100%', marginTop: '10px', marginBottom: '10px' }}>
         <Col align='middle' style={{ overflowX: 'auto', overflowY: 'clip' }}>
             <div ref={componentRef} > 
-                {!props.refund ? null : <InvoicePreview invoice={props.refund} type='salesRefund' />}
+                {!props.refund ? null : <InvoiceView invoice={props.refund} type='salesRefund' />}
             </div>
         </Col>
         <Col align='end'>

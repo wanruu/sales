@@ -27,7 +27,7 @@ function PreviewTable(props) {
                 <tbody>
                     {
                         props.invoice.items.map((item, itemIdx) =>
-                            <tr key={item.id}>
+                            <tr key={item.id || item.invoiceItemId}>
                                 <td>{itemIdx+1}</td>
                                 <td>{item.material}</td>
                                 <td>{item.name}</td>
@@ -183,7 +183,7 @@ function PreviewHeader(props) {
     </Row>
 }
 
-export default function InvoicePreview(props) {
+export default function InvoiceView(props) {
     return <div className='invoiceWrapper' style={{ width: invoiceSettings.width()+'px', height: invoiceSettings.height()+'px' }}>
         <div className='invoiceContent' style={{
             paddingTop: invoiceSettings.vPadding()+'px', paddingBottom: invoiceSettings.vPadding()+'px',

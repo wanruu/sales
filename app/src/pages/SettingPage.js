@@ -3,10 +3,11 @@ import React, { useState, } from 'react'
 import * as XLSX from 'xlsx'
 import Axios from 'axios'
 import dayjs from 'dayjs'
+import uuid from 'react-uuid'
 
 
 import { baseURL, invoiceSettings, dateFormat } from '../utils/config'
-import InvoicePreview from '../components/common/InvoicePreview'
+import InvoiceView from '../components/common/InvoiceView'
 
 
 const { Item } = Form
@@ -19,7 +20,7 @@ export const initInvoiceForPreview = (prefix, itemNum) => {
         date: dayjs().format(dateFormat),
         amount: '0',
         items: [...Array(itemNum).keys()].map(_ => { return {
-            material: '', name: '', spec: '', unit: '', 
+            id: uuid(), material: '', name: '', spec: '', unit: '', 
             quantity: '', price: '', amount: '', remark: ''
         }})
     }
@@ -265,7 +266,7 @@ function SettingPage() {
                     
                     { previewType ?
                     <div style={{ overflowX: 'auto', overflowY: 'clip' }}>
-                        <InvoicePreview type={previewType} invoice={initInvoiceForPreview(previews[previewType].prefix, previewItemNum)} />
+                        <InvoiceView type={previewType} invoice={initInvoiceForPreview(previews[previewType].prefix, previewItemNum)} />
                     </div> : null }
                 </Item>
             </Form>
