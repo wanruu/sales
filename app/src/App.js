@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react'
-import { Layout, theme, Menu } from 'antd'
+import { Layout, theme, Menu, Button } from 'antd'
 import {
     SettingOutlined,
     PlusCircleOutlined,
     MinusCircleOutlined,
     BankOutlined,
     UserOutlined,
-    BarChartOutlined
+    BarChartOutlined,
+    MenuFoldOutlined, MenuUnfoldOutlined,
 } from '@ant-design/icons'
 
 
@@ -23,7 +24,8 @@ const defaultMenuKey = 'salesOrder'
 function App() {
     const [menuKey, setMenuKey] = useState(defaultMenuKey)
     const { token: { colorBgContainer }, } = theme.useToken()
-    
+    const [collapsed, setCollapsed] = useState(false)
+
     const pages = {
         'salesOrder': <SalesOrderPage />,
         'salesRefund': <SalesRefundPage />,
@@ -55,20 +57,29 @@ function App() {
     // ------------------
 
     return (
-        <Layout hasSider style={{ background: colorBgContainer }}>
-            <Sider style={{ overflow: 'auto', height: '100vh', position: 'fixed', left: 0, top: 0, bottom: 0, background: colorBgContainer }}>
-                <Menu items={menuItems} mode='inline' defaultSelectedKeys={[defaultMenuKey]}
+        // <Layout hasSider style={{ background: colorBgContainer }}>
+        //     <Sider style={{ zIndex: 2, overflow: 'auto', height: '100vh', position: 'fixed', left: 0, top: 0, bottom: 0, background: colorBgContainer }}>
+        //         <Menu items={menuItems} mode='inline' defaultSelectedKeys={[defaultMenuKey]}
+        //             defaultOpenKeys={['order', 'refund']} onSelect={({ key }) => setMenuKey(key)}
+        //         />
+        //     </Sider>
+        //     <Layout style={{ marginLeft: 190, zIndex: 1 }}>
+        //         <Content style={{ overflow: 'initial', background: colorBgContainer }}>
+        //             <div style={{ paddingLeft: 18, paddingRight: 18, background: colorBgContainer }}>
+        //                 {pages[menuKey]}
+        //             </div>
+        //         </Content> 
+        //     </Layout>
+        // </Layout>
+        <Layout hasSider style={{ minHeight: '100vh' }}>
+            <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
+                <Menu theme='dark' items={menuItems} mode='inline' defaultSelectedKeys={[defaultMenuKey]}
                     defaultOpenKeys={['order', 'refund']} onSelect={({ key }) => setMenuKey(key)}
                 />
             </Sider>
-            <Layout className="site-layout" style={{ marginLeft: 200, }}>
-                {/* <Header style={{ padding: 0, background: colorBgContainer }} >
-                    header
-                </Header> */}
-                <Content style={{ overflow: 'initial', background: colorBgContainer }}>
-                    <div style={{ paddingLeft: 18, paddingRight: 18, background: colorBgContainer }}>
-                        {pages[menuKey]}
-                    </div>
+            <Layout>
+                <Content style={{ padding: '0 16px', background: colorBgContainer }}>
+                    {pages[menuKey]}
                 </Content>
             </Layout>
         </Layout>

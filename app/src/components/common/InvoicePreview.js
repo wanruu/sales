@@ -2,7 +2,7 @@ import React from 'react';
 import { Row, Col, Space } from 'antd'
 import { FieldNumberOutlined } from '@ant-design/icons';
 
-import './InvoicePreview.css';
+import './Invoice.css';
 import digitUppercase from '../../utils/digitUppercase';
 import { invoiceSettings } from '../../utils/config'
 

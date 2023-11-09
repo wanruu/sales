@@ -13,7 +13,7 @@ import { dcInvoice, calItemAmount, calTotalAmount, emptyInvoice, emptyInvoiceIte
 import { isSalesOrderItemEmpty, isSalesOrderItemComplete } from '../../utils/salesOrderUtils'
 import { PartnerInput, ProductInput, UnitInput } from "../common/PromptInput";
 import { baseURL, dateFormat } from "../../utils/config";
-import "../common/InvoiceEdit.css"
+import "../common/Invoice.css"
 
 
 function SalesOrderFB(props) {

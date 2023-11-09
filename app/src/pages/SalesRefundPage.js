@@ -137,7 +137,8 @@ function SalesRefundPage() {
             </Row></Form></Card>
 
             {/* Sales Refund Table */}
-            <Table dataSource={filteredSalesRefunds} size='small' rowKey={record => record.id} bordered columns={salesTableColumns} pagination={pagination} />
+            <Table dataSource={filteredSalesRefunds} size='small' rowKey={record => record.id} 
+                bordered columns={salesTableColumns} pagination={pagination} />
         </Space>
     </>
 }

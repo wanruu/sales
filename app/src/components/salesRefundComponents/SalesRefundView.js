@@ -84,10 +84,10 @@ function EditView(props) {
     }
     const itemColumns = [
         { title: '', align: 'center', width: 30, render: (_, __, idx) => idx + 1 },
-        { title: '材质', dataIndex: 'material', align: 'center', width: 45 },
-        { title: '名称', dataIndex: 'name', align: 'center', width: 80 },
-        { title: '规格', dataIndex: 'spec', align: 'center', width: 60 },
-        { title: '数量', dataIndex: 'quantity', align: 'center', width: 60, render: (_, record, idx) => 
+        { title: '材质', dataIndex: 'material', align: 'center', width: 50 },
+        { title: '名称', dataIndex: 'name', align: 'center', width: 150 },
+        { title: '规格', dataIndex: 'spec', align: 'center', width: 70 },
+        { title: '数量', dataIndex: 'quantity', align: 'center', width: 70, render: (_, record, idx) => 
             <InputNumber min={0} stringMode keyboard={false} size='small' controls={false} style={{width: '100%'}} 
                 value={record.quantity} onChange={value => updateRow(idx, 'quantity', value)} />
         },
@@ -96,14 +96,14 @@ function EditView(props) {
         { title: '金额', dataIndex: 'originalAmount', align: 'center', width: 80 },
         { title: '折扣', dataIndex: 'discount', align: 'center', width: 50, render: d => `${d}%`},
         { title: '折后价', dataIndex: 'amount', align: 'center', width: 80 },
-        { title: '备注', dataIndex: 'remark', align: 'center', width: 90, render: (_, record, idx) => 
+        { title: '备注', dataIndex: 'remark', align: 'center', width: 100, render: (_, record, idx) => 
             <Input size='small' style={{ width: '100%' }} value={record.remark} onChange={e => updateRow(idx, 'remark', e.target.value)} />
         },
-        { title: '配送', dataIndex: 'delivered', align: 'center', width: 70, fixed: 'right', render: (_, record, idx) => 
+        { title: '配送', dataIndex: 'delivered', align: 'center', width: 60, fixed: 'right', render: (_, record, idx) => 
             <DeliveredInput size='small' align='center' style={{ width: '100%' }} value={record.delivered} 
                 onChange={value => updateRow(idx, 'delivered', value)} />
         },
-        { title: '', align: 'center', fixed: 'right', render: (_, __, idx) => 
+        { title: '', align: 'center', width: 30, fixed: 'right', render: (_, __, idx) => 
             <Button type='link' size='small' danger onClick={_ => {
                 const newRefund = dcInvoice(refund)
                 newRefund.items.splice(idx, 1)
@@ -186,17 +186,17 @@ function EditView(props) {
 function View(props) {
     const itemColumns = [
         { title: '', align: 'center', width: 30, render: (_, __, idx) => idx + 1 },
-        { title: '材质', dataIndex: 'material', align: 'center', width: 45, export: true, summary: '总计' },
-        { title: '名称', dataIndex: 'name', align: 'center', width: 80, export: true },
-        { title: '规格', dataIndex: 'spec', align: 'center', width: 60, export: true },
-        { title: '数量', dataIndex: 'quantity', align: 'center', width: 60, export: true },
+        { title: '材质', dataIndex: 'material', align: 'center', width: 50, export: true, summary: '总计' },
+        { title: '名称', dataIndex: 'name', align: 'center', width: 150, export: true },
+        { title: '规格', dataIndex: 'spec', align: 'center', width: 70, export: true },
+        { title: '数量', dataIndex: 'quantity', align: 'center', width: 70, export: true },
         { title: '单位', dataIndex: 'unit', align: 'center', width: 50, export: true },
         { title: '单价', dataIndex: 'price', align: 'center', width: 70, export: true },
         { title: '金额', dataIndex: 'originalAmount', align: 'center', width: 80, export: true, summary: 'sum' },
         { title: '折扣', dataIndex: 'discount', align: 'center', width: 50, export: true, onExport: d => `${d}%`, render: discount => `${discount}%` },
         { title: '折后价', dataIndex: 'amount', align: 'center', width: 80, export: true, summary: 'sum' },
-        { title: '备注', dataIndex: 'remark', align: 'center', width: 90, export: true },
-        { title: '配送', dataIndex: 'delivered', align: 'center', width: 70, fixed: 'right', export: true, onExport: d => d ? '已配送' : '未配送', 
+        { title: '备注', dataIndex: 'remark', align: 'center', width: 100, export: true },
+        { title: '配送', dataIndex: 'delivered', align: 'center', width: 60, fixed: 'right', export: true, onExport: d => d ? '已配送' : '未配送', 
             render: delivered => <span style={{ color: delivered ? 'black' : 'red' }}>{delivered ? '已配送' : '未配送'}</span>
         }
     ]

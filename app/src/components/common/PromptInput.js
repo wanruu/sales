@@ -4,7 +4,7 @@ import React, { useEffect, useState,  } from "react";
 
 
 import { baseURL, unitOptions } from "../../utils/config";
-import './InvoiceEdit.css'
+// import './Invoice.css'
 
 export function PartnerInput(props) {
     const [options, setOptions] = useState([])

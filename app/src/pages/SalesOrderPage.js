@@ -126,7 +126,7 @@ function SalesOrderPage() {
         <br />
         <Space direction='vertical'>
             {/* Function Box */}
-             <Card size='small'><Form form={form} onFinish={_ => filterSalesOrders(salesOrders)}><Row>
+            <Card size='small'><Form form={form} onFinish={_ => filterSalesOrders(salesOrders)}><Row>
                 <Item label='单号' name='orderId' style={itemStyle}><Input allowClear placeholder='单号' /></Item>
                 <Item label='客户' name='partner' style={itemStyle}><Input allowClear placeholder='客户' /></Item>
                 <Item label='日期' name='date' style={itemStyle}><RangePicker format={dateFormat} allowEmpty={[true, true]} /></Item>
@@ -139,7 +139,10 @@ function SalesOrderPage() {
             </Row></Form></Card>
 
             {/* Sales Order Table */}
-            <Table dataSource={filteredSalesOrders} bordered size='small' rowKey={record => record.id} columns={orderTableColumns} pagination={pagination} />
+            <div style={{ width: '100%' }}>
+                <Table dataSource={filteredSalesOrders} bordered size='small' rowKey={record => record.id} 
+                    columns={orderTableColumns} pagination={pagination} />
+            </div>
         </Space>
     </>
 }
