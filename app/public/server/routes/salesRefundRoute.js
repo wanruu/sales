@@ -1,11 +1,11 @@
-const express = require("express")
+const express = require('express')
 const router = express.Router()
 
 
-const db = require("../db")
+const db = require('../db')
 const { formatInsert, getNextInvoiceId, updateProductByInvoiceItems,calQuanByInvoiceType,
     INVOICE_TYPE_2_INT
-} = require('./utils.js');
+} = require('./utils.js')
 
 
 const prefix = 'XT'
@@ -155,7 +155,7 @@ router.post('/', async (req, res) => {
 
 
 router.delete('/', async (req, res) => {
-    const ids = (req.body.ids || []).map(id => `"${id}"`).join(', ');
+    const ids = (req.body.ids || []).map(id => `"${id}"`).join(', ')
     // 1. update product quantity
     const refundItems = await new Promise((resolve, reject) => {
         const query = `SELECT p.id AS productId, p.quantity AS originalQuantity, ii.quantity  

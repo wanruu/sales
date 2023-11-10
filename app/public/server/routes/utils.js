@@ -1,5 +1,5 @@
-const db = require("../db")
-const Decimal = require('decimal.js');
+const db = require('../db')
+const Decimal = require('decimal.js')
 const crypto = require('crypto')
 
 // ----- constant -----
@@ -37,7 +37,7 @@ const formatInsert = (oper, tableName, dictArray, fieldnames) => {
     const itemHolder = fieldnames.map(() => '?').join(', ')
     const placeholders = dictArray.map(() => `(${itemHolder})`).join(', ')
     const query = `${oper} INTO ${tableName} (${fieldnames.join(', ')}) VALUES ${placeholders};`
-    const flatData = [];
+    const flatData = []
     dictArray.forEach(dict => {
         fieldnames.forEach(key => {
             flatData.push(dict[key])
@@ -65,7 +65,7 @@ const updateProductQuantityByInfo = (material, name, spec, unit, quantityChange)
     return new Promise((resolve, reject) => {
         db.all(`SELECT * FROM product WHERE material="${material}" AND name="${name}" AND spec="${spec}";`, (err, products) => {
             if (err) { reject(err) }
-            var query;
+            var query
             if (products.length === 0) {
                 query = `INSERT INTO product (id, material, name, spec, unit, quantity) 
                 VALUES ("${crypto.randomUUID()}", "${material}", "${name}", "${spec}", "${unit}", "${quantityChange}")`
@@ -169,14 +169,14 @@ const updateProductByInvoiceItems = async (items, invoiceType) => {
 
 const getNextInvoiceId = (date, invoicePrefix) => {
     const match = (/(\d{4})-(\d{2})-(\d{2})/g).exec(date);
-    const prefix = invoicePrefix + match[1] + match[2] + match[3];
+    const prefix = invoicePrefix + match[1] + match[2] + match[3]
     return new Promise((resolve, reject) => {
         const query = `SELECT MAX(id) id FROM invoice WHERE id LIKE "${prefix}%";`
         db.each(query, (err, row) => {
             if (err) { reject(err) }
             const invoiceId = row.id === null ?
                 prefix + '0001' :
-                prefix + (parseInt(row.id.slice(prefix.length)) + 1).toString().padStart(4, '0');
+                prefix + (parseInt(row.id.slice(prefix.length)) + 1).toString().padStart(4, '0')
             resolve(invoiceId)
         })
     })

@@ -1,16 +1,16 @@
-import React from 'react';
+import React from 'react'
 import { Row, Col, Space } from 'antd'
-import { FieldNumberOutlined } from '@ant-design/icons';
+import { FieldNumberOutlined } from '@ant-design/icons'
 
-import './Invoice.css';
-import digitUppercase from '../../utils/digitUppercase';
+import './Invoice.css'
+import digitUppercase from '../../utils/digitUppercase'
 import { invoiceSettings } from '../../utils/config'
 
 /* type */
 function PreviewTable(props) {
     return (
         <div style={{ fontSize: invoiceSettings.fontSize()+'px' }}>
-            <table className='previewTable' style={{ width: "100%", height: '100%', }} >
+            <table className='previewTable' style={{ width: '100%', height: '100%', }} >
                 <thead>
                     <tr>
                         <th style={{ width: '04.0%', }}>编号</th>
@@ -58,7 +58,7 @@ function PreviewTable(props) {
 /* type */
 function PreviewTitle(props) {
     const getTitle = () => {
-        return invoiceSettings.title().replace(/ /g, "\xa0")
+        return invoiceSettings.title().replace(/ /g, '\xa0')
     }
     const getSubTitle = () => {
         let subTitle
@@ -71,7 +71,7 @@ function PreviewTitle(props) {
         } else {
             subTitle = invoiceSettings.purchaseRefundTitle()
         }
-        return subTitle.replace(/ /g, "\xa0")
+        return subTitle.replace(/ /g, '\xa0')
     }
 
     if (invoiceSettings.titleStyle() === 'inline') {
@@ -102,10 +102,10 @@ function PreviewFooter() {
     return contents().map((arr, idx) => 
         <Row key={idx}>
             <Col align='left' span={12} style={{ fontSize: invoiceSettings.footerFontSize()+'px' }}>
-                {arr[0].replace(/ /g, "\xa0")}
+                {arr[0].replace(/ /g, '\xa0')}
             </Col>
             {arr.length === 2 ? <Col align='left' span={12} style={{ fontSize: invoiceSettings.footerFontSize()+'px' }}>
-                {arr[1].replace(/ /g, "\xa0")}
+                {arr[1].replace(/ /g, '\xa0')}
             </Col> : ''}
         </Row>
     )

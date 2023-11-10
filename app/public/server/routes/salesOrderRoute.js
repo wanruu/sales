@@ -1,9 +1,9 @@
 const Decimal = require('decimal.js')
-const express = require("express")
+const express = require('express')
 const router = express.Router()
 
 
-const db = require("../db")
+const db = require('../db')
 const { formatInsert, updatePartner, updateProductByInvoiceItems, getNextInvoiceId,
     INVOICE_TYPE_2_INT, UNIT_COEFF_DICT, calQuanByInvoiceType
 } = require('./utils.js')
@@ -359,7 +359,7 @@ router.get('/id/:id', (req, res) => {
 })
 
 router.delete('/', async (req, res) => {
-    const ids = (req.body.ids || []).map(id => `"${id}"`).join(', ');
+    const ids = (req.body.ids || []).map(id => `"${id}"`).join(', ')
 
     // 1. update product quantity
     const orderItems = await new Promise((resolve, reject) => {

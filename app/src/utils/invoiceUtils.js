@@ -1,5 +1,5 @@
 import dayjs from 'dayjs'
-import { Decimal } from 'decimal.js';
+import { Decimal } from 'decimal.js'
 import uuid from 'react-uuid'
 
 

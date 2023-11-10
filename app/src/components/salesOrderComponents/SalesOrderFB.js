@@ -33,7 +33,7 @@ function SalesOrderFB(props) {
 
     return (<>
         {contextHolder}
-        <Popover title={`草稿箱 (${draftOrders.length})`} placement="topLeft" zIndex={999} trigger='click' content={
+        <Popover title={`草稿箱 (${draftOrders.length})`} placement='topLeft' zIndex={999} trigger='click' content={
             <Table className='draftTable' dataSource={draftOrders} size='small' pagination={{pageSize: 5, size: 'small'}} hideOnSinglePage bordered>
                 <Column title='保存时间' dataIndex='draftTime' align='center' render={time => time.format('HH:mm:ss')} />
                 <Column title='客户' dataIndex='partner' align='center' />

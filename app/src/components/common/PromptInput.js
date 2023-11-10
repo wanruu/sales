@@ -1,9 +1,9 @@
 import Axios from 'axios'
-import { AutoComplete, Select, } from "antd";
-import React, { useEffect, useState,  } from "react";
+import { AutoComplete, Select, } from 'antd'
+import React, { useEffect, useState,  } from 'react'
 
 
-import { baseURL, unitOptions } from "../../utils/config";
+import { baseURL, unitOptions } from '../../utils/config'
 // import './Invoice.css'
 
 export function PartnerInput(props) {

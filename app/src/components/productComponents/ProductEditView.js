@@ -1,12 +1,12 @@
-import React, { useEffect } from "react"
-import { Input, Space, Button, Form, InputNumber, message, Col, Row } from "antd"
-import  Axios  from "axios"
-import Decimal from "decimal.js"
+import React, { useEffect } from 'react'
+import { Input, Space, Button, Form, InputNumber, message, Col, Row } from 'antd'
+import  Axios  from 'axios'
+import Decimal from 'decimal.js'
 
 const { Item } = Form
 
-import { baseURL, unitCoeffDict } from "../../utils/config"
-import { UnitInput } from "../common/PromptInput"
+import { baseURL, unitCoeffDict } from '../../utils/config'
+import { UnitInput } from '../common/PromptInput'
 
 /*
     Required fields: (empty)

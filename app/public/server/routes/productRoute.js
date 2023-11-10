@@ -1,9 +1,9 @@
-const express = require("express")
+const express = require('express')
 const router = express.Router()
-const Decimal = require('decimal.js');
+const Decimal = require('decimal.js')
 const crypto = require('crypto')
 
-const db = require("../db")
+const db = require('../db')
 const { UNIT_COEFF_DICT } = require('./utils')
 
 
@@ -41,7 +41,7 @@ router.get('/unit/:material/:name/:spec', (req, res) => {
 
 
 router.delete('/', (req, res) => {
-    const ids = req.body.ids.map(id => `"${id}"`).join(', ');
+    const ids = req.body.ids.map(id => `"${id}"`).join(', ')
     db.run(`DELETE FROM product WHERE id IN (${ids})`, err => {
         if (err) {
             console.error(err)

@@ -27,27 +27,27 @@ export const getExportData = (columns, data) => {
 
 
 export const exportExcel = (filename, jsa) => {
-    var wb = XLSX.utils.book_new();
-    var ws = XLSX.utils.json_to_sheet(jsa);
+    var wb = XLSX.utils.book_new()
+    var ws = XLSX.utils.json_to_sheet(jsa)
     if (jsa.length > 0) {
         ws['!cols'] = Object.keys(jsa[0]).map(key => {
             const maxWidth = jsa.reduce((w, r) => Math.max(w, (r[key] || '').toString().length), 10)
             return { wch: maxWidth }
         })
     }
-    XLSX.utils.book_append_sheet(wb, ws);
-    XLSX.writeFile(wb, filename + '.xlsx');
+    XLSX.utils.book_append_sheet(wb, ws)
+    XLSX.writeFile(wb, filename + '.xlsx')
 }
 
 
 export const exportExcelMultiSheet = (filename, jsas, sheetnames=[]) => {
-    var wb = XLSX.utils.book_new();
+    var wb = XLSX.utils.book_new()
     // jsas.forEach((idx, jsa) => {
-    //     var ws = XLSX.utils.json_to_sheet(jsa);
-    //     XLSX.utils.book_append_sheet(wb, ws);
-    // });
+    //     var ws = XLSX.utils.json_to_sheet(jsa)
+    //     XLSX.utils.book_append_sheet(wb, ws)
+    // })
     for (const [i, jsa] of jsas.entries()) {
-        var ws = XLSX.utils.json_to_sheet(jsa);
+        var ws = XLSX.utils.json_to_sheet(jsa)
         if (jsa.length > 0) {
             ws['!cols'] = Object.keys(jsa[0]).map(key => {
                 const maxWidth = jsa.reduce((w, r) => Math.max(w, (r[key] || '').toString().length), 10)
@@ -55,10 +55,10 @@ export const exportExcelMultiSheet = (filename, jsas, sheetnames=[]) => {
             })
         }
         if (i < sheetnames.length) {
-            XLSX.utils.book_append_sheet(wb, ws, sheetnames[i]);
+            XLSX.utils.book_append_sheet(wb, ws, sheetnames[i])
         } else {
-            XLSX.utils.book_append_sheet(wb, ws);
+            XLSX.utils.book_append_sheet(wb, ws)
         }
     }
-    XLSX.writeFile(wb, filename + '.xlsx');
+    XLSX.writeFile(wb, filename + '.xlsx')
 }

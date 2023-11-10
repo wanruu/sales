@@ -3,7 +3,7 @@ const app = express()
 
 
 // middleware
-require("./middlewareConfig")(app)
+require('./middlewareConfig')(app)
 
 
 const start = (port) => {
@@ -13,7 +13,7 @@ const start = (port) => {
 }
 
 
-// start(8888);
+// start(8888)
 module.exports = {
     start: start
 }

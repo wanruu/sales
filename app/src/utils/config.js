@@ -1,10 +1,10 @@
-import Decimal from "decimal.js"
+import Decimal from 'decimal.js'
 
 export const baseURL = () => {
-    return "http://localhost:8888/"
+    return 'http://localhost:8888/'
 }
 
-export const dateFormat = 'YYYY-MM-DD';
+export const dateFormat = 'YYYY-MM-DD'
 
 
 export const invoiceSettings = {

@@ -72,7 +72,7 @@ function View(props) {
         { title: '配送', dataIndex: 'delivered', align: 'center', width: 60, fixed: 'right', export: true, onExport: d => d ? '已配送' : '未配送', 
             render: delivered => <span style={{ color: delivered ? 'black' : 'red' }}>{delivered ? '已配送' : '未配送'}</span>
         },
-        { title: '退货', align: 'center', width: 75, fixed: 'right', export: true, render: (_, record) => 
+        { title: '退货状态', align: 'center', width: 75, fixed: 'right', export: true, render: (_, record) => 
             <Popover trigger='click' content={
                 <Space direction='vertical'>
                     <span>退货数量：{record.refundQuantity}</span>
@@ -81,7 +81,9 @@ function View(props) {
                 </Space>
             }>
                 <a>{ Decimal(record.refundQuantity || 0).equals(record.quantity) ? '全部退货' :
-                    (Decimal(record.refundQuantity || 0).equals(0) ? null : '部分退货')
+                    (Decimal(record.refundQuantity || 0).gt(record.quantity) ? '退货超数' : (
+                        Decimal(record.refundQuantity || 0).equals(0) ? null : '部分退货'
+                    ))
                 }</a>
             </Popover>
         }
