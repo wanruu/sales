@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react'
 import Axios from 'axios'
 import Decimal from 'decimal.js'
-import { Table, Button, Col, Row, Divider, Space } from 'antd'
+import { Table, Button, Col, Row, Divider, Space, Popover } from 'antd'
 import { EditOutlined, PrinterOutlined, TableOutlined, RollbackOutlined } from '@ant-design/icons'
 import { useReactToPrint } from 'react-to-print'
 
@@ -71,6 +71,19 @@ function View(props) {
         { title: '备注', dataIndex: 'remark', align: 'center', width: 100, export: true },
         { title: '配送', dataIndex: 'delivered', align: 'center', width: 60, fixed: 'right', export: true, onExport: d => d ? '已配送' : '未配送', 
             render: delivered => <span style={{ color: delivered ? 'black' : 'red' }}>{delivered ? '已配送' : '未配送'}</span>
+        },
+        { title: '退货', align: 'center', width: 75, fixed: 'right', export: true, render: (_, record) => 
+            <Popover trigger='click' content={
+                <Space direction='vertical'>
+                    <span>退货数量：{record.refundQuantity}</span>
+                    <span>退货金额：{record.refundOriginalAmount}</span>
+                    <span>折后价：{record.refundAmount}</span>
+                </Space>
+            }>
+                <a>{ Decimal(record.refundQuantity || 0).equals(record.quantity) ? '全部退货' :
+                    (Decimal(record.refundQuantity || 0).equals(0) ? null : '部分退货')
+                }</a>
+            </Popover>
         }
     ]
     const exportFile = () => {

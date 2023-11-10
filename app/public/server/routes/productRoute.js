@@ -3,16 +3,9 @@ const router = express.Router()
 const Decimal = require('decimal.js');
 const crypto = require('crypto')
 
-
 const db = require("../db")
+const { UNIT_COEFF_DICT } = require('./utils')
 
-const unitCoeffDict = {
-    '千件': new Decimal(1000),
-    '只': new Decimal(1),
-    '包': new Decimal(1),
-    '斤': new Decimal(1),
-    '套': new Decimal(1),
-}
 
 router.get('/', async (req, res) => {
     const t1 = `SELECT p.id, COUNT(*) AS invoiceNum 
@@ -90,7 +83,7 @@ router.put('/id/:id', async (req, res) => {
             })
         })
         const invoiceItemsInfo = await Promise.all(items.map(item => {
-            const originalAmount = Decimal(item.quantity).times(item.price).times(unitCoeffDict[item.unit]).toString()
+            const originalAmount = Decimal(item.quantity).times(item.price).times(UNIT_COEFF_DICT[item.unit]).toString()
             const amount = Decimal(originalAmount).times(item.discount).dividedBy(100).toString()
             const amountChange = Decimal(amount).sub(item.amount).toString()
             return new Promise((resolve, reject) => {

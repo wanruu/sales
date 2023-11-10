@@ -24,9 +24,6 @@ function SalesRefundItemSelectView(props) {
             'Content-Type': 'application/json',
         }).then(res => {
             var orders = res.data
-            // if (props.editRefund.partner !== '') {
-            //     orders = orders.filter(o => o.partner === props.editRefund.partner)
-            // }
             setSalesOrders(orders)
             updateFilters(orders, { id: null, partner: null })
         }).catch(_ => { })

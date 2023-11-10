@@ -121,7 +121,7 @@ export default function SalesRefundEditView(props) {
             </Row>
         </Space>
         <Table className='editTable' dataSource={refund.items} size='small' bordered pagination={false}
-            rowKey={r => r.invoiceItemId} style={{height: 400}} scroll={{x: 'max-content', y: 400 }} columns={itemColumns} />
+            rowKey={r => r.orderItemId} style={{height: 400}} scroll={{x: 'max-content', y: 400 }} columns={itemColumns} />
     
         <Divider />
         <Col align='end'>

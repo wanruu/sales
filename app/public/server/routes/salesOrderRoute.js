@@ -1,11 +1,12 @@
+const Decimal = require('decimal.js')
 const express = require("express")
 const router = express.Router()
 
 
 const db = require("../db")
 const { formatInsert, updatePartner, updateProductByInvoiceItems, getNextInvoiceId,
-    INVOICE_TYPE_2_INT, calQuanByInvoiceType
-} = require('./utils.js');
+    INVOICE_TYPE_2_INT, UNIT_COEFF_DICT, calQuanByInvoiceType
+} = require('./utils.js')
 
 
 const prefix = 'XS'
@@ -140,8 +141,8 @@ router.put('/id/:id', async (req, res) => {
     
     // 3. get original invoice items & delete
     const selectItems = `SELECT productId, p.quantity AS originalQuantity, ii.quantity 
-    FROM invoiceItem AS ii, product AS p 
-    WHERE ii.invoiceId="${orderId}" AND ii.productId=p.id`
+        FROM invoiceItem AS ii, product AS p 
+        WHERE ii.invoiceId="${orderId}" AND ii.productId=p.id`
     const oldInvoiceItems = await new Promise((resolve, reject) => {
         db.all(selectItems, (err, items) => {
             if (err) { reject(err) }
@@ -199,8 +200,55 @@ router.put('/id/:id', async (req, res) => {
             res.status(500).send(err)
         })
     }
-    
-    res.end()
+
+    // 6. update refund & refund items if any
+    const oldRefundItems = await new Promise((resolve, reject) => {
+        const selectRefundItems = `SELECT i.*, p.material, p.name, p.spec, p.unit
+            FROM invoiceRelation AS r, invoiceItem AS i, product AS p
+            WHERE r.orderId="${orderId}" AND r.refundId=i.invoiceId AND i.productId=p.id`
+        db.all(selectRefundItems, (err, oldRefundItems) => {
+            if (err) { reject(err) }
+            resolve(oldRefundItems)
+        })
+    }).catch(err => {
+        console.error(err)
+        res.status(500).send(err)
+    })
+    if (oldRefundItems.length !== 0) {
+        // var newRefundAmount = Decimal(0)
+        const amounts = await Promise.all(
+            oldRefundItems.map(async oldItem => {
+                const newItem = items.find(i => i.material===oldItem.material && i.name===oldItem.name && i.spec===oldItem.spec)
+                if (newItem) {
+                    const newOriginalAmount = Decimal(oldItem.quantity).times(newItem.price).times(UNIT_COEFF_DICT[newItem.unit])
+                    const newAmount = newOriginalAmount.times(newItem.discount).dividedBy(100)
+                    const updateRefundItem = `UPDATE invoiceItem SET price="${newItem.price}", discount=${newItem.discount}, originalAmount="${newOriginalAmount.toString()}", amount="${newAmount.toString()}" WHERE id=${oldItem.id}`
+                    return new Promise((resolve2, reject2) => {
+                        db.run(updateRefundItem, err => {
+                            if (err) { reject2(err) }
+                            resolve2(newAmount)
+                        })
+                    })
+                }
+                return oldItem.amount
+            })
+        ).catch(err => {
+            console.error(err)
+            res.status(500).send(err)
+        })
+
+        const newRefundAmount = amounts.reduce((pre, cur) => pre.plus(cur), Decimal(0)).toString()
+        const updateInvoice = `UPDATE invoice SET amount="${newRefundAmount}" WHERE id="${oldRefundItems[0].invoiceId}"`
+        db.run(updateInvoice, err => {
+            if (err) { 
+                console.error(err)
+                res.status(500).send(err)
+            }
+            res.end()
+        })
+    } else {
+        res.end()
+    }
 })
 
 router.get('/', (req, res) => {
@@ -286,12 +334,20 @@ router.get('/id/:id', (req, res) => {
             res.status(500).send(err)
             return
         }
-        const itemSelect = `SELECT i.id, 
-        productId, material, name, spec, unit, p.quantity AS remainingQuantity, 
-        price, discount, i.quantity, originalAmount, amount, remark, delivered
-        FROM invoiceItem AS i, product AS p 
-        WHERE i.invoiceId="${orderId}" AND p.id=i.productId;`
-        db.all(itemSelect, (err, items) => {
+        const refundId = order.refundId
+
+        const selectItem = refundId ?
+        `SELECT oi.id, oi.productId, oi.price, oi.discount, oi.quantity, oi.originalAmount, oi.amount, oi.remark, oi.delivered,
+            p.material, p.name, p.spec, p.unit, p.quantity AS remainingQuantity,
+            ri.quantity AS refundQuantity, ri.originalAmount AS refundOriginalAmount, ri.amount AS refundAmount
+            FROM invoiceItem AS oi, product AS p 
+            LEFT JOIN invoiceItem AS ri ON oi.productId=ri.productId AND ri.invoiceId="${refundId}"
+            WHERE oi.invoiceId="${orderId}" AND p.id=oi.productId` :
+        `SELECT oi.id, oi.productId, oi.price, oi.discount, oi.quantity, oi.originalAmount, oi.amount, oi.remark, oi.delivered,
+            p.material, p.name, p.spec, p.unit, p.quantity AS remainingQuantity
+            FROM invoiceItem AS oi, product AS p
+            WHERE oi.invoiceId="${orderId}" AND p.id=oi.productId`
+        db.all(selectItem, (err, items) => {
             if (err) {
                 console.error(err)
                 res.status(500).send(err)

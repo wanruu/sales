@@ -12,6 +12,13 @@ const INVOICE_TYPE_2_INT = {
 
 const INT_2_INVOICE_TYPE = ['salesOrder', 'salesRefund', 'purchaseOrder', 'purchaseRefund']
 
+const UNIT_COEFF_DICT = {
+    '千件': new Decimal(1000),
+    '只': new Decimal(1),
+    '包': new Decimal(1),
+    '斤': new Decimal(1),
+    '套': new Decimal(1),
+}
 
 const formatInsert = (oper, tableName, dictArray, fieldnames) => {
     if (dictArray.length === 0) {
@@ -188,3 +195,4 @@ exports.getNextInvoiceId = getNextInvoiceId
 
 exports.INVOICE_TYPE_2_INT = INVOICE_TYPE_2_INT
 exports.INT_2_INVOICE_TYPE = INT_2_INVOICE_TYPE
+exports.UNIT_COEFF_DICT = UNIT_COEFF_DICT

@@ -39,6 +39,7 @@ function SalesOrderPage() {
         }).then(res => {
             const orders = res.data.map(order => {
                 order.paid = Decimal(order.payment).plus(order.prepayment).toString()
+                order.unpaid = Decimal(order.amount).minus(order.paid).toString()
                 return order
             })
             setSalesOrders(orders)
@@ -51,10 +52,11 @@ function SalesOrderPage() {
         { title: '日期', dataIndex: 'date', align: 'center', export: true },
         { title: '客户', dataIndex: 'partner', align: 'center', export: true },
         { title: '金额', dataIndex: 'amount', align: 'center', export: true, summary: 'sum' },
-        { title: '订金', dataIndex: 'prepayment', align: 'center', export: true, summary: 'sum' },
-        { title: '尾款', dataIndex: 'payment', align: 'center', export: true, summary: 'sum' },
-        { title: '已付', dataIndex: 'paid', align: 'center', export: true, summary: 'sum', render: (paid, record) => 
-            <span style={{ color: Decimal(paid).equals(record.amount) ? 'black' : 'red' }}>{paid}</span>
+        // { title: '订金', dataIndex: 'prepayment', align: 'center', export: true, summary: 'sum' },
+        // { title: '尾款', dataIndex: 'payment', align: 'center', export: true, summary: 'sum' },
+        { title: '已付', dataIndex: 'paid', align: 'center', export: true, summary: 'sum' },
+        { title: '未付', dataIndex: 'unpaid', align: 'center', export: true, summary: 'sum', render: unpaid => 
+            <span style={{ color: unpaid === '0' ? 'black' : 'red' }}>{unpaid}</span>
         },
         { title: '配送情况', dataIndex: 'delivered', align: 'center', export: true },
         { title: '关联退货单', dataIndex: 'refundId', align: 'center', render: id => id ? <a onClick={_ => setSelectedRefundId(id)}>{id}</a> : null },
