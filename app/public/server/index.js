@@ -18,3 +18,6 @@ module.exports = {
     start: start
 }
 
+if (process.argv.length >= 3) {
+    start(process.argv[2])
+}

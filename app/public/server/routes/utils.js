@@ -12,13 +12,6 @@ const INVOICE_TYPE_2_INT = {
 
 const INT_2_INVOICE_TYPE = ['salesOrder', 'salesRefund', 'purchaseOrder', 'purchaseRefund']
 
-const UNIT_COEFF_DICT = {
-    '千件': new Decimal(1000),
-    '只': new Decimal(1),
-    '包': new Decimal(1),
-    '斤': new Decimal(1),
-    '套': new Decimal(1),
-}
 
 const formatInsert = (oper, tableName, dictArray, fieldnames) => {
     if (dictArray.length === 0) {
@@ -44,20 +37,6 @@ const formatInsert = (oper, tableName, dictArray, fieldnames) => {
         })
     })
     return { query: query, flatData: flatData }
-}
-
-
-const updateProductQuantityById = (id, quantityChange) => {
-    return new Promise((resolve, reject) => {
-        db.each(`SELECT * FROM product WHERE id="${id}";`, (err, product) => {
-            if (err) { reject(err) }
-            const newQuantity = Decimal(product.quantity).plus(quantityChange).toString()
-            db.run(`UPDATE product SET quantity="${newQuantity}" WHERE id="${id}"`, err => {
-                if (err) { reject(err) }
-                resolve()
-            })
-        })
-    })
 }
 
 
@@ -100,16 +79,19 @@ const updatePartner = (oper, name, phone, address) => {
     Calculate new quantity by invoice type.
  */
 const calQuanByInvoiceType = (original, change, invoiceType, reversed) => {
-    if (invoiceType === 'salesOrder' || invoiceType === 'purchaseRefund') {
-        if (!reversed) {
-            return Decimal(original).minus(change)
-        }
+    if (getQuantitySign(invoiceType, reversed) === '+') {
         return Decimal(original).plus(change)
     }
-    if (reversed) {
-        return Decimal(original).minus(change)
+    return Decimal(original).minus(change)
+}
+
+const getQuantitySign = (invoiceType, ifDelete) => {
+    if (invoiceType === 'salesOrder' || invoiceType === 'purchaseRefund') {
+        if (!ifDelete) return '-'
+        return '+'
     }
-    return Decimal(original).plus(change)
+    if (ifDelete) return '-'
+    return '+'
 }
 
 /*
@@ -168,7 +150,7 @@ const updateProductByInvoiceItems = async (items, invoiceType) => {
 
 
 const getNextInvoiceId = (date, invoicePrefix) => {
-    const match = (/(\d{4})-(\d{2})-(\d{2})/g).exec(date);
+    const match = (/(\d{4})-(\d{2})-(\d{2})/g).exec(date)
     const prefix = invoicePrefix + match[1] + match[2] + match[3]
     return new Promise((resolve, reject) => {
         const query = `SELECT MAX(id) id FROM invoice WHERE id LIKE "${prefix}%";`
@@ -190,15 +172,14 @@ const isDateValid = (date) => {
 
 exports.isDateValid = isDateValid
 exports.formatInsert = formatInsert
-exports.calQuanByInvoiceType = calQuanByInvoiceType
+exports.getQuantitySign = getQuantitySign
+exports.getNextInvoiceId = getNextInvoiceId
+// exports.calQuanByInvoiceType = calQuanByInvoiceType
 
-exports.updateProductQuantityById = updateProductQuantityById
 exports.updateProductQuantityByInfo = updateProductQuantityByInfo
 exports.updatePartner = updatePartner
 exports.updateProductByInvoiceItems = updateProductByInvoiceItems
 
-exports.getNextInvoiceId = getNextInvoiceId
 
 exports.INVOICE_TYPE_2_INT = INVOICE_TYPE_2_INT
 exports.INT_2_INVOICE_TYPE = INT_2_INVOICE_TYPE
-exports.UNIT_COEFF_DICT = UNIT_COEFF_DICT

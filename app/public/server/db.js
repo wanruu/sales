@@ -28,7 +28,7 @@ const product = `CREATE TABLE IF NOT EXISTS product(
     name TEXT NOT NULL, 
     spec TEXT NOT NULL, 
     unit TEXT NOT NULL,
-    quantity TEXT NOT NULL,
+    quantity DECIMAL NOT NULL,
     PRIMARY KEY(material, name, spec)
 );`
 
@@ -36,12 +36,12 @@ const product = `CREATE TABLE IF NOT EXISTS product(
 const invoiceItem = `CREATE TABLE IF NOT EXISTS invoiceItem(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     productId TEXT NOT NULL,
-    price TEXT NOT NULL,
+    price DECIMAL NOT NULL,
     discount INTEGER NOT NULL,
-    quantity TEXT NOT NULL,
-    weight TEXT,
-    originalAmount TEXT NOT NULL,
-    amount TEXT NOT NULL,
+    quantity DECIMAL NOT NULL,
+    weight DECIMAL,
+    originalAmount MONEY NOT NULL,
+    amount MONEY NOT NULL,
     remark TEXT,
     delivered INTEGER,
     invoiceId TEXT NOT NULL,
@@ -54,9 +54,9 @@ const invoice = `CREATE TABLE IF NOT EXISTS invoice(
     type INTEGER NOT NULL,
     partner TEXT NOT NULL,
     date TEXT NOT NULL,
-    amount TEXT NOT NULL,
-    prepayment TEXT NOT NULL,
-    payment TEXT NOT NULL,
+    amount MONEY NOT NULL,
+    prepayment MONEY NOT NULL,
+    payment MONEY NOT NULL,
     FOREIGN KEY(partner) REFERENCES partner(name) ON DELETE CASCADE
 );`
 

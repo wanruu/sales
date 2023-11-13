@@ -1,18 +1,16 @@
 const express = require('express')
 const router = express.Router()
-const Decimal = require('decimal.js')
 const crypto = require('crypto')
 
 const db = require('../db')
-const { UNIT_COEFF_DICT } = require('./utils')
 
 
 router.get('/', async (req, res) => {
-    const t1 = `SELECT p.id, COUNT(*) AS invoiceNum 
-    FROM product AS p, invoiceItem AS ii 
-    WHERE p.id=ii.productId GROUP BY p.id`
+    const t1 = `(SELECT p.id, COUNT(*) AS invoiceNum 
+        FROM product AS p, invoiceItem AS ii 
+        WHERE p.id=ii.productId GROUP BY p.id)`
     const query = `SELECT p.id, material, name, spec, unit, quantity, invoiceNum
-    FROM product AS p LEFT JOIN (${t1}) AS t ON p.id=t.id`
+        FROM product AS p LEFT JOIN ${t1} AS t ON p.id=t.id`
     db.all(query, (err, products) => {
         if (err) {
             console.error(err)
@@ -22,7 +20,6 @@ router.get('/', async (req, res) => {
         res.send(products)
     })
 })
-
 
 
 router.get('/unit/:material/:name/:spec', (req, res) => {
@@ -54,11 +51,11 @@ router.delete('/', (req, res) => {
 
 
 router.put('/id/:id', async (req, res) => {
-    const updates = ['material', 'name', 'spec', 'unit', 'quantity'].map(key => 
-        `${key}="${req.body[key]}"`
-    ).join(', ')
-    const query = `UPDATE product SET ${updates} WHERE id="${req.params.id}"`
+    const productId = req.params.id
+    const updates = ['material', 'name', 'spec', 'unit', 'quantity'].map(key => `${key}="${req.body[key]}"`).join(', ')
+    const query = `UPDATE product SET ${updates} WHERE id="${productId}"`
     
+    // 1. update product
     const data = await new Promise((resolve, reject) => {
         db.run(query, err => {
             if (err && err.errno === 19) { 
@@ -71,55 +68,43 @@ router.put('/id/:id', async (req, res) => {
         })
     })
     
+    // 2. update invoice & invoice items (order & refund)
     if (req.body.unitRatio !== '1') {
         // update invoice items: amount & originalAmount
-        const selectItems = `SELECT invoiceId, ii.id AS invoiceItemId, ii.price, ii.quantity, p.unit, ii.discount, i.amount
-        FROM product AS p, invoiceItem AS ii, invoice AS i
-        WHERE ii.productId=p.id AND p.id="${req.params.id}" AND ii.invoiceId=i.id`
-        const items = await new Promise((resolve, reject) => {
-            db.all(selectItems, (err, items) => {
-                if (err) { reject(err) }
-                resolve(items)
+        const unitRatio = req.body.unit === '千件' ? 1000 : 1
+        const updateInvoiceItem = `UPDATE invoiceItem
+            SET originalAmount=invoiceItem.quantity*price*${unitRatio},
+                amount=invoiceItem.quantity*price*${unitRatio}*discount/100
+            FROM product AS p WHERE invoiceItem.productId=p.id`
+        // update invoice: amount
+        const updateInvoice = `UPDATE invoice
+            SET amount=(SELECT SUM(amount) FROM invoiceItem WHERE invoiceItem.invoiceId=invoice.id)
+            FROM invoiceItem AS ii
+            WHERE ii.productId="${productId}" AND invoice.id=ii.invoiceId`
+        db.run(updateInvoiceItem, err => {
+            if (err) { 
+                console.error(err)
+                res.status(500).send(err)
+                return
+            }
+            db.run(updateInvoice, err => {
+                if (err) { 
+                    console.error(err)
+                    res.status(500).send(err)
+                    return
+                }
+                res.send(data)
             })
         })
-        const invoiceItemsInfo = await Promise.all(items.map(item => {
-            const originalAmount = Decimal(item.quantity).times(item.price).times(UNIT_COEFF_DICT[item.unit]).toString()
-            const amount = Decimal(originalAmount).times(item.discount).dividedBy(100).toString()
-            const amountChange = Decimal(amount).sub(item.amount).toString()
-            return new Promise((resolve, reject) => {
-                db.run(`UPDATE invoiceItem SET originalAmount="${originalAmount}", amount="${amount}" WHERE id="${item.invoiceItemId}"`, err => {
-                    if (err) { reject(err) }
-                    resolve({ invoiceId: item.invoiceId, amount: item.amount, amountChange: amountChange })
-                })
-            })
-        }))
-        // update invoice: amount
-        const invoiceInfo = invoiceItemsInfo.reduce((pre, cur) => {
-            if (pre[cur.invoiceId] === undefined) {
-                pre[cur.invoiceId] = Decimal(cur.amount).plus(cur.amountChange)
-            } else {
-                pre[cur.invoiceId] = pre[cur.invoiceId].plus(cur.amountChange)
-            }
-            return pre
-        }, {})
-        for (const invoiceId in invoiceInfo) {
-            const query = `UPDATE invoice SET amount="${invoiceInfo[invoiceId].toFixed(2, Decimal.ROUND_HALF_UP)}" WHERE id="${invoiceId}"`
-            await new Promise((resolve, reject) => {
-                db.run(query, err => {
-                    if (err) { reject(err) }
-                    resolve()
-                })
-            })
-        }
+    } else {
+        res.send(data)
     }
-
-    res.send(data)
 })
 
 
 router.post('/', (req, res) => {
     const query = `INSERT INTO product (id, material, name, spec, quantity, unit) 
-    VALUES ("${crypto.randomUUID()}", "${req.body.material}", "${req.body.name}", "${req.body.spec}", "${req.body.quantity}", "${req.body.unit}")`
+        VALUES ("${crypto.randomUUID()}", "${req.body.material}", "${req.body.name}", "${req.body.spec}", "${req.body.quantity}", "${req.body.unit}")`
     db.run(query, err => {
         if (err && err.errno === 19) { 
             console.error(err)

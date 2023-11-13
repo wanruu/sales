@@ -1,6 +1,5 @@
 const express = require('express')
 const router = express.Router()
-const Decimal = require('decimal.js')
 
 const db = require('../db')
 
