@@ -5,7 +5,7 @@ const router = express.Router()
 
 const db = require('../db')
 const { formatInsert, updatePartner, updateProductByInvoiceItems, getNextInvoiceId,
-    INVOICE_TYPE_2_INT, UNIT_COEFF_DICT, calQuanByInvoiceType
+    INVOICE_TYPE_2_INT, UNIT_COEFF_DICT, calQuanByInvoiceType, isDateValid
 } = require('./utils.js')
 
 
@@ -27,11 +27,11 @@ router.post('/', async (req, res) => {
     const items = req.body.items || []
     
     // ---------- validate ----------
-    if (partner === undefined || date === undefined || amount === undefined) {
+    if (!partner || !date || !amount) {
         res.status(400).send('Insufficient data')
         return
     }
-    if ((/(\d{4})-(\d{2})-(\d{2})/g).exec(date) === null) {
+    if (!isDateValid(date)) {
         res.status(400).send('Wrong data format, use MMMM-YY-DD')
         return
     }
@@ -105,11 +105,11 @@ router.put('/id/:id', async (req, res) => {
     const payment = req.body.payment || '0'
     const items = req.body.items || []
 
-    if (orderId === undefined || partner === undefined || date === undefined || amount === undefined) {
+    if (!orderId || !partner || !date || !amount) {
         res.status(400).send('Insufficient data')
         return
     }
-    if ((/(\d{4})-(\d{2})-(\d{2})/g).exec(date) === null) {
+    if (!isDateValid(date)) {
         res.status(400).send('Wrong data format, use MMMM-YY-DD')
         return
     }
@@ -252,31 +252,22 @@ router.put('/id/:id', async (req, res) => {
 })
 
 router.get('/', (req, res) => {
-    const query = `SELECT * 
-    FROM invoice AS i LEFT JOIN invoiceRelation AS r ON i.id=r.orderId
-    WHERE type=${typeInt}`
+    const deliveredTable = `(SELECT invoiceId, 
+        CASE WHEN COUNT(*) = SUM(delivered) THEN '全部配送'
+        WHEN SUM(delivered) = 0 THEN '未配送'
+        ELSE '部分配送' END AS delivered
+        FROM invoiceItem GROUP BY invoiceId)`
+    const query = `SELECT i.*, refundId 
+        FROM invoice AS i, ${deliveredTable} AS d
+        LEFT JOIN invoiceRelation AS r ON i.id=r.orderId
+        WHERE i.type=${typeInt} AND d.invoiceId=i.id`
     db.all(query, (err, orders) => {
         if (err) {
             console.error(err)
             res.status(500).send()
             return
         }
-        // get delivered
-        const q = `SELECT invoiceId, COUNT(*) AS itemNum, SUM(delivered) AS deliveredNum FROM invoiceItem GROUP BY invoiceId`
-        db.all(q, (err, items) => {
-            if (err) {
-                console.error(err)
-                res.status(500).send()
-                return
-            }
-            items.forEach(item => {
-                const order = orders.find(order => order.id === item.invoiceId)
-                if (order) {
-                    order.delivered = item.itemNum === item.deliveredNum ? '全部配送' : (item.deliveredNum === 0 ? '未配送' : '部分配送')
-                }
-            })
-            res.send(orders)
-        })
+        res.send(orders)
     })
 })
 
@@ -319,7 +310,7 @@ router.get('/detailed', (req, res) => {
 
 router.get('/id/:id', (req, res) => {
     const orderId = req.params.id  // str
-    if (orderId === undefined) {
+    if (!orderId) {
         res.status(400).send('Insufficient data')
         return
     }
@@ -392,8 +383,11 @@ router.delete('/', async (req, res) => {
         })
     })
 
-    // 2. delete sales order
-    db.run(`DELETE FROM invoice WHERE id IN (${ids})`, err => {
+    // 2. delete sales order & sales refund (if any)
+    const deleteQuery = `DELETE FROM invoice 
+        WHERE id IN (${ids}) OR 
+        id IN (SELECT refundId AS id FROM invoiceRelation WHERE orderId IN (${ids}))`
+    db.run(deleteQuery, err => {
         if (err) {
             console.error(err)
             res.status(500).send(err)

@@ -183,6 +183,12 @@ const getNextInvoiceId = (date, invoicePrefix) => {
 }
 
 
+const isDateValid = (date) => {
+    return (/(\d{4})-(\d{2})-(\d{2})/g).exec(date) !== null
+}
+
+
+exports.isDateValid = isDateValid
 exports.formatInsert = formatInsert
 exports.calQuanByInvoiceType = calQuanByInvoiceType
 

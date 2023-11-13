@@ -8,6 +8,7 @@ import {
     UserOutlined,
     BarChartOutlined,
     MenuFoldOutlined, MenuUnfoldOutlined,
+    QuestionCircleOutlined
 } from '@ant-design/icons'
 
 
@@ -18,6 +19,7 @@ import SettingPage from './pages/SettingPage.js'
 import ProductPage from './pages/ProductPage.js'
 import PartnerPage from './pages/PartnerPage.js'
 import SalesRefundPage from './pages/SalesRefundPage.js'
+import HelpPage from './pages/HelpPage.js'
 
 
 const defaultMenuKey = 'salesOrder'
@@ -34,6 +36,7 @@ function App() {
         'product': <ProductPage />,
         'partner': <PartnerPage />,
         'settings': <SettingPage />,
+        'help': <HelpPage />
     }
 
     // ------------------ Menu
@@ -53,6 +56,7 @@ function App() {
         getMenuItem('交易对象', 'partner', <UserOutlined />),
         getMenuItem('统计数据', 'stat', <BarChartOutlined />),
         getMenuItem('设置', 'settings', <SettingOutlined />),
+        getMenuItem('帮助', 'help', <QuestionCircleOutlined />)
     ]
     // ------------------
 

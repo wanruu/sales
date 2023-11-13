@@ -1,0 +1,14 @@
+.helpCard li {
+    padding-bottom: 5px;
+    padding-top: 5px;
+}
+
+.helpCard .ant-card-body {
+    padding-left: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.helpCard {
+    margin-top: 15px;
+}

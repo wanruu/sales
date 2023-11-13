@@ -4,7 +4,7 @@ const router = express.Router()
 
 const db = require('../db')
 const { formatInsert, getNextInvoiceId, updateProductByInvoiceItems,calQuanByInvoiceType,
-    INVOICE_TYPE_2_INT
+    isDateValid, INVOICE_TYPE_2_INT
 } = require('./utils.js')
 
 
@@ -76,15 +76,15 @@ router.post('/', async (req, res) => {
     const amount = req.body.amount
     const prepayment = req.body.prepayment || '0'
     const payment = req.body.payment || '0'
-    const items = req.body.items
+    const items = req.body.items || []
     const orderId = req.body.orderId
 
     // ---------- validate ----------
-    if (partner === undefined || date === undefined || amount === undefined || orderId === undefined || items.length === 0) {
+    if (!partner || !date || !amount || !orderId || items.length === 0) {
         res.status(400).send('Insufficient data')
         return
     }
-    if ((/(\d{4})-(\d{2})-(\d{2})/g).exec(date) === null) {
+    if (!isDateValid(date)) {
         res.status(400).send('Wrong data format, use MMMM-YY-DD')
         return
     }
@@ -206,16 +206,16 @@ router.put('/id/:id', async (req, res) => {
     const partner = req.body.partner
     const amount = req.body.amount
     const date = req.body.date
-    const items = req.body.items
+    const items = req.body.items || []
     const payment = req.body.payment || '0'
     const prepayment = req.body.prepayment || '0'
 
     // ---------- validate ----------
-    if (partner === undefined || date === undefined || amount === undefined || newOrderId === undefined || items.length === 0) {
+    if (!partner || !date || !amount || !newOrderId || items.length === 0) {
         res.status(400).send('Insufficient data')
         return
     }
-    if ((/(\d{4})-(\d{2})-(\d{2})/g).exec(date) === null) {
+    if (!isDateValid(date)) {
         res.status(400).send('Wrong data format, use MMMM-YY-DD')
         return
     }

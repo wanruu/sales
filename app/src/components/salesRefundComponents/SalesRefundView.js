@@ -58,7 +58,7 @@ export default function SalesRefundView(props) {
 */
 function View(props) {
     const itemColumns = [
-        { title: '', align: 'center', width: 30, render: (_, __, idx) => idx + 1 },
+        { title: '', align: 'center', width: 30, fixed: 'left', render: (_, __, idx) => idx + 1 },
         { title: '材质', dataIndex: 'material', align: 'center', width: 50, export: true, summary: '总计' },
         { title: '名称', dataIndex: 'name', align: 'center', width: 150, export: true },
         { title: '规格', dataIndex: 'spec', align: 'center', width: 70, export: true },

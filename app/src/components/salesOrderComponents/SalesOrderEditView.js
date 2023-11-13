@@ -86,7 +86,7 @@ export default function SalesOrderEditView(props) {
     
     // Table
     const itemColumns = [
-        { title: '', align: 'center', width: 30, render: (_, __, idx) => idx + 1 },
+        { title: '', align: 'center', width: 30, fixed: 'left', render: (_, __, idx) => idx + 1 },
         { title: '材质', dataIndex: 'material', align: 'center', width: 50, render: (_, record, idx) =>
             <ProductInput field='material' size='small' style={{ width: '100%' }} 
                 value={record.material} onChange={value => updateRow(idx, 'material', value)} />

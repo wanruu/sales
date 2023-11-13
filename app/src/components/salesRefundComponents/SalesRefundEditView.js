@@ -39,7 +39,7 @@ export default function SalesRefundEditView(props) {
         setRefund(newRefund)
     }
     const itemColumns = [
-        { title: '', align: 'center', width: 30, render: (_, __, idx) => idx + 1 },
+        { title: '', align: 'center', width: 30, fixed: 'left', render: (_, __, idx) => idx + 1 },
         { title: '材质', dataIndex: 'material', align: 'center', width: 50 },
         { title: '名称', dataIndex: 'name', align: 'center', width: 150 },
         { title: '规格', dataIndex: 'spec', align: 'center', width: 70 },

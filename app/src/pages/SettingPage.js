@@ -259,7 +259,7 @@ function SettingPage() {
                     <Row style={{ marginBottom: '10px' }} align='middle'>
                         <Radio.Group value={previewType} onChange={e => setPreviewType(e.target.value)} >
                             <Radio value={undefined}>不显示</Radio>
-                            { Object.keys(previews).map(type => <Radio value={type}>{previews[type].title}</Radio>) }
+                            { Object.keys(previews).map(type => <Radio key={type} value={type}>{previews[type].title}</Radio>) }
                         </Radio.Group>
                         <InputNumber style={{ width: '130px' }} addonBefore='产品数' value={previewItemNum} min={0} onChange={num => setPreviewItemNum(Math.round(num)) } />
                     </Row>
