@@ -14,30 +14,22 @@ const typeInt = INVOICE_TYPE_2_INT.salesRefund
 
 
 router.get('/', (req, res) => {
-    const query = `SELECT * 
-        FROM invoice AS i LEFT JOIN invoiceRelation AS r ON i.id=r.refundId
-        WHERE type=${typeInt}`
+    const deliveredTable = `(SELECT invoiceId, 
+        CASE WHEN COUNT(*) = SUM(delivered) THEN '全部配送'
+        WHEN SUM(delivered) = 0 THEN '未配送'
+        ELSE '部分配送' END AS delivered
+        FROM invoiceItem GROUP BY invoiceId)`
+    const query = `SELECT i.*, orderId 
+        FROM invoice AS i, ${deliveredTable} AS d 
+        LEFT JOIN invoiceRelation AS r ON i.id=r.refundId
+        WHERE type=${typeInt} AND d.invoiceId=i.id`
     db.all(query, (err, refunds) => {
         if (err) {
             console.error(err)
             res.status(500).send(err)
             return
         }
-        // get delivered
-        const q = `SELECT invoiceId, COUNT(*) AS itemNum, SUM(delivered) AS deliveredNum FROM invoiceItem GROUP BY invoiceId`
-        db.all(q, (err, items) => {
-            if (err) {
-                console.error(err)
-                res.status(500).send()
-                return
-            }
-            items.forEach(item => {
-                const refund = refunds.find(refund => refund.id === item.invoiceId)
-                if (refund) 
-                    refund.delivered = item.itemNum === item.deliveredNum ? '全部配送' : (item.deliveredNum === 0 ? '未配送' : '部分配送')
-            })
-            res.send(refunds)
-        })
+        res.send(refunds)
     })
 })
 
