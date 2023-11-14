@@ -94,7 +94,7 @@ function View(props) {
         </Space>
 
         <Table dataSource={props.refund.items} columns={itemColumns} size='small' bordered style={{ height: 400 }} 
-            rowKey={record => record.invoiceItemId} scroll={{x: 'max-content', y: 400 }} pagination={false} />
+            rowKey={record => record.refundItemId} scroll={{x: 'max-content', y: 400 }} pagination={false} />
 
         <Divider />
         <Col align='end'>

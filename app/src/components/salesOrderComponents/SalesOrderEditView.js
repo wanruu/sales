@@ -6,7 +6,7 @@ import Axios from 'axios'
 
 import { dcInvoice, calItemAmount, calTotalAmount, emptyInvoice, emptyInvoiceItem } from '../../utils/invoiceUtils'
 import { isSalesOrderItemEmpty, isSalesOrderItemComplete } from '../../utils/salesOrderUtils'
-import { PartnerInput, ProductInput, UnitInput, DeliveredInput } from '../common/PromptInput'
+import { PartnerInput, ProductInput, UnitInput, DeliveredInput, PriceInput } from '../common/PromptInput'
 import { baseURL, dateFormat } from '../../utils/config'
 import '../common/Invoice.css'
 
@@ -109,7 +109,8 @@ export default function SalesOrderEditView(props) {
                 onChange={value => updateRow(idx, 'unit', value)} />
         },
         { title: '单价', dataIndex: 'price', align: 'center', width: 70, render: (_, record, idx) => 
-            <InputNumber min={0} stringMode keyboard={false} size='small' controls={false} style={{width: '100%'}} value={record.price} 
+            <PriceInput partner={order.partner} material={record.material} name={record.name} spec={record.spec}
+                min={0} stringMode keyboard={false} size='small' controls={false} style={{width: '100%'}} value={record.price} 
                 onChange={value => updateRow(idx, 'price', value)} />
         },
         { title: '金额', dataIndex: 'originalAmount', align: 'center', width: 80 },

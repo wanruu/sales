@@ -3,6 +3,7 @@ const router = express.Router()
 const crypto = require('crypto')
 
 const db = require('../db')
+const { INVOICE_TYPE_2_INT } = require('./utils')
 
 
 router.get('/', async (req, res) => {
@@ -24,7 +25,7 @@ router.get('/', async (req, res) => {
 
 router.get('/unit/:material/:name/:spec', (req, res) => {
     const query = `SELECT unit FROM product 
-    WHERE material="${req.params.material}" AND name="${req.params.name}" AND spec="${req.params.spec}"`
+        WHERE material="${req.params.material}" AND name="${req.params.name}" AND spec="${req.params.spec}"`
     db.all(query, (err, rows) => {
         if (err) {
             console.error(err)
@@ -33,6 +34,33 @@ router.get('/unit/:material/:name/:spec', (req, res) => {
         }
         const unit = rows.length === 0 ? undefined : rows[0].unit
         res.send({ unit: unit })
+    })
+})
+
+
+router.get('/price/:material/:name/:spec', (req, res) => {
+    // data
+    const material = req.params.material
+    const name = req.params.name
+    const spec = req.params.spec
+    const salesOrderType = INVOICE_TYPE_2_INT.salesOrder
+    const purchaseOrderType = INVOICE_TYPE_2_INT.purchaseOrder
+    // sales order
+    const selectQuery = `SELECT i.partner, i.date, i.id,
+            CASE WHEN i.type=${salesOrderType} THEN 'salesOrder' ELSE 'purchaseOrder' END AS type,
+            ii.quantity, p.unit, ii.price, ii.discount, ii.originalAmount, ii.amount, ii.remark
+        FROM invoiceItem AS ii, product AS p, invoice AS i
+        WHERE p.material="${material}" AND name="${name}" AND spec="${spec}" 
+            AND ii.productId=p.id AND ii.invoiceId=i.id 
+            AND (i.type=${salesOrderType} OR i.type=${purchaseOrderType})
+        ORDER BY i.id DESC`
+    db.all(selectQuery, (err, items) => {
+        if (err) {
+            console.error(err)
+            res.status(500).send(err)
+            return
+        }
+        res.send(items)
     })
 })
 

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Row, Col, Space } from 'antd'
 import { FieldNumberOutlined } from '@ant-design/icons'
 
@@ -27,7 +27,7 @@ function PreviewTable(props) {
                 <tbody>
                     {
                         props.invoice.items.map((item, itemIdx) =>
-                            <tr key={item.id || item.invoiceItemId}>
+                            <tr key={item.productId}>
                                 <td>{itemIdx+1}</td>
                                 <td>{item.material}</td>
                                 <td>{item.name}</td>

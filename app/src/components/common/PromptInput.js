@@ -1,10 +1,14 @@
+import React, { useEffect, useState } from 'react'
 import Axios from 'axios'
-import { AutoComplete, Select, } from 'antd'
-import React, { useEffect, useState,  } from 'react'
+import { AutoComplete, Button, Divider, InputNumber, Modal, Radio, Row, Select, 
+    Space, Table, Checkbox 
+} from 'antd'
+import { LineChartOutlined, CloseOutlined } from '@ant-design/icons'
+import ReactEcharts from 'echarts-for-react'
 
 
 import { baseURL, unitOptions } from '../../utils/config'
-// import './Invoice.css'
+
 
 export function PartnerInput(props) {
     const [options, setOptions] = useState([])
@@ -93,18 +97,163 @@ export function UnitInput(props) {
         return unit !== undefined && unit != props.value ? 'warning' : ''
     }
 
-    useEffect(() => {
-        load()
-    }, [props.material, props.name, props.spec])
+    useEffect(load, [props.material, props.name, props.spec])
 
-    return unit === undefined ? <Select size={props.size || 'small'} options={unitOptions} id='unitInput' disabled={props.disabled || false}
+    return unit === undefined ? <Select size={props.size || 'small'} options={unitOptions} disabled={props.disabled || false}
         align={props.align || 'center'} style={props.style || {}} value={props.value} 
         onChange={props.onChange} status={getStatus()}
     /> : unit
 }
 
+
 export function DeliveredInput(props) {
-    return <Select size={props.size || 'small'} id='unitInput' options={[{ label: '未配送', value: false }, { label: '已配送', value: true }]} 
+    const options = [
+        { label: '未配送', value: false }, 
+        { label: '已配送', value: true }
+    ]
+    return <Select size={props.size || 'small'} options={options} 
         align={props.align || 'center'} value={props.value} onChange={props.onChange} style={props.style || {}}
     />
+}
+
+
+function PriceHistory(props) {
+    const [prices, setPrices] = useState([])
+    const [displayType, setDisplayType] = useState('table')
+    const [tableFilters, setTableFilters] = useState(['salesOrder', 'purchaseOrder'])
+
+    // table
+    const itemColumns = [
+        { title: '序号', align: 'center', render: (_, __, idx) => idx + 1, width: 45, fixed: 'left' },
+        { title: '单号', dataIndex: 'id', align: 'center', width: 150, sorter: (a, b) => a.id > b.id ? 1 : -1, showSorterTooltip: false },
+        { title: '交易对象', dataIndex: 'partner', align: 'center', width: 130 },
+        { title: '单价', dataIndex: 'price', align: 'center', width: 80, 
+            render: price => <Button size='small' type='text' style={{ width: '100%' }} onClick={_ => props.setPrice(price) }>{price}</Button>,
+            sorter: (a, b) => a.price - b.price, showSorterTooltip: false
+        },
+        { title: '数量', dataIndex: 'quantity', align: 'center', width: 80, 
+            sorter: (a, b) => a.quantity - b.quantity, showSorterTooltip: false 
+        },
+        { title: '折后价', dataIndex: 'amount', align: 'center', width: 90, 
+            sorter: (a, b) => a.amount - b.amount, showSorterTooltip: false 
+        },
+        { title: '日期', dataIndex: 'date', align: 'center', width: 100, 
+            sorter: (a, b) => a.date > b.date ? 1 : ( a.date < b.date ? -1 : 0), showSorterTooltip: false
+        },
+        { title: '备注', dataIndex: 'remark', align: 'center', width: 120 }
+    ]
+
+    // chart
+    const getChartOption = (data) => {
+        const newData = data.map(item => {
+            item.value = item.price
+            return item
+        }).reverse()
+        return {
+            title: { text: newData.length === 0 ? '暂无数据' : '', x: 'center', y: 'center' },
+            xAxis: { type: 'category', data: newData.map(item => item.date) },
+            yAxis: { type: 'value' },
+            legend: { show: true, data: ['销售单', '采购单'] },
+            tooltip: {
+                trigger: 'axis',
+                formatter: function (params) {
+                    const data = params[0].data
+                    const remark = data.remark ? `备注：${data.remark}` : ''
+                    const partnerTitle = data.type === 'salesOrder' ? '客户' : '供应商'
+                    return `<div style="border-bottom:dashed lightgray;padding-bottom:5px;">
+                        单价：${data.price}<br/>
+                        数量：${data.quantity} ${data.unit}<br/>
+                        折后价：${data.amount}<br/>
+                        ${remark}
+                    </div>
+                    <div style="padding-top:5px;">
+                        单号：${data.id}<br/>
+                        ${partnerTitle}：${data.partner}<br/>
+                        日期：${data.date}
+                    </div>`
+                }
+            },
+            series: [
+                { data: newData.filter(i => i.type === 'salesOrder'), type: 'line', name: '销售单' },
+                { data: newData.filter(i => i.type === 'purchaseOrder'), type: 'line', name: '采购单' },
+            ]
+        }
+    }
+
+    const load = () => {
+        setPrices([])
+        // if (getButtonDisabled()) { 
+        //     return 
+        // }
+        Axios({
+            method: 'get',
+            baseURL: baseURL(),
+            url: `product/price/${props.material}/${props.name}/${props.spec}`,
+            'Content-Type': 'application/json',
+        }).then(res => {
+            setPrices(res.data)
+            // const item = res.data.find(item => item.type === 'salesOrder')
+            // if (item) props.onChange(item.price)
+        }).catch(err => {
+            console.error(err)
+        })
+    }
+
+    // effect
+    useEffect(load, [props.material, props.name, props.spec])
+
+    return <div>
+        {/* Product Information */}
+        <Row style={{ justifyContent: 'space-between', padding: '10px 0' }}>
+            <span>材质：{ props.material }</span>
+            <span>名称：{ props.name }</span>
+            <span>规格：{ props.spec }</span>
+        </Row>
+        {/* Display Options */}
+        <Row style={{ justifyContent: 'space-between', padding: '5px 0 15px 0' }} align='middle'>
+            <Radio.Group value={displayType} onChange={e => setDisplayType(e.target.value)} >
+                <Radio.Button value='table'>表格</Radio.Button>
+                <Radio.Button value='chart'>折线图</Radio.Button>
+            </Radio.Group>
+            { displayType === 'chart' ? null : <Checkbox.Group value={tableFilters} onChange={val => setTableFilters(val)}>
+                <Checkbox value='salesOrder'>销售单</Checkbox>
+                <Checkbox value='purchaseOrder'>采购单</Checkbox>
+            </Checkbox.Group> }
+            { displayType === 'chart' ? null : <span style={{ color: 'gray', fontStyle: 'italic' }}>* 点击单价可自动填入</span> }
+        </Row>
+        {/* Main Content */}
+        { displayType === 'chart' ? 
+            <ReactEcharts option={getChartOption(prices)} style={{ height: 400 }} /> :
+            <Table dataSource={prices.filter(p => tableFilters.includes(p.type))} size='small' rowKey={record => record.id} columns={itemColumns}
+                scroll={{ x: 'max-content', y: 400 }} style={{ height: 400 }} pagination={false} bordered /> 
+        }
+        <Divider />
+    </div>
+}
+
+export function PriceInput(props) {
+    const [showHistory, setShowHistory] = useState(false)
+
+    const getButtonDisabled = () => {
+        if (!props.material || !props.name || !props.spec)
+            return true
+        return false
+    }
+
+    return <>
+        <Modal open={showHistory} onCancel={_ => setShowHistory(false)} title='历史价格' width={900} destroyOnClose 
+            footer={<Button type='primary' onClick={_ => setShowHistory(false)} icon={<CloseOutlined/>}>关闭</Button>}>
+            <PriceHistory partner={props.partner} material={props.material} name={props.name} spec={props.spec} 
+                setPrice={val => { props.onChange(val); setShowHistory(false) }} />
+        </Modal>
+    
+        <Space.Compact size={props.size || 'small'} style={props.style || {}}>
+            <InputNumber controls={props.controls === undefined ? true : props.controls}
+                value={props.value} onChange={props.onChange} min={props.min || Number.MIN_SAFE_INTEGER}
+                stringMode={props.stringMode === undefined ? false : props.stringMode}
+                keyboard={props.keyboard === undefined ? true : props.keyboard} />
+            <Button icon={<LineChartOutlined />} disabled={getButtonDisabled()}
+                onClick={_ => setShowHistory(true)} />
+        </Space.Compact>
+    </>
 }

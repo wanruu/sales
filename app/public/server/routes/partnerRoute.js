@@ -6,12 +6,12 @@ const db = require('../db')
 
 router.get('/', (req, res) => {
     const t = `SELECT p.name, COUNT(*) AS invoiceNum
-    FROM partner AS p, invoiceItem AS ii, invoice AS i 
-    WHERE p.name=i.partner AND ii.invoiceId=i.id 
-    GROUP BY p.name`
+        FROM partner AS p, invoiceItem AS ii, invoice AS i 
+        WHERE p.name=i.partner AND ii.invoiceId=i.id 
+        GROUP BY p.name`
 
     const query = `SELECT p.*, invoiceNum 
-    FROM partner AS p LEFT JOIN (${t}) AS t ON p.name=t.name`
+        FROM partner AS p LEFT JOIN (${t}) AS t ON p.name=t.name`
     db.all(query, (err, rows) => {
         if (err) {
             console.error(err)
@@ -38,7 +38,7 @@ router.delete('/', (req, res) => {
 
 router.post('/', (req, res) => {
     const query = `INSERT INTO partner(name, phone, address) 
-    VALUES ("${req.body.name}", "${req.body.phone}", "${req.body.address}")`
+        VALUES ("${req.body.name}", "${req.body.phone}", "${req.body.address}")`
     db.run(query, err => {
         if (err && err.errno === 19) {
             res.send({ changes: 0, prompt: '姓名重复' })

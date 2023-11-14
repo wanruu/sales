@@ -15,7 +15,7 @@ const typeInt = INVOICE_TYPE_2_INT.salesOrder
 
 
 /*
-    item: { productId, price, discount, quantity, originalAmount, amount, remark }
+    item: { material, name, spec, price, discount, quantity, originalAmount, amount, remark }
 */
 router.post('/', async (req, res) => {
     // ---------- data ----------
@@ -35,7 +35,6 @@ router.post('/', async (req, res) => {
         res.status(400).send('Wrong data format, use MMMM-YY-DD')
         return
     }
-    // ---------- -------- ----------
 
     // 1. insert partner
     await updatePartner('INSERT OR IGNORE', partner, '', '').catch(err => {
@@ -43,7 +42,6 @@ router.post('/', async (req, res) => {
         res.status(500).send(err)
     })
 
-    
     // 2. insert salesOrder
     const orderId = await getNextInvoiceId(date, prefix).catch(err => {
         console.error(err)
@@ -91,7 +89,7 @@ router.post('/', async (req, res) => {
             res.status(500).send(err)
         })
     }
-    // 5. return
+    // 3. return
     res.end()
 })
 
@@ -127,10 +125,10 @@ router.put('/id/:id', async (req, res) => {
     })
     
     // 2. update salesOrder
-    const updateInvoice = `UPDATE invoice SET partner="${partner}", date="${date}", amount="${amount}", 
+    const updateOrder = `UPDATE invoice SET partner="${partner}", date="${date}", amount="${amount}", 
         prepayment="${prepayment}", payment="${payment}" WHERE id="${orderId}"`
     await new Promise((resolve, reject) => {
-        db.run(updateInvoice, err => {
+        db.run(updateOrder, err => {
             if (err) { reject(err) }
             resolve()
         })

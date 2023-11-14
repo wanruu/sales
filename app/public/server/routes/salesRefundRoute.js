@@ -4,8 +4,7 @@ const router = express.Router()
 
 const db = require('../db')
 const { formatInsert, getNextInvoiceId, updateProductByInvoiceItems,
-    isDateValid, getQuantitySign,
-    INVOICE_TYPE_2_INT
+    isDateValid, getQuantitySign, INVOICE_TYPE_2_INT
 } = require('./utils.js')
 
 
@@ -46,10 +45,10 @@ router.get('/id/:id', (req, res) => {
             res.status(500).send(err)
             return
         }
-        const query = `SELECT ii.id AS invoiceItemId, productId, material, name, spec, unit, p.quantity AS remainingQuantity, 
-        price, discount, ii.quantity, originalAmount, amount, remark, delivered 
-        FROM invoiceItem ii, product p
-        WHERE ii.invoiceId="${refundId}" AND ii.productId=p.id`
+        const query = `SELECT ii.id AS refundItemId, productId, material, name, spec, unit, p.quantity AS remainingQuantity, 
+            price, discount, ii.quantity, originalAmount, amount, remark, delivered 
+            FROM invoiceItem ii, product p
+            WHERE ii.invoiceId="${refundId}" AND ii.productId=p.id`
         db.all(query, (err, items) => {
             if (err) {
                 console.error(err)
@@ -88,14 +87,13 @@ router.post('/', async (req, res) => {
         res.status(500).send(err)
     })
     
-    
     // 2. insert salesRefund
     const refundId = await getNextInvoiceId(req.body.date, prefix).catch(err => {
         console.error(err)
         res.status(500).send(err)
     })
     const refundInsert = `INSERT INTO invoice (id, type, partner, date, amount, prepayment, payment) VALUES 
-    ("${refundId}", ${typeInt}, "${partner}", "${date}", "${amount}", "${prepayment}", "${payment}")`
+        ("${refundId}", ${typeInt}, "${partner}", "${date}", "${amount}", "${prepayment}", "${payment}")`
     await new Promise((resolve, reject) => {
         db.run(refundInsert, err => {
             if (err) { reject(err) }
