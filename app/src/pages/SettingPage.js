@@ -6,7 +6,7 @@ import dayjs from 'dayjs'
 import uuid from 'react-uuid'
 
 
-import { baseURL, invoiceSettings, dateFormat } from '../utils/config'
+import { baseURL, invoiceSettings, DATE_FORMAT } from '../utils/config'
 import InvoiceView from '../components/common/InvoiceView'
 
 
@@ -17,7 +17,7 @@ export const initInvoiceForPreview = (prefix, itemNum) => {
     return {
         id: `${prefix}${dayjs().format('YYYYMMDD')}0001`,
         partner: '',  phone: ' ', address: ' ',
-        date: dayjs().format(dateFormat),
+        date: dayjs().format(DATE_FORMAT),
         amount: '0',
         items: [...Array(itemNum).keys()].map(_ => { return {
             id: uuid(), material: '', name: '', spec: '', unit: '', 

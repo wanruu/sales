@@ -7,7 +7,7 @@ import Axios from 'axios'
 import { dcInvoice, calItemAmount, calTotalAmount, emptyInvoice, emptyInvoiceItem } from '../../utils/invoiceUtils'
 import { isSalesOrderItemEmpty, isSalesOrderItemComplete } from '../../utils/salesOrderUtils'
 import { PartnerInput, ProductInput, UnitInput, DeliveredInput, PriceInput } from '../common/PromptInput'
-import { baseURL, dateFormat } from '../../utils/config'
+import { baseURL, DATE_FORMAT } from '../../utils/config'
 import '../common/Invoice.css'
 
 
@@ -66,7 +66,7 @@ export default function SalesOrderEditView(props) {
 
         // 2. Clean data & Upload
         const newOrder = dcInvoice(order)
-        newOrder.date = newOrder.date.format(dateFormat)
+        newOrder.date = newOrder.date.format(DATE_FORMAT)
         newOrder.items = newOrder.items.filter(item => !isSalesOrderItemEmpty(item))
         Axios({
             method: newOrder.id ? 'put' : 'post',

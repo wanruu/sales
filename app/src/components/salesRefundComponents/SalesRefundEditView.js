@@ -6,7 +6,7 @@ import { FieldNumberOutlined, EditOutlined, SaveOutlined, DeleteOutlined, CloseO
 
 
 import { calItemAmount, calTotalAmount, dcInvoice, emptyInvoice } from '../../utils/invoiceUtils'
-import { baseURL, dateFormat } from '../../utils/config'
+import { baseURL, DATE_FORMAT } from '../../utils/config'
 import { DeliveredInput } from '../common/PromptInput'
 import SalesRefundItemSelectView from './SalesRefundItemSelectView'
 import '../common/Invoice.css'
@@ -71,7 +71,7 @@ export default function SalesRefundEditView(props) {
     ]
     const upload = () => {
         const newRefund = dcInvoice(refund)
-        newRefund.date = newRefund.date.format(dateFormat)
+        newRefund.date = newRefund.date.format(DATE_FORMAT)
         newRefund.items = newRefund.items.map(item => {
             item.quantity = item.quantity || '0'
             return item

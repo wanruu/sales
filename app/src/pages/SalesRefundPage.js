@@ -10,7 +10,7 @@ const { Item } = Form
 const { RangePicker } = DatePicker
 
 
-import { baseURL, dateFormat } from '../utils/config'
+import { baseURL, DATE_FORMAT, DEFAULT_PAGINATION } from '../utils/config'
 import { exportExcel, getExportData } from '../utils/export'
 import SalesRefundFB from '../components/salesRefundComponents/SalesRefundFB'
 import SalesRefundView from '../components/salesRefundComponents/SalesRefundView'
@@ -46,18 +46,17 @@ function SalesRefundPage() {
             filterSalesRefunds(refunds)
         }).catch(_ => { })
     }
-    const pagination = { defaultPageSize: 50, pageSizeOptions: [50, 100], showQuickJumper: true, showSizeChanger: true }
     const salesTableColumns = [
-        { title: '序号', align: 'center', render: (_, __, idx) => idx + 1 },
+        { title: '序号', align: 'center', render: (_, __, idx) => idx + 1, fixed: 'left' },
         { title: '单号', dataIndex: 'id', align: 'center', export: true, render: id => <a onClick={_ => setSelectedRefundId(id)}>{id}</a> },
-        { title: '日期', dataIndex: 'date', align: 'center', export: true },
         { title: '客户', dataIndex: 'partner', align: 'center', export: true },
+        { title: '日期', dataIndex: 'date', align: 'center', export: true },
         { title: '金额', dataIndex: 'amount', align: 'center', export: true },
         { title: '已付', dataIndex: 'payment', align: 'center', export: true },
         { title: '未付', dataIndex: 'unpaid', align: 'center', export: true, render: unpaid => <span style={{ color: unpaid === '0' ? 'black' : 'red' }}>{unpaid}</span> },
         { title: '配送情况', dataIndex: 'delivered', align: 'center', export: true },
         { title: '关联销售单', dataIndex: 'orderId', align: 'center', export: true, render: id => <a onClick={_ => setSelectedOrderId(id)}>{id}</a> },
-        { title: '操作', align: 'center', render: (_, record) => 
+        { title: '操作', align: 'center', fixed: 'right', render: (_, record) => 
             <Space.Compact size='small'>
                 <Button type='link' onClick={_ => showDeleteConfirm([record.id])} danger>删除</Button>
              </Space.Compact>
@@ -93,8 +92,8 @@ function SalesRefundPage() {
         const conds = form.getFieldsValue()
         setFilteredSalesRefunds(salesRefunds.filter(o => 
             (!conds.refundId || o.id.includes(conds.refundId)) &&
-            (!conds.date || !conds.date[0] || o.date >= conds.date[0].format(dateFormat)) &&
-            (!conds.date || !conds.date[1] || o.date <= conds.date[1].format(dateFormat)) &&
+            (!conds.date || !conds.date[0] || o.date >= conds.date[0].format(DATE_FORMAT)) &&
+            (!conds.date || !conds.date[1] || o.date <= conds.date[1].format(DATE_FORMAT)) &&
             (!conds.partner || o.partner.includes(conds.partner)) &&
             (!conds.orderId || (o.orderId != null && o.orderId.includes(conds.orderId)))
         ))
@@ -122,14 +121,14 @@ function SalesRefundPage() {
         </Modal>
 
         <br />
-        <Space direction='vertical'>
+        <Space direction='vertical' style={{ width: '100%' }}>
             {/* Function Box */}
             <Card size='small'><Form form={form} onFinish={_ => filterSalesRefunds(salesRefunds)}><Row>
                 <Item label='单号' name='refundId' style={itemStyle}><Input allowClear placeholder='单号' /></Item>
                 <Item label='客户' name='partner' style={itemStyle}><Input allowClear placeholder='客户' /></Item>
-                <Item label='日期' name='date' style={itemStyle}><RangePicker format={dateFormat} allowEmpty={[true, true]} /></Item>
+                <Item label='日期' name='date' style={itemStyle}><RangePicker format={DATE_FORMAT} allowEmpty={[true, true]} /></Item>
                 <Item label='销售单号' name='orderId' style={itemStyle}><Input allowClear placeholder='销售单号' /></Item>
-                <Space style={itemStyle}>
+                <Space wrap style={itemStyle}>
                     <Button icon={<SearchOutlined />} type='primary' htmlType='submit'>搜索</Button>
                     <Button icon={<TableOutlined />} onClick={exportSalesRefunds} disabled={filteredSalesRefunds.length === 0}>批量导出</Button>
                     <Button danger icon={<DeleteOutlined />} onClick={_ => showDeleteConfirm(filteredSalesRefunds.map(f => f.id) || [])} disabled={filteredSalesRefunds.length === 0}>批量删除</Button>
@@ -138,7 +137,7 @@ function SalesRefundPage() {
 
             {/* Sales Refund Table */}
             <Table dataSource={filteredSalesRefunds} size='small' rowKey={record => record.id} 
-                bordered columns={salesTableColumns} pagination={pagination} />
+                bordered columns={salesTableColumns} pagination={DEFAULT_PAGINATION} scroll={{ x: 'max-content' }} />
         </Space>
     </>
 }

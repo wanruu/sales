@@ -1,9 +1,9 @@
 import dayjs from 'dayjs'
-import { Decimal } from 'decimal.js'
+import Decimal from 'decimal.js'
 import uuid from 'react-uuid'
 
 
-import { unitCoeffDict } from './config'
+import { UNIT_COEFF_DICT } from './config'
 
 
 export const dcInvoice = (invoice) => {
@@ -43,12 +43,12 @@ export const emptyInvoice = (itemsNum) => {
 }
 
 export const calItemAmount = (itemDict) => {
-    const quantity = new Decimal(itemDict.quantity || 0)
-    const price = new Decimal(itemDict.price || 0)
-    const unit = new Decimal(unitCoeffDict[itemDict.unit])
-    const discount = new Decimal(itemDict.discount || 0)
+    const quantity = Decimal(itemDict.quantity || 0)
+    const price = Decimal(itemDict.price || 0)
+    const unitRatio = Decimal(UNIT_COEFF_DICT[itemDict.unit])
+    const discount = Decimal(itemDict.discount || 0)
 
-    const originalAmount = quantity.times(price).times(unit)
+    const originalAmount = quantity.times(price).times(unitRatio)
     const amount = originalAmount.times(discount).dividedBy(100)
 
     return { originalAmount: originalAmount.toString(), amount: amount.toString()}

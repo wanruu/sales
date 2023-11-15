@@ -4,7 +4,7 @@ export const baseURL = () => {
     return 'http://localhost:8888/'
 }
 
-export const dateFormat = 'YYYY-MM-DD'
+export const DATE_FORMAT = 'YYYY-MM-DD'
 
 
 export const invoiceSettings = {
@@ -27,7 +27,7 @@ export const invoiceSettings = {
     showAddress: () => (localStorage.getItem('showAddress') || 'false') === 'true',
 }
 
-export const unitOptions = [
+export const UNIT_OPTIONS = [
     { label: '-', value: '' },
     { label: '千件', value: '千件' },
     { label: '只', value: '只' },
@@ -36,11 +36,18 @@ export const unitOptions = [
     { label: '套', value: '套' }
 ]
 
-export const unitCoeffDict = {
+export const UNIT_COEFF_DICT = {
     '': new Decimal(0),
     '千件': new Decimal(1000),
     '只': new Decimal(1),
     '包': new Decimal(1),
     '斤': new Decimal(1),
     '套': new Decimal(1),
+}
+
+export const DEFAULT_PAGINATION = {
+    defaultPageSize: 50, 
+    pageSizeOptions: [50, 100], 
+    showQuickJumper: true, 
+    showSizeChanger: true
 }

@@ -7,7 +7,7 @@ import _ from 'lodash'
 const { confirm } = Modal
 const { Item } = Form
 
-import { baseURL } from '../utils/config'
+import { baseURL, DEFAULT_PAGINATION } from '../utils/config'
 import ProductEditView from '../components/productComponents/ProductEditView'
 import { exportExcel, getExportData } from '../utils/export'
 
@@ -37,13 +37,13 @@ function ProductPage() {
         }).catch(_ => { })
     }
     const productTableColumns = [
-        { title: '序号', align: 'center', render: (_, __, idx) => idx + 1 },
+        { title: '序号', align: 'center', render: (_, __, idx) => idx + 1, fixed: 'left' },
         { title: '材质', dataIndex: 'material', align: 'center', export: true },
         { title: '名称', dataIndex: 'name', align: 'center', export: true },
         { title: '规格', dataIndex: 'spec', align: 'center', export: true },
         { title: '库存', dataIndex: 'quantity', align: 'center', export: true, render: quantity => <span style={{ color: quantity[0] == '-' ? 'red': 'black' }}>{quantity}</span> },
         { title: '单位', dataIndex: 'unit', align: 'center', export: true },
-        { title: '操作', align: 'center', render: (_, record) => 
+        { title: '操作', align: 'center', fixed: 'right', render: (_, record) => 
             <Space.Compact size='small'>
                 <Button type='link' onClick={_ => setEditProduct(record)}>编辑</Button>
                 {record.invoiceNum > 0 ?
@@ -53,7 +53,6 @@ function ProductPage() {
             </Space.Compact>
         }
     ]
-    const pagination = { defaultPageSize: 50, showSizeChanger: true, pageSizeOptions: [50, 100], showQuickJumper: true }
 
     // delete products
     const showDeleteConfirm = (products) => {
@@ -111,13 +110,13 @@ function ProductPage() {
         </Modal>
 
         <br />
-        <Space direction='vertical'>
+        <Space direction='vertical' style={{ width: '100%' }}>
             {/* Function Box */}
             <Card size='small'><Form form={form} onFinish={_ => filterProducts(products)}><Row>
                 <Item label='材质' name='material' style={itemStyle}><Input allowClear placeholder='材质' /></Item>
                 <Item label='名称' name='name' style={itemStyle}><Input allowClear placeholder='名称' /></Item>
                 <Item label='规格' name='spec' style={itemStyle}><Input allowClear placeholder='规格' /></Item>
-                <Space style={itemStyle}>
+                <Space wrap style={itemStyle}>
                     <Button icon={<SearchOutlined />} type='primary' htmlType='submit'>搜索</Button>
                     <Button icon={<PlusOutlined />} onClick={_ => setNewProduct(true)}>新增产品</Button>
                     <Button icon={<TableOutlined />} disabled={filteredProducts.length === 0} onClick={exportProducts}>批量导出</Button>
@@ -128,7 +127,7 @@ function ProductPage() {
 
             {/* Product Table */}
             <Table dataSource={filteredProducts} size='small' bordered rowKey={record => record.id} columns={productTableColumns}
-                pagination={pagination} />
+                pagination={DEFAULT_PAGINATION} scroll={{ x: 'max-content' }} />
         </Space>
     </>
 }

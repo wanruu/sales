@@ -11,7 +11,7 @@ const { RangePicker } = DatePicker
 
 
 import SalesOrderFB from '../components/salesOrderComponents/SalesOrderFB'
-import { baseURL, dateFormat } from '../utils/config'
+import { baseURL, DATE_FORMAT, DEFAULT_PAGINATION } from '../utils/config'
 import { exportExcel, getExportData } from '../utils/export'
 import SalesOrderView from '../components/salesOrderComponents/SalesOrderView'
 import SalesRefundView from '../components/salesRefundComponents/SalesRefundView'
@@ -47,10 +47,10 @@ function SalesOrderPage() {
         }).catch(_ => { })
     }
     const orderTableColumns = [
-        { title: '序号', align: 'center', render: (_, __, idx) => idx + 1 },
+        { title: '序号', align: 'center', render: (_, __, idx) => idx + 1, fixed: 'left' },
         { title: '单号', dataIndex: 'id', align: 'center', export: true, summary: '总计', render: id => <a onClick={_ => setSelectedOrderId(id)}>{id}</a> },
-        { title: '日期', dataIndex: 'date', align: 'center', export: true },
         { title: '客户', dataIndex: 'partner', align: 'center', export: true },
+        { title: '日期', dataIndex: 'date', align: 'center', export: true },
         { title: '金额', dataIndex: 'amount', align: 'center', export: true, summary: 'sum' },
         // { title: '订金', dataIndex: 'prepayment', align: 'center', export: true, summary: 'sum' },
         // { title: '尾款', dataIndex: 'payment', align: 'center', export: true, summary: 'sum' },
@@ -60,13 +60,12 @@ function SalesOrderPage() {
         },
         { title: '配送情况', dataIndex: 'delivered', align: 'center', export: true },
         { title: '关联退货单', dataIndex: 'refundId', align: 'center', render: id => id ? <a onClick={_ => setSelectedRefundId(id)}>{id}</a> : null },
-        { title: '操作', align: 'center', render: (_, record) => (
+        { title: '操作', align: 'center', fixed: 'right', render: (_, record) => (
             <Space.Compact size='small'>
                 <Button type='link' onClick={_ => showDeleteConfirm([record.id])} danger>删除</Button>
             </Space.Compact>
         ) }
     ]
-    const pagination = {defaultPageSize: 50, pageSizeOptions: [50, 100], showQuickJumper: true, showSizeChanger: true}
 
     // delete
     const showDeleteConfirm = (orderIds) => {
@@ -97,8 +96,8 @@ function SalesOrderPage() {
         const conds = form.getFieldsValue()
         setFilteredSalesOrders(salesOrders.filter(o => 
             (!conds.orderId || o.id.includes(conds.orderId)) &&
-            (!conds.date || !conds.date[0] || o.date >= conds.date[0].format(dateFormat)) &&
-            (!conds.date || !conds.date[1] || o.date <= conds.date[1].format(dateFormat)) &&
+            (!conds.date || !conds.date[0] || o.date >= conds.date[0].format(DATE_FORMAT)) &&
+            (!conds.date || !conds.date[1] || o.date <= conds.date[1].format(DATE_FORMAT)) &&
             (!conds.partner || o.partner.includes(conds.partner)) &&
             (!conds.refundId || (o.refundId != null && o.refundId.includes(conds.refundId)))
         ))
@@ -126,14 +125,14 @@ function SalesOrderPage() {
         </Modal>
 
         <br />
-        <Space direction='vertical'>
+        <Space direction='vertical' style={{ width: '100%' }}>
             {/* Function Box */}
             <Card size='small'><Form form={form} onFinish={_ => filterSalesOrders(salesOrders)}><Row>
                 <Item label='单号' name='orderId' style={itemStyle}><Input allowClear placeholder='单号' /></Item>
                 <Item label='客户' name='partner' style={itemStyle}><Input allowClear placeholder='客户' /></Item>
-                <Item label='日期' name='date' style={itemStyle}><RangePicker format={dateFormat} allowEmpty={[true, true]} /></Item>
+                <Item label='日期' name='date' style={itemStyle}><RangePicker format={DATE_FORMAT} allowEmpty={[true, true]} /></Item>
                 <Item label='退货单号' name='refundId' style={itemStyle}><Input allowClear placeholder='退货单号' /></Item>
-                <Space style={itemStyle}>
+                <Space wrap style={itemStyle}>
                     <Button icon={<SearchOutlined />} type='primary' htmlType='submit'>搜索</Button>
                     <Button icon={<TableOutlined />} onClick={exportSalesOrders} disabled={filteredSalesOrders.length === 0}>批量导出</Button>
                     <Button icon={<DeleteOutlined />} onClick={_ => showDeleteConfirm(filteredSalesOrders.map(o => o.id) || [])} danger disabled={filteredSalesOrders.length === 0}>批量删除</Button>
@@ -142,7 +141,7 @@ function SalesOrderPage() {
 
             {/* Sales Order Table */}
             <Table dataSource={filteredSalesOrders} bordered size='small' rowKey={record => record.id} 
-                columns={orderTableColumns} pagination={pagination} />
+                columns={orderTableColumns} pagination={DEFAULT_PAGINATION} scroll={{ x: 'max-content' }} />
         </Space>
     </>
 }

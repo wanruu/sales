@@ -5,7 +5,7 @@ import Decimal from 'decimal.js'
 
 const { Item } = Form
 
-import { baseURL, unitCoeffDict } from '../../utils/config'
+import { baseURL, UNIT_COEFF_DICT } from '../../utils/config'
 import { UnitInput } from '../common/PromptInput'
 
 /*
@@ -23,7 +23,7 @@ function ProductEditView(props) {
         const p = form.getFieldsValue()
         p.quantity = p.quantity || '0'
         if (props.product !== undefined) {
-            p.unitRatio = Decimal(unitCoeffDict[p.unit]).div(unitCoeffDict[props.product.unit]).toString()
+            p.unitRatio = Decimal(UNIT_COEFF_DICT[p.unit]).div(UNIT_COEFF_DICT[props.product.unit]).toString()
         }
         Axios({
             method: props.product === undefined ? 'post' : 'put',

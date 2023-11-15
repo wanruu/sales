@@ -7,7 +7,7 @@ const { Column } = Table
 const { confirm } = Modal
 const { Item } = Form
 
-import { baseURL } from '../utils/config'
+import { baseURL, DEFAULT_PAGINATION } from '../utils/config'
 import PartnerEditView from '../components/partnerComponents/PartnerEditView'
 import { exportExcel } from '../utils/export'
 
@@ -93,13 +93,13 @@ function PartnerPage() {
         </Modal>
 
         <br />
-        <Space direction='vertical'>
+        <Space direction='vertical' style={{ width: '100%' }}>
             {/* Function Box */}
             <Card size='small'><Form form={form} onFinish={_ => filterPartners(partners)}><Row>
                 <Item label='姓名' name='name' style={itemStyle}><Input allowClear placeholder='姓名' /></Item>
                 <Item label='电话' name='phone' style={itemStyle}><Input allowClear placeholder='电话' /></Item>
                 <Item label='地址' name='address' style={itemStyle}><Input allowClear placeholder='地址' style={{ width: '300px' }} /></Item>
-                <Space style={itemStyle}>
+                <Space wrap style={itemStyle}>
                     <Button icon={<SearchOutlined />} type='primary' htmlType='submit'>搜索</Button>
                     <Button icon={<PlusOutlined />} onClick={_ => setNewPartner(true)}>新增对象</Button>
                     <Button icon={<TableOutlined />} onClick={exportPartners} disabled={filteredPartners.length === 0}>批量导出</Button>
@@ -109,12 +109,13 @@ function PartnerPage() {
             </Row></Form></Card>
 
             {/* Partner Table */}
-            <Table dataSource={filteredPartners} size='small' bordered rowKey={record => record.name}>
-                <Column title='序号' align='center' render={(_, __, idx) => idx+1} />
+            <Table dataSource={filteredPartners} size='small' bordered rowKey={record => record.name} 
+                scroll={{ x: 'max-content' }} pagination={DEFAULT_PAGINATION}>
+                <Column title='序号' align='center' render={(_, __, idx) => idx+1} fixed='left' />
                 <Column title='姓名' dataIndex='name' align='center' />
                 <Column title='电话' dataIndex='phone' align='center' />
                 <Column title='地址' dataIndex='address' align='center' />
-                <Column title='操作' align='center' render={(_, record) => 
+                <Column title='操作' align='center' fixed='right' render={(_, record) => 
                     <Space.Compact size='small'>
                         <Button type='link' onClick={_ => setEditPartner(record)}>编辑</Button>
                         {record.invoiceNum > 0 ?

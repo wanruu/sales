@@ -5,7 +5,7 @@ import { Card, Col, Row, Statistic, Radio } from 'antd'
 import CountUp from 'react-countup'
 import ReactEcharts from 'echarts-for-react'
 
-import { dateFormat, baseURL } from '../config'
+import { DATE_FORMAT, baseURL } from '../config'
 
 function SaleStat() {
     const [todayStat, setTodayStat] = useState({
@@ -66,7 +66,7 @@ function SaleStat() {
             xAxis: {
                 type: 'category',
                 data: historyStat.map(history => {
-                    const d = dayjs(history.date).format(dateFormat)
+                    const d = dayjs(history.date).format(DATE_FORMAT)
                     if (historyRange === 'day') return d
                     if (historyRange === 'month') return d.slice(0, 8)
                     if (historyRange === 'year') return d.slice(0, 5)
@@ -80,7 +80,7 @@ function SaleStat() {
                 formatter: function (params) {
                     const data = params[0].data
                     const result = `成交金额：¥ ${data.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}<br/>`
-                    const d = dayjs(data.date).format(dateFormat)
+                    const d = dayjs(data.date).format(DATE_FORMAT)
                     if (historyRange === 'day') return result + `日期：${d}`
                     if (historyRange === 'month') return result + `月份：${d.slice(0, 8)}`
                     if (historyRange === 'year') return result + `年份：${d.slice(0, 5)}`
