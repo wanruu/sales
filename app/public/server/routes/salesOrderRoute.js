@@ -228,7 +228,8 @@ router.get('/', (req, res) => {
     const query = `SELECT i.*, d.delivered, refundId 
         FROM invoice AS i, (${deliveredTable}) AS d
         LEFT JOIN invoiceRelation AS r ON i.id=r.orderId
-        WHERE i.type=${typeInt} AND d.invoiceId=i.id`
+        WHERE i.type=${typeInt} AND d.invoiceId=i.id
+        ORDER BY i.id DESC`
     db.all(query, (err, orders) => {
         if (err) {
             console.error(err)

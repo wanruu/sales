@@ -37,8 +37,13 @@ router.delete('/', (req, res) => {
 
 
 router.post('/', (req, res) => {
-    const query = `INSERT INTO partner(name, phone, address) 
-        VALUES ("${req.body.name}", "${req.body.phone}", "${req.body.address}")`
+    const name = req.body.name
+    const phone = req.body.phone
+    const address = req.body.address
+    const folder = req.body.folder
+
+    const query = `INSERT INTO partner(name, phone, address, folder) 
+        VALUES ("${name}", "${phone}", "${address}", "${folder}")`
     db.run(query, err => {
         if (err && err.errno === 19) {
             res.send({ changes: 0, prompt: '姓名重复' })
@@ -59,10 +64,13 @@ router.put('/name/:name', (req, res) => {
     const name = req.body.name
     const phone = req.body.phone
     const address = req.body.address
+    const folder = req.body.folder
     const originalName = req.params.name
 
     if (name === originalName) {
-        const query = `UPDATE partner SET phone="${phone}", address="${address}" WHERE name="${name}"`
+        const query = `UPDATE partner 
+            SET phone="${phone}", address="${address}", folder="${folder}" 
+            WHERE name="${name}"`
         db.run(query, err => {
             if (err) {
                 console.error(err)
@@ -73,7 +81,8 @@ router.put('/name/:name', (req, res) => {
         })
     } else {
         // create new partner
-        const insertPartner = `INSERT INTO partner(name, phone, address) VALUES ("${name}", "${phone}", "${address}")`
+        const insertPartner = `INSERT INTO partner(name, phone, address, folder) 
+            VALUES ("${name}", "${phone}", "${address}", "${folder}")`
         db.run(insertPartner, err => {
             if (err && err.errno === 19) {
                 res.send({ changes: 0, prompt: '姓名重复' })

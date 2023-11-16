@@ -1,0 +1,18 @@
+.setting .ant-form-item {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    margin-bottom: 0;
+}
+
+
+.setting .ant-card-body {
+    padding: 10px 20px;
+}
+
+
+.setting .itemTitle {
+    font-size: 14pt;
+    font-weight: bold;
+    padding-bottom: 5px;
+    padding-top: 15px;
+}

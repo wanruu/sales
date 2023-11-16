@@ -14,15 +14,16 @@ const typeInt = INVOICE_TYPE_2_INT.salesRefund
 
 
 router.get('/', (req, res) => {
-    const deliveredTable = `(SELECT invoiceId, 
+    const deliveredTable = `SELECT invoiceId, 
         CASE WHEN COUNT(*) = SUM(delivered) THEN '全部配送'
             WHEN SUM(delivered) = 0 THEN '未配送'
             ELSE '部分配送' END AS delivered
-        FROM invoiceItem GROUP BY invoiceId)`
+        FROM invoiceItem GROUP BY invoiceId`
     const query = `SELECT i.*, d.delivered, orderId 
-        FROM invoice AS i, ${deliveredTable} AS d 
+        FROM invoice AS i, (${deliveredTable}) AS d 
         LEFT JOIN invoiceRelation AS r ON i.id=r.refundId
-        WHERE type=${typeInt} AND d.invoiceId=i.id`
+        WHERE type=${typeInt} AND d.invoiceId=i.id
+        ORDER BY i.id DESC`
     db.all(query, (err, refunds) => {
         if (err) {
             console.error(err)

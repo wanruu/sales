@@ -3,7 +3,6 @@ import { Table, Button, Space, message, Modal, Form, Input, Card, Row } from 'an
 import Axios from 'axios'
 import { ExclamationCircleFilled, PlusOutlined, TableOutlined, ClearOutlined, SearchOutlined } from '@ant-design/icons'
 
-const { Column } = Table
 const { confirm } = Modal
 const { Item } = Form
 
@@ -79,6 +78,23 @@ function PartnerPage() {
         exportExcel('交易对象', partners)
     }
 
+    const columns = [
+        { title: '序号', align: 'center', render: (_, __, idx) => idx + 1, fixed: 'left' },
+        { title: '姓名', align: 'center', dataIndex: 'name' },
+        { title: '文件位置', align: 'center', dataIndex: 'folder' },
+        { title: '联系方式', align: 'center', dataIndex: 'phone' },
+        { title: '地址', align: 'center', dataIndex: 'address' },
+        { title: '操作', align: 'center', fixed: 'right', render: (_, record) => 
+            <Space.Compact size='small'>
+                <Button type='link' onClick={_ => setEditPartner(record)}>编辑</Button>
+                {record.invoiceNum > 0 ?
+                    <Button type='link'>查看</Button> :
+                    <Button type='link' danger onClick={_ => showDeleteConfirm([record.name])}>删除</Button>
+                }
+            </Space.Compact>
+        }
+    ]
+
     useEffect(load, [])
 
     return <>
@@ -110,21 +126,7 @@ function PartnerPage() {
 
             {/* Partner Table */}
             <Table dataSource={filteredPartners} size='small' bordered rowKey={record => record.name} 
-                scroll={{ x: 'max-content' }} pagination={DEFAULT_PAGINATION}>
-                <Column title='序号' align='center' render={(_, __, idx) => idx+1} fixed='left' />
-                <Column title='姓名' dataIndex='name' align='center' />
-                <Column title='电话' dataIndex='phone' align='center' />
-                <Column title='地址' dataIndex='address' align='center' />
-                <Column title='操作' align='center' fixed='right' render={(_, record) => 
-                    <Space.Compact size='small'>
-                        <Button type='link' onClick={_ => setEditPartner(record)}>编辑</Button>
-                        {record.invoiceNum > 0 ?
-                            <Button type='link'>查看</Button> :
-                            <Button type='link' danger onClick={_ => showDeleteConfirm([record.name])}>删除</Button>
-                        }
-                    </Space.Compact>
-                } />
-            </Table>
+                scroll={{ x: 'max-content' }} pagination={DEFAULT_PAGINATION} columns={columns} />
         </Space>
     </>
 }

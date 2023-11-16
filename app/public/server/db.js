@@ -19,7 +19,8 @@ fs.chmod(dbName, '777', (err) => {
 const partner = `CREATE TABLE IF NOT EXISTS partner(
     name TEXT PRIMARY KEY,
     phone TEXT,
-    address TEXT
+    address TEXT,
+    folder TEXT
 );`
 
 const product = `CREATE TABLE IF NOT EXISTS product(

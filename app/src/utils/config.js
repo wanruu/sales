@@ -7,24 +7,20 @@ export const baseURL = () => {
 export const DATE_FORMAT = 'YYYY-MM-DD'
 
 
-export const invoiceSettings = {
-    width: () => localStorage.getItem('width') || 772,
-    height: () => localStorage.getItem('height') || 493,
-    title: () => localStorage.getItem('title') || '鑫森（鑫欣）紧固件有限公司',
-    salesOrderTitle: () => localStorage.getItem('salesOrderTitle') || '销售单',
-    salesRefundTitle: () => localStorage.getItem('salesRefundTitle') || '销售退货单',
-    purchaseOrderTitle: () => localStorage.getItem('purchaseOrderTitle') || '采购单',
-    purchaseRefundTitle: () => localStorage.getItem('purchaseRefundTitle') || '采购退货单',
-    titleFontSize: () => localStorage.getItem('titleFontSize') || 23,
-    subtitleFontSize: () => localStorage.getItem('subtitleFontSize') || 20,
-    titleStyle: () => localStorage.getItem('titleStyle') || 'inline',
-    footer: () => localStorage.getItem('footer') || '送货电话：13605772335/15858580989/13306773365\n送货地址：浙江省温州市龙湾区紧固件市场8排34号\n工行：6222 0812 0301 2544 033（陈建挺）\n收货人(签字)：',
-    footerFontSize: () => localStorage.getItem('footerFontSize') || 12,
-    fontSize: () => localStorage.getItem('fontSize') || 12,
-    hPadding: () => localStorage.getItem('hPadding') || 28,
-    vPadding: () => localStorage.getItem('vPadding') || 24,
-    showPhone: () => (localStorage.getItem('showPhone') || 'false') === 'true',
-    showAddress: () => (localStorage.getItem('showAddress') || 'false') === 'true',
+export const DEFAULT_PRINT_SETTINGS = {
+    width: 772, height: 493, hPadding: 28, vPadding: 24,
+    title: 'xx公司', titleFontSize: 23,
+    salesOrderSubtitle: '销售单', salesRefundSubtitle: '销售退货单', 
+    purchaseOrderSubtitle: '采购单', purchaseRefundSubtitle: '采购退货单',
+    subtitleFontSize: 20, subtitleStyle: 'inline',
+    headerFontSize: 14, ifShowPhone: 'false', ifShowAddress: 'false',
+    footer: '脚注1\n脚注2\n脚注3', footerFontSize: 12,
+    tableFontSize: 14
+}
+
+export const printSettings = {
+    get: (key) =>  localStorage.getItem(key) || DEFAULT_PRINT_SETTINGS[key],
+    set: (key, value) => localStorage.setItem(key, value)
 }
 
 export const UNIT_OPTIONS = [

@@ -1,4 +1,6 @@
-import { Input, Upload, InputNumber, Space, Select, Checkbox, Card, Form, Radio, Row } from 'antd'
+import { Input, Upload, InputNumber, Space, Select, Checkbox, Card, Form, Radio, Row,
+    Switch, Typography 
+} from 'antd'
 import React, { useState, } from 'react'
 import * as XLSX from 'xlsx'
 import Axios from 'axios'
@@ -6,55 +8,210 @@ import dayjs from 'dayjs'
 import uuid from 'react-uuid'
 
 
-import { baseURL, invoiceSettings, DATE_FORMAT } from '../utils/config'
+import { baseURL, DATE_FORMAT, printSettings, DEFAULT_PRINT_SETTINGS } from '../utils/config'
 import InvoiceView from '../components/common/InvoiceView'
+import './SettingPage.css'
 
 
 const { Item } = Form
+const { Title } = Typography
 
 
-export const initInvoiceForPreview = (prefix, itemNum) => {
-    return {
-        id: `${prefix}${dayjs().format('YYYYMMDD')}0001`,
-        partner: '',  phone: ' ', address: ' ',
-        date: dayjs().format(DATE_FORMAT),
-        amount: '0',
-        items: [...Array(itemNum).keys()].map(_ => { return {
-            id: uuid(), material: '', name: '', spec: '', unit: '', 
-            quantity: '', price: '', amount: '', remark: ''
-        }})
-    }
+function InvoiceSetting() {
+    return <Card size='small'>
+        <Form layout='inline'>
+            <Item label='折扣'><Switch /></Item>
+            <Item label='材质'><Switch /></Item>
+        </Form>
+    </Card>
 }
 
 
-function SettingPage() {
-    const [width, setWidth] = useState(invoiceSettings.width())
-    const [height, setHeight] = useState(invoiceSettings.height())
-    const [fontSize, setFontSize] = useState(invoiceSettings.fontSize())
+function PrintSettingView() {
+    // Overall
+    const [width, setWidth] = useState(localStorage.getItem('width'))
+    const [height, setHeight] = useState(localStorage.getItem('height'))
+    const [hPadding, setHPadding] = useState(localStorage.getItem('hPadding'))
+    const [vPadding, setVPadding] = useState(localStorage.getItem('vPadding'))
+    // Title
+    const [title, setTitle] = useState(localStorage.getItem('title'))
+    const [titleFontSize, setTitleFontSize] = useState(localStorage.getItem('titleFontSize'))
+    const [salesOrderSubtitle, setSalesOrderSubtitle] = useState(localStorage.getItem('salesOrderSubtitle'))
+    const [salesRefundSubtitle, setSalesRefundSubtitle] = useState(localStorage.getItem('salesRefundSubtitle'))
+    const [purchaseOrderSubtitle, setPurchaseOrderSubtitle] = useState(localStorage.getItem('purchaseOrderSubtitle'))
+    const [purchaseRefundSubtitle, setPurchaseRefundSubtitle] = useState(localStorage.getItem('purchaseRefundSubtitle'))
+    const [subtitleStyle, setSubtitleStyle] = useState(printSettings.get('subtitleStyle'))
+    const [subtitleFontSize, setSubtitleFontSize] = useState(localStorage.getItem('subtitleFontSize'))
+    // Header
+    const [headerFontSize, setHeaderFontSize] = useState(localStorage.getItem('headerFontSize'))
+    const [ifShowPhone, setIfShowPhone] = useState(printSettings.get('ifShowPhone'))  // str: true / false
+    const [ifShowAddress, setIfShowAddress] = useState(printSettings.get('ifShowAddress'))  // str: true / false
+    // Table
+    const [tableFontSize, setTableFontSize] = useState(printSettings.get('tableFontSize'))
+    // Footer
+    const [footer, setFooter] = useState(localStorage.getItem('footer'))
+    const [footerFontSize, setFooterFontSize] = useState(localStorage.getItem('footerFontSize'))
 
-    const [hPadding, setHPadding] = useState(invoiceSettings.hPadding())
-    const [vPadding, setVPadding] = useState(invoiceSettings.vPadding())
+    const subtitleStyleOptions = [
+        { label: '标题同行', value: 'inline' },
+        { label: '另起一行', value: 'multi' }
+    ]
 
-    const [title, setTitle] = useState(invoiceSettings.title())
-    const [titleFontSize, setTitleFontSize] = useState(invoiceSettings.titleFontSize())
+    const inputNum2Str = (val) => {
+        if (val < 0) return ''
+        return val === 0 ? '0' : val || ''
+    }
+    return <Card size='small'>
+        <Space direction='vertical' size={0} style={{ width: '100%' }}>
+            <div className='itemTitle'>整体</div>
+            <Form layout='inline'>
+                <Item label='宽度'>
+                    <InputNumber keyboard={false} placeholder={DEFAULT_PRINT_SETTINGS.width}
+                        value={width} onChange={val => { setWidth(inputNum2Str(val)); printSettings.set('width', inputNum2Str(val)) }} />
+                </Item>
+                <Item label='高度'>
+                    <InputNumber keyboard={false} placeholder={DEFAULT_PRINT_SETTINGS.height}
+                        value={height} onChange={val => { setHeight(inputNum2Str(val)); printSettings.set('height', inputNum2Str(val)) }} />
+                </Item>
+                <Item label='水平边距'>
+                    <InputNumber keyboard={false} placeholder={DEFAULT_PRINT_SETTINGS.hPadding}
+                        value={hPadding} onChange={val => { setHPadding(inputNum2Str(val)); printSettings.set('hPadding', inputNum2Str(val)) }} />
+                </Item>
+                <Item label='垂直边距'>
+                    <InputNumber keyboard={false} placeholder={DEFAULT_PRINT_SETTINGS.vPadding}
+                        value={vPadding} onChange={val => { setVPadding(inputNum2Str(val)); printSettings.set('vPadding', inputNum2Str(val)) }} />
+                </Item>
+            </Form>
 
-    const [salesOrderTitle, setSalesOrderTitle] = useState(invoiceSettings.salesOrderTitle())
-    const [salesRefundTitle, setSalesRefundTitle] = useState(invoiceSettings.salesRefundTitle())
-    const [purchaseOrderTitle, setPurchaseOrderTitle] = useState(invoiceSettings.purchaseOrderTitle())
-    const [purchaseRefundTitle, setPurchaseRefundTitle] = useState(invoiceSettings.purchaseRefundTitle())
-    const [titleStyle, setTitleStyle] = useState(invoiceSettings.titleStyle())
-    const [subtitleFontSize, setSubtitleFontSize] = useState(invoiceSettings.subtitleFontSize())
+            <div className='itemTitle'>标题及副标题</div>
+            <Form layout='inline'>
+                <Item label='标题'>
+                    <Input placeholder={DEFAULT_PRINT_SETTINGS.title} value={title}
+                        onChange={e => { printSettings.set('title', e.target.value); setTitle(e.target.value) }} style={{ width: '300px' }} />
+                </Item>
+                <Item label='标题字号'>
+                    <InputNumber keyboard={false} placeholder={DEFAULT_PRINT_SETTINGS.titleFontSize} 
+                        value={titleFontSize} onChange={val => { 
+                            printSettings.set('titleFontSize', inputNum2Str(val)); setTitleFontSize(inputNum2Str(val)) }}/>
+                </Item>
+            </Form>
+            <Form layout='inline'>
+                <Item label='副标题'>
+                    <Input placeholder={DEFAULT_PRINT_SETTINGS.salesOrderSubtitle} value={salesOrderSubtitle} style={{ width: '130px' }}
+                        onChange={e => { printSettings.set('salesOrderSubtitle', e.target.value); setSalesOrderSubtitle(e.target.value) }} />
+                </Item>
+                <Item label=''>
+                    <Input placeholder={DEFAULT_PRINT_SETTINGS.salesRefundSubtitle} value={salesRefundSubtitle} style={{ width: '130px' }}
+                        onChange={e => { printSettings.set('salesRefundSubtitle', e.target.value); setSalesRefundSubtitle(e.target.value) }} />
+                </Item>
+                <Item label=''>
+                    <Input placeholder={DEFAULT_PRINT_SETTINGS.purchaseOrderSubtitle} value={purchaseOrderSubtitle} style={{ width: '130px' }}
+                        onChange={e => { printSettings.set('purchaseOrderSubtitle', e.target.value); setPurchaseOrderSubtitle(e.target.value) }} />
+                </Item>
+                <Item label=''>
+                    <Input placeholder={DEFAULT_PRINT_SETTINGS.purchaseRefundSubtitle} value={purchaseRefundSubtitle} style={{ width: '130px' }}
+                        onChange={e => { printSettings.set('purchaseRefundSubtitle', e.target.value); setPurchaseRefundSubtitle(e.target.value) }} />
+                </Item>
+                <Item label='副标题样式'>
+                    <Select options={subtitleStyleOptions} value={subtitleStyle} onChange={val => { printSettings.set('subtitleStyle', val); setSubtitleStyle(val) }} />
+                </Item>
+                <Item label='副标题字号'>
+                    <InputNumber keyboard={false} placeholder={DEFAULT_PRINT_SETTINGS.subtitleFontSize} disabled={subtitleStyle === 'inline'}
+                        value={subtitleFontSize} onChange={val => { printSettings.set('subtitleFontSize', inputNum2Str(val)); setSubtitleFontSize(inputNum2Str(val)) }} />
+                </Item>
+            </Form>
 
-    const [showPhone, setShowPhone] = useState(invoiceSettings.showPhone())
-    const [showAddress, setShowAddress] = useState(invoiceSettings.showAddress())
+            <div className='itemTitle'>头部（单据信息）</div>
+            <Form layout='inline'>
+                <Item label='客户/供应商'>
+                    <Checkbox checked={ifShowPhone==='true'} onChange={e => { 
+                        setIfShowPhone(`${e.target.checked}`); 
+                        printSettings.set('ifShowPhone', e.target.checked) 
+                    }}>显示电话 (如有)</Checkbox>
+                    <Checkbox checked={ifShowAddress==='true'} onChange={e => {
+                        setIfShowAddress(`${e.target.checked}`)
+                        printSettings.set('ifShowAddress', e.target.checked) 
+                    }}>显示地址 (如有)</Checkbox>
+                </Item>
+            </Form>
+            <Form layout='inline'>
+                <Item label='字号'>
+                    <InputNumber keyboard={false} placeholder={DEFAULT_PRINT_SETTINGS.headerFontSize} disabled={subtitleStyle === 'inline'}
+                        value={headerFontSize} onChange={val => { printSettings.set('headerFontSize', inputNum2Str(val)); setHeaderFontSize(inputNum2Str(val)) }} />
+                </Item>
+            </Form>
+            
+            <div className='itemTitle'>表格</div>
+            <Form layout='inline'>
+                <Item label='字号'>
+                    <InputNumber keyboard={false} placeholder={DEFAULT_PRINT_SETTINGS.tableFontSize} 
+                        value={tableFontSize} onChange={val => { printSettings.set('tableFontSize', inputNum2Str(val)); setTableFontSize(inputNum2Str(val)) }}/>
+                </Item>
+            </Form>
 
-    const [footer, setFooter] = useState(invoiceSettings.footer())
-    const [footerFontSize, setFooterFontSize] = useState(invoiceSettings.footerFontSize())
+            <div className='itemTitle'>脚注</div>
+            <Form layout='horizontal'>
+                <Item label='脚注' extra='以回车键分行，每行脚注将依次列在单据脚注位置，单据脚注为两列。'>
+                    <Input.TextArea style={{ maxWidth: '600px' }} placeholder={DEFAULT_PRINT_SETTINGS.footer} autoSize
+                        value={footer} onChange={e => { setFooter(e.target.value); printSettings.set('footer', e.target.value) }} />
+                </Item>
+                <Item label='字号'>
+                    <InputNumber keyboard={false} placeholder={DEFAULT_PRINT_SETTINGS.footerFontSize}
+                        value={footerFontSize} onChange={val => { printSettings.set('footerFontSize', inputNum2Str(val)); setFooterFontSize(inputNum2Str(val)) }} />
+                </Item>
+            </Form>
 
+            <div className='itemTitle'>预览</div>
+            <PrintPreview/>
+        </Space>
+    </Card>
+}
+
+
+function PrintPreview() {
     const [previewType, setPreviewType] = useState(undefined)
     const [previewItemNum, setPreviewItemNum] = useState(8)
+    const previews = {
+        salesOrder: { title: '销售清单', prefix: 'XS' },
+        purchaseOrder: { title: '采购清单', prefix: 'CG' },
+        salesRefund: { title: '销售退货', prefix: 'XT' },
+        purchaseRefund: { title: '采购退货', prefix: 'CT' }
+    }
+    const initInvoiceForPreview = (prefix, itemNum) => {
+        return {
+            id: `${prefix}${dayjs().format('YYYYMMDD')}0001`,
+            partner: '交易对象',  phone: '12345678901', 
+            address: '地址地址地址地址地址地址地址地址地址地址地址地址地址地址地址',
+            date: dayjs().format(DATE_FORMAT),
+            amount: '0',
+            items: [...Array(itemNum).keys()].map((_, idx) => { return {
+                productId: uuid(), // for table key
+                material: `材质${idx+1}`, name: `名称${idx+1}`, spec: `规格${idx+1}`,
+                quantity: idx+1, unit: '只', 
+                price: 0, amount: 0, remark: `备注${idx+1}`
+            }})
+        }
+    }
+    return <Form layout='vertical'>
+        <Item label=''>
+            <Row style={{ marginBottom: '10px' }} align='middle'>
+                <Radio.Group value={previewType} onChange={e => setPreviewType(e.target.value)} >
+                    <Radio value={undefined}>不显示</Radio>
+                    { Object.keys(previews).map(type => <Radio key={type} value={type}>{previews[type].title}</Radio>) }
+                </Radio.Group>
+                <InputNumber style={{ width: '130px' }} addonBefore='产品数' value={previewItemNum} onChange={num => setPreviewItemNum(Math.round(num)) } />
+            </Row>
+            
+            { previewType ?
+            <div style={{ overflowX: 'auto', overflowY: 'clip' }}>
+                <InvoiceView type={previewType} invoice={initInvoiceForPreview(previews[previewType].prefix, previewItemNum)} />
+            </div> : null }
+        </Item>
+    </Form>
+}
 
 
+export default function SettingPage() {
     const handleUpload = (options) => {
         const { onSuccess, onError, file, onProgress } = options
         
@@ -140,137 +297,11 @@ function SettingPage() {
         readFile(file)
     }
 
-    const ItemTitle = (text) => {
-        return <font style={{ fontWeight: 'bold', fontSize: '12pt' }}>{text}</font>
-    }
-
-    const previews = {
-        salesOrder: { title: '销售清单', prefix: 'XS' },
-        purchaseOrder: { title: '采购清单', prefix: 'CG' },
-        salesRefund: { title: '销售退货', prefix: 'XT' },
-        purchaseRefund: { title: '采购退货', prefix: 'CT' }
-    }
-
-    return <>
-        <h2>清单外观</h2>
-        <Card>
-            <Form layout='vertical' >
-                <Item label={ItemTitle('尺寸')}>
-                    <Space direction='vertical'>
-                        <Space wrap>
-                            <InputNumber style={{ width: '150px' }} addonBefore='宽度' value={width} onChange={val => {
-                                setWidth(val)
-                                localStorage.setItem('width', val)
-                            }} />
-                            <InputNumber style={{ width: '150px' }} addonBefore='高度' value={height} onChange={val => {
-                                setHeight(val)
-                                localStorage.setItem('height', val)
-                            }} />
-                        </Space>
-                        <Space wrap>
-                            <InputNumber style={{ width: '150px' }} addonBefore='水平边距' value={hPadding} onChange={val => {
-                                setHPadding(val)
-                                localStorage.setItem('hPadding', val)
-                            }} />
-                            <InputNumber style={{ width: '150px' }} addonBefore='垂直边距' value={vPadding} onChange={val => {
-                                setVPadding(val)
-                                localStorage.setItem('vPadding', val)
-                            }} />
-                            <InputNumber style={{ width: '130px' }} addonBefore='字号' value={fontSize} onChange={val => {
-                                setFontSize(val)
-                                localStorage.setItem('fontSize', val)
-                            }} />
-                        </Space>
-                    </Space>
-                </Item>
-
-                <Item label={ItemTitle('标题')}>
-                    <Space wrap>
-                        <Input style={{ width: '310px' }} value={title} onChange={e => {
-                            setTitle(e.target.value)
-                            localStorage.setItem('title', e.target.value)
-                        }} />
-                        <InputNumber style={{ width: '130px' }} addonBefore='字号' value={titleFontSize} onChange={val => {
-                            setTitleFontSize(val)
-                            localStorage.setItem('titleFontSize', val)
-                        } }/>
-                    </Space>
-                </Item>
-                
-                <Item label={ItemTitle('副标题')}>
-                    <Space wrap>
-                        <Input style={{ width: '235px' }} addonBefore='销售清单' value={salesOrderTitle} onChange={e => {
-                            setSalesOrderTitle(e.target.value)
-                            localStorage.setItem('salesOrderTitle', e.target.value)
-                        }} />
-                        <Input style={{ width: '235px' }} addonBefore='采购清单' value={purchaseOrderTitle} onChange={e => {
-                            setPurchaseOrderTitle(e.target.value)
-                            localStorage.setItem('purchaseOrderTitle', e.target.value)
-                        }} />
-                        <Input style={{ width: '235px' }} addonBefore='销售退货' value={salesRefundTitle} onChange={e => {
-                            setSalesRefundTitle(e.target.value)
-                            localStorage.setItem('salesRefundTitle', e.target.value)
-                        }} />
-                        <Input style={{ width: '235px' }} addonBefore='采购退货' value={purchaseRefundTitle} onChange={e => {
-                            setPurchaseRefundTitle(e.target.value)
-                            localStorage.setItem('purchaseRefundTitle', e.target.value)
-                        }} />
-                        <Select value={titleStyle} options={[{label: '标题同行', value: 'inline'},{label: '另起一行', value: 'multi'}]} onChange={val => {
-                            setTitleStyle(val)
-                            localStorage.setItem('titleStyle', val)
-                        }} />
-                        <InputNumber style={{ width: '130px' }} addonBefore='字号' value={subtitleFontSize} disabled={titleStyle==='inline'} onChange={val => {
-                            setSubtitleFontSize(val)
-                            localStorage.setItem('subtitleFontSize', val)
-                        }} />
-                    </Space>
-                </Item>
-
-                <Item label={ItemTitle('交易对象信息')}>
-                    <Space wrap>
-                        <Checkbox checked={showPhone} onChange={e => {
-                            setShowPhone(e.target.checked)
-                            localStorage.setItem('showPhone', e.target.checked) 
-                        }} >显示电话 (如有)</Checkbox>
-                        <Checkbox checked={showAddress} onChange={e => {
-                            setShowAddress(e.target.checked)
-                            localStorage.setItem('showAddress', e.target.checked) 
-                        }} >显示地址 (如有)</Checkbox>
-                    </Space>
-                </Item>
-                
-                <Item label={ItemTitle('脚注')}>
-                    <Space direction='vertical' style={{ width: '100%' }}>
-                        <font style={{ color: 'gray', fontStyle: 'italic', fontSize: '9pt' }}>
-                            * 以回车键分行，每行脚注将依次列在单据脚注位置，单据脚注为两列。
-                        </font>
-                        <Input.TextArea style={{ maxWidth: '600px' }} placeholder='脚注' autoSize value={footer} onChange={e => {
-                            setFooter(e.target.value)
-                            localStorage.setItem('footer', e.target.value) 
-                        }} />
-                        <InputNumber style={{ width: '130px' }} addonBefore='字号' value={footerFontSize} onChange={val => {
-                            setFooterFontSize(val)
-                            localStorage.setItem('footerFontSize', val)
-                        }} />
-                    </Space>
-                </Item>
-
-                <Item label={ItemTitle('预览')}>
-                    <Row style={{ marginBottom: '10px' }} align='middle'>
-                        <Radio.Group value={previewType} onChange={e => setPreviewType(e.target.value)} >
-                            <Radio value={undefined}>不显示</Radio>
-                            { Object.keys(previews).map(type => <Radio key={type} value={type}>{previews[type].title}</Radio>) }
-                        </Radio.Group>
-                        <InputNumber style={{ width: '130px' }} addonBefore='产品数' value={previewItemNum} min={0} onChange={num => setPreviewItemNum(Math.round(num)) } />
-                    </Row>
-                    
-                    { previewType ?
-                    <div style={{ overflowX: 'auto', overflowY: 'clip' }}>
-                        <InvoiceView type={previewType} invoice={initInvoiceForPreview(previews[previewType].prefix, previewItemNum)} />
-                    </div> : null }
-                </Item>
-            </Form>
-        </Card>
+    return <div className='setting'>
+        <Title level={2}>开单设置</Title>
+        <InvoiceSetting />
+        <Title level={2}>打印设置</Title>
+        <PrintSettingView />
 
         {/* <h2>导入</h2>
         <Upload directory accept='.xlsx' customRequest={handleUpload}>
@@ -278,7 +309,5 @@ function SettingPage() {
                 选择.xlsx文件
             </Button>
         </Upload> */}
-    </>
+    </div>
 }
-
-export default SettingPage

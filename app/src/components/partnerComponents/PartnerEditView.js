@@ -57,10 +57,16 @@ function PartnerEditView(props) {
             if (props.partner && value !== props.partner.address) throw new Error()
         }}
     ]
+    const folderRules = [
+        { whitespace: true },
+        { warningOnly: true, validator: async (rule, value) => {
+            if (props.partner && value !== props.partner.folder) throw new Error()
+        }}
+    ]
 
     // initialize form
     const initForm = () => {
-        form.setFieldsValue(props.partner || { name: '', phone: '', address: '' })
+        form.setFieldsValue(props.partner || { name: '', phone: '', address: '', folder: '' })
     }
     useEffect(() => {
         initForm()
@@ -70,6 +76,9 @@ function PartnerEditView(props) {
         {contextHolder}
         <Form labelCol={{ span: 3 }} wrapperCol={{ span: 20 }} onFinish={upload} onReset={initForm} form={form}>
             <Item label='姓名' name='name' rules={nameRules}>
+                <Input allowClear />
+            </Item>
+            <Item label='文件位置' name='folder' rules={folderRules}>
                 <Input allowClear />
             </Item>
             <Item label='电话' name='phone' rules={phoneRules}>

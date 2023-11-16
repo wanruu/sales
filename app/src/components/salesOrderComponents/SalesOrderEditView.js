@@ -151,32 +151,33 @@ export default function SalesOrderEditView(props) {
     }, [order])
 
     // Return
-    return <Space direction='vertical' style={{ width: '100%', marginTop: '10px', marginBottom: '15px' }}>
-        <Row style={{ justifyContent: 'space-between' }}>
-            <Col style={{ width: '30%' }}>客户：
-                <PartnerInput style={{ width: 180 }} size='small' value={order.partner} onChange={value => updateOrder('partner', value)}  />
-            </Col>
-            <Col style={{ width: '30%' }} align={order.id ? 'center' : 'right'}>日期：
-                <DatePicker style={{ width: 150 }} size='small' value={order.date} onChange={value => updateOrder('date', value)} />
-            </Col>
-            { order.id ? <Col style={{ width: '30%' }} align='right'><FieldNumberOutlined style={{ marginRight: '4px' }} />{order.id}</Col> : null }
-        </Row>
-        <Row style={{ justifyContent: 'space-between' }}>
-            <Col style={{ width: '30%' }}>总金额：{order.amount}</Col>
-            <Col style={{ width: '30%' }} align='center'>订金：
-                <InputNumber value={order.prepayment} style={{ width: 150 }} size='small' keyboard={false} stringMode controls={false} 
-                    onChange={value => updateOrder('prepayment', value)}
-                />
-            </Col>
-            <Col style={{ width: '30%' }} align='right'>尾款：
-                <InputNumber size='small' keyboard={false} stringMode controls={false} style={{ width: 120 }}
-                    placeholder={`应付 ${Decimal(order.amount).minus(order.prepayment || 0)}`}
-                    value={order.payment} onChange={value => updateOrder('payment', value)} />
-                <Button size='small' style={{marginLeft: '5px'}} icon={<EditOutlined />}
-                    onClick={_ => updateOrder('payment', Decimal(order.amount).minus(order.prepayment || 0).toString())} />
-            </Col>
-        </Row>
-
+    return <>
+        <Space direction='vertical' style={{ width: '100%', marginTop: '10px', marginBottom: '15px' }}>
+            <Row style={{ justifyContent: 'space-between' }}>
+                <Col style={{ width: '30%' }}>客户：
+                    <PartnerInput style={{ width: 180 }} size='small' value={order.partner} onChange={value => updateOrder('partner', value)}  />
+                </Col>
+                <Col style={{ width: '30%' }} align={order.id ? 'center' : 'right'}>日期：
+                    <DatePicker style={{ width: 150 }} size='small' value={order.date} onChange={value => updateOrder('date', value)} />
+                </Col>
+                { order.id ? <Col style={{ width: '30%' }} align='right'><FieldNumberOutlined style={{ marginRight: '4px' }} />{order.id}</Col> : null }
+            </Row>
+            <Row style={{ justifyContent: 'space-between' }}>
+                <Col style={{ width: '30%' }}>总金额：{order.amount}</Col>
+                <Col style={{ width: '30%' }} align='center'>订金：
+                    <InputNumber value={order.prepayment} style={{ width: 150 }} size='small' keyboard={false} stringMode controls={false} 
+                        onChange={value => updateOrder('prepayment', value)}
+                    />
+                </Col>
+                <Col style={{ width: '30%' }} align='right'>尾款：
+                    <InputNumber size='small' keyboard={false} stringMode controls={false} style={{ width: 120 }}
+                        placeholder={`应付 ${Decimal(order.amount).minus(order.prepayment || 0)}`}
+                        value={order.payment} onChange={value => updateOrder('payment', value)} />
+                    <Button size='small' style={{marginLeft: '5px'}} icon={<EditOutlined />}
+                        onClick={_ => updateOrder('payment', Decimal(order.amount).minus(order.prepayment || 0).toString())} />
+                </Col>
+            </Row>
+        </Space>
         <Table className='editTable' dataSource={order.items} size='small' bordered style={{ height: 400 }} 
             scroll={{x: 'max-content', y: 400 }} pagination={false} rowKey={record => record.id} columns={itemColumns} />
         <Divider />
@@ -188,5 +189,5 @@ export default function SalesOrderEditView(props) {
                 <Button icon={<CloseOutlined/>} onClick={_ => { initOrder(); props.dismiss() }}>取消</Button>
             </Space>
         </Col>
-    </Space>
+    </>
 }

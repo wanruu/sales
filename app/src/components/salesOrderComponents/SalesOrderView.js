@@ -128,21 +128,21 @@ function View(props) {
 function PrintView(props) {
     // for print
     const componentRef = useRef(null)
-    const handlePrint = useReactToPrint({
-        content: () => componentRef.current,
-    })
+    const handlePrint = useReactToPrint({ content: () => componentRef.current })
 
-    return <Space direction='vertical' size='middle' style={{ width: '100%', marginTop: '10px', marginBottom: '10px' }}>
-        <Col align='middle' style={{ overflowX: 'auto', overflowY: 'clip' }}>
-            <div ref={componentRef} >
-                {!props.order ? null : <InvoiceView invoice={props.order} type='salesOrder' />}
-            </div>
-        </Col>
+    return <>
+        <Space direction='vertical' size='middle' style={{ width: '100%', marginTop: '10px', marginBottom: '10px' }}>
+            <Col align='middle' style={{ overflowX: 'auto', overflowY: 'clip' }}>
+                <div ref={componentRef} >
+                    {!props.order ? null : <InvoiceView invoice={props.order} type='salesOrder' />}
+                </div>
+            </Col>
+        </Space>
         <Col align='end'>
             <Space>
                 <Button icon={<RollbackOutlined />} onClick={_ => props.setMode('view')}>返回</Button>
                 <Button icon={<PrinterOutlined/>} onClick={handlePrint} type='primary'>打印</Button>
             </Space>
         </Col>
-    </Space>
+    </>
 }
