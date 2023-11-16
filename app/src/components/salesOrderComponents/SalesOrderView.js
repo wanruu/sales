@@ -11,7 +11,7 @@ import { getExportData, exportExcel } from '../../utils/export'
 import InvoiceView from '../common/InvoiceView'
 import '../common/Invoice.css'
 import SalesOrderEditView from './SalesOrderEditView'
-
+import PartnerPopoverView from '../partnerComponents/PartnerPopoverView'
 
 /*
     Required: id, refresh, messageApi
@@ -45,7 +45,7 @@ export default function SalesOrderView(props) {
             <SalesOrderEditView order={order} dismiss={_ => setMode('view')} messageApi={props.messageApi} refresh={_ => { load(); props.refresh() }} /> 
         </div>
         <div style={{ display: mode === 'view' ? 'block' : 'none'}}>
-            <View order={order} setMode={setMode} />
+            <View order={order} setMode={setMode} refresh={load} />
         </div>
         <div style={{ display: mode === 'print' ? 'block' : 'none'}}>
             <PrintView order={order} setMode={setMode} />
@@ -94,9 +94,11 @@ function View(props) {
     return !props.order ? null : <>
         <Space direction='vertical' style={{ width: '100%', marginTop: '10px', marginBottom: '15px' }}>
             <Row style={{ justifyContent: 'space-between' }}>
-                <div>客户：{props.order.partner}</div>
+                <div>客户：<PartnerPopoverView refresh={props.refresh}
+                    partner={_.fromPairs(['name', 'folder', 'phone', 'address'].map(key => [key, props.order[key]]))} />
+                </div>
                 <div>日期：{props.order.date}</div>
-                <div>单号：{props.order.id}</div>
+                {/* <div>单号：{props.order.id}</div> */}
                 <div>关联退货单：{props.order.refundId || '无'}</div>
             </Row>
             <Row style={{ justifyContent: 'space-between' }}>

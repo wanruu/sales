@@ -23,6 +23,20 @@ router.get('/', (req, res) => {
 })
 
 
+router.get('/name/:name', (req, res) => {
+    const query = `SELECT * 
+        FROM partner WHERE name="${req.params.name}"`
+    db.each(query, (err, row) => {
+        if (err) {
+            console.error(err)
+            res.status(500).send(err)
+            return
+        }
+        res.send(row)
+    })
+})
+
+
 router.delete('/', (req, res) => {
     const names = (req.body.names || []).map(name => `"${name}"`).join(', ')
     db.run(`DELETE FROM partner WHERE name IN (${names})`, err => {

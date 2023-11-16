@@ -112,7 +112,7 @@ function ProductPage() {
         <br />
         <Space direction='vertical' style={{ width: '100%' }}>
             {/* Function Box */}
-            <Card size='small'><Form form={form} onFinish={_ => filterProducts(products)}><Row>
+            <Card size='small'><Form form={form} onFinish={_ => filterProducts(products)} layout='inline'>
                 <Item label='材质' name='material' style={itemStyle}><Input allowClear placeholder='材质' /></Item>
                 <Item label='名称' name='name' style={itemStyle}><Input allowClear placeholder='名称' /></Item>
                 <Item label='规格' name='spec' style={itemStyle}><Input allowClear placeholder='规格' /></Item>
@@ -120,10 +120,10 @@ function ProductPage() {
                     <Button icon={<SearchOutlined />} type='primary' htmlType='submit'>搜索</Button>
                     <Button icon={<PlusOutlined />} onClick={_ => setNewProduct(true)}>新增产品</Button>
                     <Button icon={<TableOutlined />} disabled={filteredProducts.length === 0} onClick={exportProducts}>批量导出</Button>
-                    <Button icon={<ClearOutlined />} disabled={filteredProducts.filter(p => !p.invoiceNum > 0).length === 0}
+                    <Button icon={<ClearOutlined />} type='dashed' disabled={filteredProducts.filter(p => !p.invoiceNum > 0).length === 0}
                         onClick={_ => showDeleteConfirm(filteredProducts.filter(p => !p.invoiceNum > 0))} danger>批量清理</Button>
                 </Space>
-            </Row></Form></Card>
+            </Form></Card>
 
             {/* Product Table */}
             <Table dataSource={filteredProducts} size='small' bordered rowKey={record => record.id} columns={productTableColumns}

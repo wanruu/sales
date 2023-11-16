@@ -8,6 +8,7 @@ import {
     UserOutlined,
     BarChartOutlined,
     MenuFoldOutlined, MenuUnfoldOutlined,
+    DropboxOutlined,
     QuestionCircleOutlined
 } from '@ant-design/icons'
 
@@ -52,8 +53,8 @@ function App() {
             getMenuItem('销售退货', 'salesRefund'),
             getMenuItem('采购退货', 'purchaseRefund')
         ]),
-        getMenuItem('产品', 'product', <BankOutlined />),
-        getMenuItem('交易对象', 'partner', <UserOutlined />),
+        getMenuItem('产品', 'product', <DropboxOutlined />),
+        getMenuItem('客户 / 供应商', 'partner', <UserOutlined />),
         getMenuItem('统计数据', 'stat', <BarChartOutlined />),
         getMenuItem('设置', 'settings', <SettingOutlined />),
         getMenuItem('帮助', 'help', <QuestionCircleOutlined />)

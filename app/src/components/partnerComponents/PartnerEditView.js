@@ -68,13 +68,11 @@ function PartnerEditView(props) {
     const initForm = () => {
         form.setFieldsValue(props.partner || { name: '', phone: '', address: '', folder: '' })
     }
-    useEffect(() => {
-        initForm()
-    }, [])
+    useEffect(initForm, [])
 
     return <>
         {contextHolder}
-        <Form labelCol={{ span: 3 }} wrapperCol={{ span: 20 }} onFinish={upload} onReset={initForm} form={form}>
+        <Form labelCol={{ span: 4 }} wrapperCol={{ span: 20 }} onFinish={upload} onReset={initForm} form={form}>
             <Item label='姓名' name='name' rules={nameRules}>
                 <Input allowClear />
             </Item>

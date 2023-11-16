@@ -101,22 +101,21 @@ export default function SalesRefundEditView(props) {
                 <Col style={{ width: '30%' }}>客户：
                     { refund.partner ? refund.partner : <span style={{color: 'gray'}}>(选择产品后自动显示)</span> }
                 </Col>
-                <Col style={{ width: '30%' }} align={refund.id ? 'center' : 'right'}>日期：
+                <Col style={{ width: '30%' }} align={'center'}>日期：
                     <DatePicker size='small' style={{ width: 150 }} value={refund.date} onChange={value => updateRefund('date', value)} />
                 </Col>
-                { refund.id ? <Col style={{ width: '30%' }} align='right'><FieldNumberOutlined style={{ marginRight: '4px' }} />{refund.id}</Col> : null }
+                <Col style={{ width: '30%' }} align='right'>
+                    <Button type='primary' onClick={_ => setSelectionModalOpen(true)}>选择销售单及产品</Button>
+                </Col>
             </Row>
             <Row style={{ justifyContent: 'space-between' }} align='middle'>
                 <Col style={{ width: '30%' }}>总金额：{refund.amount}</Col>
-                <Col style={{ width: '30%' }} align='center'>付款：
+                <Col style={{ width: '30%' }} align='right'>付款：
                     <InputNumber size='small' keyboard={false} stringMode controls={false} style={{ width: 120 }}
                         placeholder={`应付 ${Decimal(refund.amount).minus(refund.prepayment || 0)}`}
                         value={refund.payment} onChange={value => updateRefund('payment', value)} />
                     <Button size='small' style={{ marginLeft: '5px' }} icon={<EditOutlined />}
                         onClick={_ => updateRefund('payment', Decimal(refund.amount).minus(refund.prepayment || 0).toString())} />
-                </Col>
-                <Col style={{ width: '30%' }} align='right'>
-                    <Button type='primary' onClick={_ => setSelectionModalOpen(true)}>选择销售单及产品</Button>
                 </Col>
             </Row>
         </Space>

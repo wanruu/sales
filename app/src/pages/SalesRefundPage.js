@@ -110,12 +110,12 @@ function SalesRefundPage() {
         {contextHolder}
         <SalesRefundFB refresh={load} />
 
-        <Modal title='销售退货单' open={selectedRefundId !== undefined} width={900} destroyOnClose 
+        <Modal title={`销售退货单 (${selectedRefundId})`} open={selectedRefundId !== undefined} width={900} destroyOnClose 
             onCancel={_ => setSelectedRefundId(undefined)} footer={null} maskClosable={false}>
             <SalesRefundView id={selectedRefundId} refresh={load} messageApi={messageApi} />
         </Modal>
 
-        <Modal title='销售清单' open={selectedOrderId !== undefined} width={900} destroyOnClose 
+        <Modal title={`销售清单 (${selectedOrderId})`} open={selectedOrderId !== undefined} width={900} destroyOnClose 
             onCancel={_ => setSelectedOrderId(undefined)} footer={null} maskClosable={false}>
             <SalesOrderView id={selectedOrderId} refresh={load} messageApi={messageApi} />
         </Modal>

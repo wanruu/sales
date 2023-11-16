@@ -81,7 +81,6 @@ function View(props) {
             <Row style={{ justifyContent: 'space-between' }}>
                 <div>客户：{props.refund.partner}</div>
                 <div>日期：{props.refund.date}</div>
-                <div>单号：{props.refund.id}</div>
                 <div>关联销售单：{props.refund.orderId || '无'}</div>
             </Row>
             <Row style={{ justifyContent: 'space-between' }}>
