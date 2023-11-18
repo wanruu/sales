@@ -222,9 +222,10 @@ router.get('/', (req, res) => {
             ELSE '部分配送' END AS delivered
         FROM invoiceItem GROUP BY invoiceId`
     const query = `SELECT i.*, d.delivered, refundId 
-        FROM invoice AS i, (${deliveredTable}) AS d
+        FROM invoice AS i
         LEFT JOIN invoiceRelation AS r ON i.id=r.orderId
-        WHERE i.type=${typeInt} AND d.invoiceId=i.id
+        LEFT JOIN (${deliveredTable}) AS d ON d.invoiceId=i.id
+        WHERE i.type=${typeInt}
         ORDER BY i.id DESC`
     db.all(query, (err, orders) => {
         if (err) {

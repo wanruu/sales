@@ -132,25 +132,28 @@ function PriceHistory(props) {
     const [tableFilters, setTableFilters] = useState(['salesOrder', 'purchaseOrder'])
 
     // table
-    const itemColumns = [
-        { title: '序号', align: 'center', render: (_, __, idx) => idx + 1, width: 45, fixed: 'left' },
-        { title: '单号', dataIndex: 'id', align: 'center', width: 150, sorter: (a, b) => a.id > b.id ? 1 : -1, showSorterTooltip: false },
-        { title: '交易对象', dataIndex: 'partner', align: 'center', width: 130 },
-        { title: '单价', dataIndex: 'price', align: 'center', width: 80, 
-            render: price => <Button size='small' type='text' style={{ width: '100%' }} onClick={_ => props.setPrice(price) }>{price}</Button>,
-            sorter: (a, b) => a.price - b.price, showSorterTooltip: false
-        },
-        { title: '数量', dataIndex: 'quantity', align: 'center', width: 80, 
-            sorter: (a, b) => a.quantity - b.quantity, showSorterTooltip: false 
-        },
-        { title: '折后价', dataIndex: 'amount', align: 'center', width: 90, 
-            sorter: (a, b) => a.amount - b.amount, showSorterTooltip: false 
-        },
-        { title: '日期', dataIndex: 'date', align: 'center', width: 100, 
-            sorter: (a, b) => a.date > b.date ? 1 : ( a.date < b.date ? -1 : 0), showSorterTooltip: false
-        },
-        { title: '备注', dataIndex: 'remark', align: 'center', width: 120 }
-    ]
+    const getTableColumns = () =>  {
+        const ifShowDiscount = invoiceSettings.get('ifShowDiscount') === 'true'
+        return [
+            { title: '序号', align: 'center', render: (_, __, idx) => idx + 1, width: 45, fixed: 'left' },
+            { title: '单号', dataIndex: 'id', align: 'center', width: 150, sorter: (a, b) => a.id > b.id ? 1 : -1, showSorterTooltip: false },
+            { title: '交易对象', dataIndex: 'partner', align: 'center', width: 130 },
+            { title: '单价', dataIndex: 'price', align: 'center', width: 80, 
+                render: price => <Button size='small' type='text' style={{ width: '100%' }} onClick={_ => props.setPrice(price) }>{price}</Button>,
+                sorter: (a, b) => a.price - b.price, showSorterTooltip: false
+            },
+            { title: '数量', dataIndex: 'quantity', align: 'center', width: 80, 
+                sorter: (a, b) => a.quantity - b.quantity, showSorterTooltip: false 
+            },
+            { title: ifShowDiscount ? '折后价' : '金额', dataIndex: 'amount', align: 'center', width: 90, 
+                sorter: (a, b) => a.amount - b.amount, showSorterTooltip: false 
+            },
+            { title: '日期', dataIndex: 'date', align: 'center', width: 100, 
+                sorter: (a, b) => a.date > b.date ? 1 : ( a.date < b.date ? -1 : 0), showSorterTooltip: false
+            },
+            { title: '备注', dataIndex: 'remark', align: 'center', width: 120 }
+        ]
+    }
 
     // chart
     const getChartOption = (data) => {
@@ -169,10 +172,11 @@ function PriceHistory(props) {
                     const data = params[0].data
                     const remark = data.remark ? `备注：${data.remark}` : ''
                     const partnerTitle = data.type === 'salesOrder' ? '客户' : '供应商'
+                    const ifShowDiscount = invoiceSettings.get('ifShowDiscount') === 'true'
                     return `<div style="border-bottom:dashed lightgray;padding-bottom:5px;">
                         单价：${data.price}<br/>
-                        数量：${data.quantity} ${data.unit}<br/>
-                        折后价：${data.amount}<br/>
+                        数量：${data.quantity.toLocaleString()} ${data.unit}<br/>
+                        ${ifShowDiscount ? '折后价' : '金额'}：${data.amount.toLocaleString()}<br/>
                         ${remark}
                     </div>
                     <div style="padding-top:5px;">
@@ -191,9 +195,6 @@ function PriceHistory(props) {
 
     const load = () => {
         setPrices([])
-        // if (getButtonDisabled()) { 
-        //     return 
-        // }
         Axios({
             method: 'get',
             baseURL: baseURL(),
@@ -228,12 +229,12 @@ function PriceHistory(props) {
                 <Checkbox value='salesOrder'>销售单</Checkbox>
                 <Checkbox value='purchaseOrder'>采购单</Checkbox>
             </Checkbox.Group> }
-            { displayType === 'chart' ? null : <span style={{ color: 'gray', fontStyle: 'italic' }}>* 点击单价可自动填入</span> }
+            <span style={{ color: 'gray', fontStyle: 'italic' }}>{ displayType === 'chart' ? '点击图例可显示或隐藏折线' : '点击单价可自动填入' }</span>
         </Row>
         {/* Main Content */}
         { displayType === 'chart' ? 
             <ReactEcharts option={getChartOption(prices)} style={{ height: 400 }} /> :
-            <Table dataSource={prices.filter(p => tableFilters.includes(p.type))} size='small' rowKey={record => record.id} columns={itemColumns}
+            <Table dataSource={prices.filter(p => tableFilters.includes(p.type))} size='small' rowKey={record => record.id} columns={getTableColumns()}
                 scroll={{ x: 'max-content', y: 400 }} style={{ height: 400 }} pagination={false} bordered /> 
         }
         <Divider />
@@ -251,7 +252,7 @@ export function PriceInput(props) {
 
     return <>
         <Modal open={showHistory} onCancel={_ => setShowHistory(false)} title='历史价格' width={900} destroyOnClose 
-            footer={<Button type='primary' onClick={_ => setShowHistory(false)} icon={<CloseOutlined/>}>关闭</Button>}>
+            footer={<Button type='primary' ghost onClick={_ => setShowHistory(false)} icon={<CloseOutlined/>}>关闭</Button>}>
             <PriceHistory partner={props.partner} material={props.material} name={props.name} spec={props.spec} 
                 setPrice={val => { props.onChange(val); setShowHistory(false) }} />
         </Modal>

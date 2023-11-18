@@ -70,7 +70,7 @@ function View(props) {
             ifShowDiscount ? { title: '金额', dataIndex: 'originalAmount', align: 'center', width: 80, render: a => a.toLocaleString() } : null,
             ifShowDiscount ? { title: '折扣', dataIndex: 'discount', align: 'center', width: 50, render: discount => `${discount}%` } : null,
             { title: ifShowDiscount ? '折后价' : '金额', dataIndex: 'amount', align: 'center', width: 80, render: d => d.toLocaleString() },
-            { title: '重量', dataIndex: 'weight', align: 'center' },
+            { title: '重量', dataIndex: 'weight', align: 'center', width: 80 },
             { title: '备注', dataIndex: 'remark', align: 'center', width: 100 },
             { title: '配送', dataIndex: 'delivered', align: 'center', width: 60, fixed: 'right', render: delivered => 
                 <span style={{ color: delivered ? 'black' : 'red' }}>{delivered ? '已配送' : '未配送'}</span>
@@ -119,7 +119,7 @@ function View(props) {
     return !props.order ? null : <>
         <Space direction='vertical' style={{ width: '100%', marginTop: '10px', marginBottom: '15px' }}>
             <Row style={{ justifyContent: 'space-between' }}>
-                <div>客户：<PartnerPopoverView refresh={props.refresh}
+                <div>供应商：<PartnerPopoverView refresh={props.refresh}
                     partner={_.fromPairs(['name', 'folder', 'phone', 'address'].map(key => [key, props.order[key]]))} />
                 </div>
                 <div>日期：{props.order.date}</div>

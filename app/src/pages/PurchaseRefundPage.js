@@ -12,9 +12,9 @@ const { RangePicker } = DatePicker
 
 import { baseURL, DATE_FORMAT, DEFAULT_PAGINATION } from '../utils/config'
 import { exportExcel, getExportData } from '../utils/export'
-import PurchaseRefundFB from '../components/purchaseRefundComponents/PurchaseRefundFB'
 import PurchaseRefundView from '../components/purchaseRefundComponents/PurchaseRefundView'
 import PurchaseOrderView from '../components/purchaseOrderComponents/PurchaseOrderView'
+import MyFloatButton from '../components/common/MyFloatButton'
 
 
 /*
@@ -54,7 +54,7 @@ function PurchaseRefundPage(props) {
         return [
             { title: '序号', align: 'center', render: (_, __, idx) => idx + 1, fixed: 'left' },
             { title: '单号', dataIndex: 'id', align: 'center', render: id => <a onClick={_ => setSelectedRefundId(id)}>{id}</a> },
-            { title: '客户', dataIndex: 'partner', align: 'center' },
+            { title: '供应商', dataIndex: 'partner', align: 'center' },
             { title: '日期', dataIndex: 'date', align: 'center' },
             { title: '金额', dataIndex: 'amount', align: 'center', render: amount => amount.toLocaleString() },
             { title: '已付', dataIndex: 'payment', align: 'center', render: payment => payment.toLocaleString() },
@@ -62,8 +62,8 @@ function PurchaseRefundPage(props) {
             { title: '配送情况', dataIndex: 'delivered', align: 'center' },
             { title: '关联采购单', dataIndex: 'orderId', align: 'center', render: id => <a onClick={_ => setSelectedOrderId(id)}>{id}</a> },
             { title: '操作', align: 'center', fixed: 'right', render: (_, record) => 
-                <Space.Compact size='small'>
-                    <Button type='link' onClick={_ => showDeleteConfirm([record.id])} danger>删除</Button>
+                <Space.Compact>
+                    <Button onClick={_ => showDeleteConfirm([record.id])} danger>删除</Button>
                  </Space.Compact>
             }
         ]
@@ -109,7 +109,7 @@ function PurchaseRefundPage(props) {
     const exportPurchaseRefunds = () => {
         const purchaseTableColumns = [
             { title: '单号', dataIndex: 'id' },
-            { title: '客户', dataIndex: 'partner' },
+            { title: '供应商', dataIndex: 'partner' },
             { title: '日期', dataIndex: 'date' },
             { title: '金额', dataIndex: 'amount' },
             { title: '已付', dataIndex: 'payment' },
@@ -124,7 +124,7 @@ function PurchaseRefundPage(props) {
 
     return <>
         {contextHolder}
-        <PurchaseRefundFB refresh={load} drafts={props.drafts} setDrafts={props.setDrafts} />
+        <MyFloatButton type='purchaseRefund' refresh={load} drafts={props.drafts} setDrafts={props.setDrafts} />
 
         <Modal title={`采购退货单 (${selectedRefundId})`} open={selectedRefundId !== undefined} width={900} destroyOnClose 
             onCancel={_ => setSelectedRefundId(undefined)} footer={null} maskClosable={false}>
@@ -141,7 +141,7 @@ function PurchaseRefundPage(props) {
             {/* Function Box */}
             <Card size='small'><Form form={form} onFinish={_ => filterPurchaseRefunds(purchaseRefunds)}><Row>
                 <Item label='单号' name='refundId' style={itemStyle}><Input allowClear placeholder='单号' /></Item>
-                <Item label='客户' name='partner' style={itemStyle}><Input allowClear placeholder='客户' /></Item>
+                <Item label='供应商' name='partner' style={itemStyle}><Input allowClear placeholder='供应商' /></Item>
                 <Item label='日期' name='date' style={itemStyle}><RangePicker format={DATE_FORMAT} allowEmpty={[true, true]} /></Item>
                 <Item label='采购单号' name='orderId' style={itemStyle}><Input allowClear placeholder='采购单号' /></Item>
                 <Space wrap style={itemStyle}>
@@ -152,7 +152,7 @@ function PurchaseRefundPage(props) {
             </Row></Form></Card>
 
             {/* Purchase Refund Table */}
-            <Table dataSource={filteredPurchaseRefunds} size='small' rowKey={record => record.id} 
+            <Table dataSource={filteredPurchaseRefunds} size='middle' rowKey={record => record.id} 
                 bordered columns={getTableColumns()} pagination={DEFAULT_PAGINATION} scroll={{ x: 'max-content' }} />
         </Space>
     </>

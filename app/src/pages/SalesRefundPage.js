@@ -12,9 +12,9 @@ const { RangePicker } = DatePicker
 
 import { baseURL, DATE_FORMAT, DEFAULT_PAGINATION } from '../utils/config'
 import { exportExcel, getExportData } from '../utils/export'
-import SalesRefundFB from '../components/salesRefundComponents/SalesRefundFB'
 import SalesRefundView from '../components/salesRefundComponents/SalesRefundView'
 import SalesOrderView from '../components/salesOrderComponents/SalesOrderView'
+import MyFloatButton from '../components/common/MyFloatButton'
 
 
 /*
@@ -62,8 +62,8 @@ function SalesRefundPage(props) {
             { title: '配送情况', dataIndex: 'delivered', align: 'center' },
             { title: '关联销售单', dataIndex: 'orderId', align: 'center', render: id => <a onClick={_ => setSelectedOrderId(id)}>{id}</a> },
             { title: '操作', align: 'center', fixed: 'right', render: (_, record) => 
-                <Space.Compact size='small'>
-                    <Button type='link' onClick={_ => showDeleteConfirm([record.id])} danger>删除</Button>
+                <Space.Compact>
+                    <Button onClick={_ => showDeleteConfirm([record.id])} danger>删除</Button>
                  </Space.Compact>
             }
         ]
@@ -124,7 +124,7 @@ function SalesRefundPage(props) {
 
     return <>
         {contextHolder}
-        <SalesRefundFB refresh={load} drafts={props.drafts} setDrafts={props.setDrafts} />
+        <MyFloatButton type='salesRefund' refresh={load} drafts={props.drafts} setDrafts={props.setDrafts} />
 
         <Modal title={`销售退货单 (${selectedRefundId})`} open={selectedRefundId !== undefined} width={900} destroyOnClose 
             onCancel={_ => setSelectedRefundId(undefined)} footer={null} maskClosable={false}>
@@ -152,7 +152,7 @@ function SalesRefundPage(props) {
             </Row></Form></Card>
 
             {/* Sales Refund Table */}
-            <Table dataSource={filteredSalesRefunds} size='small' rowKey={record => record.id} 
+            <Table dataSource={filteredSalesRefunds} size='middle' rowKey={record => record.id} 
                 bordered columns={getTableColumns()} pagination={DEFAULT_PAGINATION} scroll={{ x: 'max-content' }} />
         </Space>
     </>

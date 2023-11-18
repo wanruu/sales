@@ -100,7 +100,7 @@ function View(props) {
     return !props.refund ? null : <>
         <Space direction='vertical' style={{ width: '100%', marginTop: '10px', marginBottom: '15px' }}>
             <Row>
-                <Col span={8}>客户：{props.refund.partner}</Col>
+                <Col span={8}>供应商：{props.refund.partner}</Col>
                 <Col span={8}>日期：{props.refund.date}</Col>
                 <Col span={8}>关联采购单：{props.refund.orderId || '无'}</Col>
             </Row>

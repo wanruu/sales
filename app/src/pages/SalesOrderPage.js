@@ -10,11 +10,11 @@ const { Item } = Form
 const { RangePicker } = DatePicker
 
 
-import SalesOrderFB from '../components/salesOrderComponents/SalesOrderFB'
 import { baseURL, DATE_FORMAT, DEFAULT_PAGINATION } from '../utils/config'
 import { exportExcel, getExportData } from '../utils/export'
 import SalesOrderView from '../components/salesOrderComponents/SalesOrderView'
 import SalesRefundView from '../components/salesRefundComponents/SalesRefundView'
+import MyFloatButton from '../components/common/MyFloatButton'
 
 
 /*
@@ -64,8 +64,8 @@ function SalesOrderPage(props) {
             { title: '配送情况', dataIndex: 'delivered', align: 'center' },
             { title: '关联退货单', dataIndex: 'refundId', align: 'center', render: id => id ? <a onClick={_ => setSelectedRefundId(id)}>{id}</a> : null },
             { title: '操作', align: 'center', fixed: 'right', render: (_, record) => (
-                <Space.Compact size='small'>
-                    <Button type='link' onClick={_ => showDeleteConfirm([record.id])} danger>删除</Button>
+                <Space.Compact>
+                    <Button onClick={_ => showDeleteConfirm([record.id])} danger>删除</Button>
                 </Space.Compact>
             ) }
         ]
@@ -128,7 +128,7 @@ function SalesOrderPage(props) {
 
     return <>
         {contextHolder}
-        <SalesOrderFB refresh={load} drafts={props.drafts} setDrafts={props.setDrafts} />
+        <MyFloatButton type='salesOrder' refresh={load} drafts={props.drafts} setDrafts={props.setDrafts} />
 
         <Modal title={`销售清单 (${selectedOrderId})`} open={selectedOrderId !== undefined} width={900} destroyOnClose 
             onCancel={_ => setSelectedOrderId(undefined)} footer={null} maskClosable={false}>
@@ -156,7 +156,7 @@ function SalesOrderPage(props) {
             </Row></Form></Card>
 
             {/* Sales Order Table */}
-            <Table dataSource={filteredSalesOrders} bordered size='small' rowKey={record => record.id} 
+            <Table dataSource={filteredSalesOrders} bordered rowKey={record => record.id} size='middle'
                 columns={getTableColumns()} pagination={DEFAULT_PAGINATION} scroll={{ x: 'max-content' }} />
         </Space>
     </>

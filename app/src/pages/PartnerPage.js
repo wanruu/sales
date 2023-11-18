@@ -86,13 +86,13 @@ function PartnerPage() {
         { title: '电话', align: 'center', dataIndex: 'phone' },
         { title: '地址', align: 'center', dataIndex: 'address' },
         { title: '操作', align: 'center', fixed: 'right', render: (_, record) => 
-            <Space.Compact size='small'>
-                <Button type='link' onClick={_ => setEditPartner(record)}>编辑</Button>
+            <Space>
+                <Button type='primary' ghost onClick={_ => setEditPartner(record)}>编辑</Button>
                 {record.invoiceNum > 0 ?
-                    <Button type='link'>查看</Button> :
-                    <Button type='link' danger onClick={_ => showDeleteConfirm([record.name])}>删除</Button>
+                    <Button>查看</Button> :
+                    <Button danger onClick={_ => showDeleteConfirm([record.name])}>删除</Button>
                 }
-            </Space.Compact>
+            </Space>
         }
     ]
 
@@ -129,7 +129,7 @@ function PartnerPage() {
             </Card>
 
             {/* Partner Table */}
-            <Table dataSource={filteredPartners} size='small' bordered rowKey={record => record.name} 
+            <Table dataSource={filteredPartners} size='middle' bordered rowKey={record => record.name} 
                 scroll={{ x: 'max-content' }} pagination={DEFAULT_PAGINATION} columns={columns} />
         </Space>
     </>

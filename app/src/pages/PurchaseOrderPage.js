@@ -10,11 +10,11 @@ const { Item } = Form
 const { RangePicker } = DatePicker
 
 
-import PurchaseOrderFB from '../components/purchaseOrderComponents/PurchaseOrderFB'
 import { baseURL, DATE_FORMAT, DEFAULT_PAGINATION } from '../utils/config'
 import { exportExcel, getExportData } from '../utils/export'
 import PurchaseOrderView from '../components/purchaseOrderComponents/PurchaseOrderView'
 import PurchaseRefundView from '../components/purchaseRefundComponents/PurchaseRefundView'
+import MyFloatButton from '../components/common/MyFloatButton'
 
 
 /*
@@ -54,7 +54,7 @@ function PurchaseOrderPage(props) {
         return [
             { title: '序号', align: 'center', render: (_, __, idx) => idx + 1, fixed: 'left' },
             { title: '单号', dataIndex: 'id', align: 'center', render: id => <a onClick={_ => setSelectedOrderId(id)}>{id}</a> },
-            { title: '客户', dataIndex: 'partner', align: 'center' },
+            { title: '供应商', dataIndex: 'partner', align: 'center' },
             { title: '日期', dataIndex: 'date', align: 'center' },
             { title: '金额', dataIndex: 'amount', align: 'center', render: amount => amount.toLocaleString() },
             { title: '已付', dataIndex: 'paid', align: 'center', render: paid => paid.toLocaleString() },
@@ -64,8 +64,8 @@ function PurchaseOrderPage(props) {
             { title: '配送情况', dataIndex: 'delivered', align: 'center' },
             { title: '关联退货单', dataIndex: 'refundId', align: 'center', render: id => id ? <a onClick={_ => setSelectedRefundId(id)}>{id}</a> : null },
             { title: '操作', align: 'center', fixed: 'right', render: (_, record) => (
-                <Space.Compact size='small'>
-                    <Button type='link' onClick={_ => showDeleteConfirm([record.id])} danger>删除</Button>
+                <Space.Compact>
+                    <Button onClick={_ => showDeleteConfirm([record.id])} danger>删除</Button>
                 </Space.Compact>
             ) }
         ]
@@ -111,7 +111,7 @@ function PurchaseOrderPage(props) {
     const exportPurchaseOrders = () => {
         const orderTableColumns = [
             { title: '单号', dataIndex: 'id', summary: '总计' },
-            { title: '客户', dataIndex: 'partner' },
+            { title: '供应商', dataIndex: 'partner' },
             { title: '日期', dataIndex: 'date' },
             { title: '金额', dataIndex: 'amount', summary: 'sum' },
             { title: '订金', dataIndex: 'prepayment', summary: 'sum' },
@@ -128,7 +128,7 @@ function PurchaseOrderPage(props) {
 
     return <>
         {contextHolder}
-        <PurchaseOrderFB refresh={load} drafts={props.drafts} setDrafts={props.setDrafts} />
+        <MyFloatButton type='purchaseOrder' refresh={load} drafts={props.drafts} setDrafts={props.setDrafts} />
 
         <Modal title={`采购清单 (${selectedOrderId})`} open={selectedOrderId !== undefined} width={900} destroyOnClose 
             onCancel={_ => setSelectedOrderId(undefined)} footer={null} maskClosable={false}>
@@ -145,7 +145,7 @@ function PurchaseOrderPage(props) {
             {/* Function Box */}
             <Card size='small'><Form form={form} onFinish={_ => filterPurchaseOrders(purchaseOrders)}><Row>
                 <Item label='单号' name='orderId' style={itemStyle}><Input allowClear placeholder='单号' /></Item>
-                <Item label='客户' name='partner' style={itemStyle}><Input allowClear placeholder='客户' /></Item>
+                <Item label='供应商' name='partner' style={itemStyle}><Input allowClear placeholder='供应商' /></Item>
                 <Item label='日期' name='date' style={itemStyle}><RangePicker format={DATE_FORMAT} allowEmpty={[true, true]} /></Item>
                 <Item label='退货单号' name='refundId' style={itemStyle}><Input allowClear placeholder='退货单号' /></Item>
                 <Space wrap style={itemStyle}>
@@ -156,7 +156,7 @@ function PurchaseOrderPage(props) {
             </Row></Form></Card>
 
             {/* Purchase Order Table */}
-            <Table dataSource={filteredPurchaseOrders} bordered size='small' rowKey={record => record.id} 
+            <Table dataSource={filteredPurchaseOrders} bordered size='middle' rowKey={record => record.id} 
                 columns={getTableColumns()} pagination={DEFAULT_PAGINATION} scroll={{ x: 'max-content' }} />
         </Space>
     </>

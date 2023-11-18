@@ -75,6 +75,9 @@ export default function SalesRefundEditView(props) {
         ].filter(i => i != null)
     }
     const upload = () => {
+        if (refund.date == null) {
+            return props.messageApi.open({ type: 'error', content: '请选择日期' })
+        }
         const newRefund = dcInvoice(refund)
         newRefund.date = newRefund.date.format(DATE_FORMAT)
         newRefund.items = newRefund.items.map(item => {

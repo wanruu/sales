@@ -120,7 +120,7 @@ function PurchaseRefundItemSelectView(props) {
                 filterSearch onFilter={(value, record) => record.id.includes(value)} filters={idFilters}
                 sorter={(a, b) =>  a.id > b.id} 
             /> 
-            <Column title='客户' dataIndex='partner' 
+            <Column title='供应商' dataIndex='partner' 
                 filterSearch onFilter={(value, record) => record.partner.includes(value)} filters={partnerFilters}
             />
             <Column title='总金额' dataIndex='amount' width={180} render={a => a.toLocaleString()} />

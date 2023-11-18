@@ -82,6 +82,9 @@ export default function PurchaseRefundEditView(props) {
         ].filter(i => i != null)
     }
     const upload = () => {
+        if (refund.date == null) {
+            return props.messageApi.open({ type: 'error', content: '请选择日期' })
+        }
         const newRefund = dcInvoice(refund)
         newRefund.date = newRefund.date.format(DATE_FORMAT)
         newRefund.items = newRefund.items.map(item => {
@@ -110,7 +113,7 @@ export default function PurchaseRefundEditView(props) {
     return <>
         <Space direction='vertical' style={{ width: '100%', marginTop: '10px', marginBottom: '15px' }}>
             <Row style={{ justifyContent: 'space-between' }} align='middle'>
-                <Col style={{ width: '30%' }}>客户：
+                <Col style={{ width: '30%' }}>供应商：
                     { refund.partner ? refund.partner : <span style={{color: 'gray'}}>(选择产品后自动显示)</span> }
                 </Col>
                 <Col style={{ width: '30%' }} align={'center'}>日期：

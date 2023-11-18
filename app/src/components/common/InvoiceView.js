@@ -3,9 +3,8 @@ import { Row, Col, Space } from 'antd'
 import { FieldNumberOutlined } from '@ant-design/icons'
 
 import './Invoice.css'
-import digitUppercase from '../../utils/digitUppercase'
 import { printSettings, invoiceSettings } from '../../utils/config'
-
+import { digitUppercase } from '../../utils/invoiceUtils'
 
 /* type */
 function PreviewTable(props) {

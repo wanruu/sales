@@ -49,20 +49,20 @@ function ProductPage() {
             { title: '库存', dataIndex: 'quantity', align: 'center', render: quantity => <span style={{ color: quantity < 0 ? 'red': 'black' }}>{quantity.toLocaleString()}</span> },
             { title: '单位', dataIndex: 'unit', align: 'center' },
             { title: '操作', align: 'center', fixed: 'right', render: (_, record) => 
-                <Space.Compact size='small'>
-                    <Button type='link' onClick={_ => setEditProduct(record)}>编辑</Button>
+                <Space>
+                    <Button type='primary' ghost onClick={_ => setEditProduct(record)}>编辑</Button>
                     {record.invoiceNum > 0 ?
-                        <Button type='link'>查看</Button> :
-                        <Button type='link' danger onClick={_ => showDeleteConfirm([record])}>删除</Button>
+                        <Button>查看</Button> :
+                        <Button danger onClick={_ => showDeleteConfirm([record])}>删除</Button>
                     }
-                </Space.Compact>
+                </Space>
             }
         ].filter(i => i != null)
     }
 
     // delete products
     const showDeleteConfirm = (products) => {
-        const title = products.length === 1 ? `是否删除产品: ${products[0].material} ${products[0].name} ${products[0].spec} ?` : `是否删除 ${products.length} 个产品 ?`
+        const title = products.length === 1 ? `是否删除产品 “${products[0].material} ${products[0].name} ${products[0].spec}” ?` : `是否删除 ${products.length} 个产品 ?`
         confirm({
             title: title,
             icon: <ExclamationCircleFilled />,
@@ -143,7 +143,7 @@ function ProductPage() {
             </Form></Card>
 
             {/* Product Table */}
-            <Table dataSource={filteredProducts} size='small' bordered rowKey={record => record.id} columns={getTableColumns()}
+            <Table dataSource={filteredProducts} size='middle' bordered rowKey={record => record.id} columns={getTableColumns()}
                 pagination={DEFAULT_PAGINATION} scroll={{ x: 'max-content' }} />
         </Space>
     </>

@@ -4,8 +4,9 @@ import { InboxOutlined, CloseOutlined, DeleteOutlined, EditOutlined, SaveOutline
 import { Decimal } from 'decimal.js'
 import Axios from 'axios'
 
-import { dcInvoice, calItemAmount, calTotalAmount, emptyInvoice, emptyInvoiceItem } from '../../utils/invoiceUtils'
-import { isSalesOrderItemEmpty, isSalesOrderItemComplete, isProductRepeat } from '../../utils/salesOrderUtils'
+import { dcInvoice, calItemAmount, calTotalAmount, emptyInvoice, emptyInvoiceItem,
+    isOrderItemComplete, isOrderItemEmpty, isProductRepeat
+} from '../../utils/invoiceUtils'
 import { PartnerInput, ProductInput, UnitInput, DeliveredInput, PriceInput } from '../common/PromptInput'
 import { baseURL, DATE_FORMAT, invoiceSettings } from '../../utils/config'
 import '../common/Invoice.css'
@@ -41,20 +42,23 @@ export default function SalesOrderEditView(props) {
     const upload = () => {
         // 1. Check data
         if (order.partner === '') {
-            return props.messageApi.open({ type: 'error', content: '收货单位不得为空' })
+            return props.messageApi.open({ type: 'error', content: '请填写客户名称' })
         }
-        const nIncomplete = order.items.filter(item => !isSalesOrderItemComplete(item) && !isSalesOrderItemEmpty(item)).length
+        if (order.date == null) {
+            return props.messageApi.open({ type: 'error', content: '请选择日期' })
+        }
+        const nIncomplete = order.items.filter(item => !isOrderItemComplete(item) && !isOrderItemEmpty(item)).length
         if (nIncomplete > 0) {
             return props.messageApi.open({ type: 'error', content: '表格填写不完整' })
         }
         if (isProductRepeat(order.items)) {
-            return props.messageApi.open({ type: 'error', content: '产品种类不得重复' })
+            return props.messageApi.open({ type: 'error', content: '产品重复' })
         }
 
         // 2. Clean data & Upload
         const newOrder = dcInvoice(order)
         newOrder.date = newOrder.date.format(DATE_FORMAT)
-        newOrder.items = newOrder.items.filter(item => !isSalesOrderItemEmpty(item))
+        newOrder.items = newOrder.items.filter(item => !isOrderItemEmpty(item))
         Axios({
             method: newOrder.id ? 'put' : 'post',
             baseURL: baseURL(),
@@ -132,10 +136,10 @@ export default function SalesOrderEditView(props) {
     useEffect(initOrder, [props.order])
     useEffect(() => {
         const newOrder = dcInvoice(order)
-        if (order.items.length === 0 || !isSalesOrderItemEmpty(order.items.at(-1))) {
+        if (order.items.length === 0 || !isOrderItemEmpty(order.items.at(-1))) {
             newOrder.items.push(emptyInvoiceItem())
             setOrder(newOrder)
-        } else if (order.items.length >= 2 && isSalesOrderItemEmpty(order.items.at(-2))) {
+        } else if (order.items.length >= 2 && isOrderItemEmpty(order.items.at(-2))) {
             newOrder.items.pop()
             setOrder(newOrder)
         }
