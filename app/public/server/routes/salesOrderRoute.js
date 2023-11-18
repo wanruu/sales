@@ -245,7 +245,7 @@ router.get('/detailed', (req, res) => {
             res.status(500).send(err)
             return
         }
-        const query = `SELECT i.id AS orderId,
+        const query = `SELECT i.id AS orderId, ii.quantity AS maxQuantity,
             p.id AS productId, p.material, p.name, p.spec, p.unit, 
             ii.id AS orderItemId, ii.price, ii.quantity, ii.amount, ii.discount, ii.originalAmount, ii.remark, ii.delivered 
             FROM invoice AS i, invoiceItem AS ii, product AS p 

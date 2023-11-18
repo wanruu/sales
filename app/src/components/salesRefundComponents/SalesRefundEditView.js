@@ -48,7 +48,8 @@ export default function SalesRefundEditView(props) {
             { title: '规格', dataIndex: 'spec', align: 'center', width: 70 },
             { title: '数量', dataIndex: 'quantity', align: 'center', width: 70, render: (_, record, idx) => 
                 <InputNumber min={0} stringMode keyboard={false} size='small' controls={false} style={{width: '100%'}} 
-                    value={record.quantity} onChange={value => updateRow(idx, 'quantity', value)} />
+                    value={record.quantity} onChange={value => updateRow(idx, 'quantity', value)} 
+                    placeholder={record.maxQuantity} />
             },
             { title: '单位', dataIndex: 'unit', align: 'center', width: 50 },
             { title: '单价', dataIndex: 'price', align: 'center', width: 70, render: p => p.toLocaleString() },

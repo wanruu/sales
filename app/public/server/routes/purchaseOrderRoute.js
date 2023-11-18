@@ -249,7 +249,8 @@ router.get('/detailed', (req, res) => {
         }
         const query = `SELECT i.id AS orderId,
             p.id AS productId, p.material, p.name, p.spec, p.unit, 
-            ii.id AS orderItemId, ii.price, ii.quantity, ii.amount, ii.discount, ii.originalAmount, ii.remark, ii.delivered 
+            ii.id AS orderItemId, ii.price, ii.quantity, ii.amount, ii.discount, ii.originalAmount, ii.remark, ii.delivered,
+            ii.weight, ii.weight/ii.quantity AS unitWeight, ii.quantity AS maxQuantity
             FROM invoice AS i, invoiceItem AS ii, product AS p 
             WHERE i.id=ii.invoiceId AND p.id=ii.productId AND i.type=${typeInt}`
         db.all(query, (err, items) => {
@@ -293,13 +294,13 @@ router.get('/id/:id', (req, res) => {
         const refundId = order.refundId
 
         const selectItem = refundId ?
-        `SELECT oi.id, oi.productId, oi.price, oi.discount, oi.quantity, oi.originalAmount, oi.amount, oi.remark, oi.delivered,
+        `SELECT oi.id, oi.productId, oi.price, oi.discount, oi.quantity, oi.originalAmount, oi.amount, oi.weight, oi.remark, oi.delivered,
             p.material, p.name, p.spec, p.unit, p.quantity AS remainingQuantity,
             ri.quantity AS refundQuantity, ri.originalAmount AS refundOriginalAmount, ri.amount AS refundAmount
             FROM invoiceItem AS oi, product AS p 
             LEFT JOIN invoiceItem AS ri ON oi.productId=ri.productId AND ri.invoiceId="${refundId}"
             WHERE oi.invoiceId="${orderId}" AND p.id=oi.productId` :
-        `SELECT oi.id, oi.productId, oi.price, oi.discount, oi.quantity, oi.originalAmount, oi.amount, oi.remark, oi.delivered,
+        `SELECT oi.id, oi.productId, oi.price, oi.discount, oi.quantity, oi.originalAmount, oi.amount, oi.weight, oi.remark, oi.delivered,
             p.material, p.name, p.spec, p.unit, p.quantity AS remainingQuantity
             FROM invoiceItem AS oi, product AS p
             WHERE oi.invoiceId="${orderId}" AND p.id=oi.productId`

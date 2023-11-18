@@ -46,11 +46,17 @@ router.get('/id/:id', (req, res) => {
             res.status(500).send(err)
             return
         }
-        const query = `SELECT ii.id AS refundItemId, productId, material, name, spec, unit, p.quantity AS remainingQuantity, 
+        const refundItems = `SELECT ii.id AS refundItemId, productId, material, name, spec, unit, p.quantity AS remainingQuantity, 
             price, discount, ii.quantity, originalAmount, amount, remark, delivered 
             FROM invoiceItem ii, product p
             WHERE ii.invoiceId="${refundId}" AND ii.productId=p.id`
-        db.all(query, (err, items) => {
+        const orderItems = `SELECT oi.*
+            FROM invoiceRelation AS r, invoiceItem AS oi
+            WHERE r.refundId="${refundId}" AND oi.invoiceId=r.orderId`
+        const selectRefundItemsWithOrderInfo = `SELECT ri.*, oi.quantity AS maxQuantity
+            FROM (${refundItems}) AS ri LEFT JOIN (${orderItems}) AS oi
+            ON ri.productId=oi.productId`
+        db.all(selectRefundItemsWithOrderInfo, (err, items) => {
             if (err) {
                 console.error(err)
                 res.status(500).send(err)

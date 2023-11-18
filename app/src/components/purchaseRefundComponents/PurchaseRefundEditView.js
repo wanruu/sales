@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import Axios from 'axios'
 import Decimal from 'decimal.js'
-import { Table, Button, DatePicker, Col, Row, InputNumber, Input, Divider, Space, Modal } from 'antd'
-import { FieldNumberOutlined, EditOutlined, SaveOutlined, DeleteOutlined, CloseOutlined, InboxOutlined } from '@ant-design/icons'
+import { Table, Button, DatePicker, Col, Row, InputNumber, Input, Divider, Space, Modal, Popover } from 'antd'
+import { ExclamationCircleOutlined, EditOutlined, SaveOutlined, DeleteOutlined, CloseOutlined, InboxOutlined } from '@ant-design/icons'
 
 
 import { calItemAmount, calTotalAmount, dcInvoice, emptyInvoice } from '../../utils/invoiceUtils'
@@ -41,20 +41,28 @@ export default function PurchaseRefundEditView(props) {
     const getTableColumns = () => {
         const ifShowMaterial = invoiceSettings.get('ifShowMaterial') === 'true'
         const ifShowDiscount = invoiceSettings.get('ifShowDiscount') === 'true'
+        const getQuantityStatus = (quantity, maxQuantity) => {
+            return maxQuantity == null ? 'error' : (Decimal(quantity||0).gt(maxQuantity) ? 'warning' : '')
+        }
         return [
             { title: '', align: 'center', width: 30, fixed: 'left', render: (_, __, idx) => idx + 1 },
             ifShowMaterial ? { title: '材质', dataIndex: 'material', align: 'center', width: 50 } : null,
             { title: '名称', dataIndex: 'name', align: 'center', width: 150 },
             { title: '规格', dataIndex: 'spec', align: 'center', width: 70 },
-            { title: '数量', dataIndex: 'quantity', align: 'center', width: 70, render: (_, record, idx) => 
+            { title: <span>数量 <Popover content={<>黄色：数量超过采购单上限。<br/>红色：产品已从采购单中移除。</>}><a style={{color: 'gray'}}><ExclamationCircleOutlined/></a></Popover></span>, 
+                dataIndex: 'quantity', align: 'center', width: 70, render: (_, record, idx) => 
                 <InputNumber min={0} stringMode keyboard={false} size='small' controls={false} style={{width: '100%'}} 
-                    value={record.quantity} onChange={value => updateRow(idx, 'quantity', value)} />
+                    value={record.quantity} onChange={value => updateRow(idx, 'quantity', value)}
+                    placeholder={record.maxQuantity} status={getQuantityStatus(record.quantity, record.maxQuantity)} />
             },
             { title: '单位', dataIndex: 'unit', align: 'center', width: 50 },
             { title: '单价', dataIndex: 'price', align: 'center', width: 70, render: p => p.toLocaleString() },
             ifShowDiscount ? { title: '金额', dataIndex: 'originalAmount', align: 'center', width: 80, render: a => parseFloat(a).toLocaleString() } : null,
             ifShowDiscount ? { title: '折扣', dataIndex: 'discount', align: 'center', width: 50, render: d => `${d}%`} : null,
             { title: ifShowDiscount ? '折后价' : '金额', dataIndex: 'amount', align: 'center', width: 80, render: a => parseFloat(a).toLocaleString() },
+            { title: '预估重量', align: 'center', width: 80, render: (_, record) => 
+                Decimal(record.unitWeight || 0).times(record.quantity || 0).toLocaleString()
+            },
             { title: '备注', dataIndex: 'remark', align: 'center', width: 100, render: (_, record, idx) => 
                 <Input size='small' style={{ width: '100%' }} value={record.remark} onChange={e => updateRow(idx, 'remark', e.target.value)} />
             },

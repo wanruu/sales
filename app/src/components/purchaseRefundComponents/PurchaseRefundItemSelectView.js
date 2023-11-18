@@ -89,6 +89,7 @@ function PurchaseRefundItemSelectView(props) {
             ifShowDiscount ? { title: '金额', dataIndex: 'originalAmount', align: 'center', render: a => a.toLocaleString() } : null,
             ifShowDiscount ? { title: '折扣', dataIndex: 'discount', align: 'center', render: discount => `${discount}%` } : null,
             { title: ifShowDiscount ? '折后价' : '金额', dataIndex: 'amount', align: 'center', render: a => a.toLocaleString()  },
+            { title: '重量', dataIndex: 'weight', align: 'center' },
             { title: '备注', dataIndex: 'remark', align: 'center' }
         ].filter(i => i != null)
     }

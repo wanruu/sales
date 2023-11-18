@@ -71,6 +71,7 @@ function View(props) {
             ifShowDiscount ? { title: '金额', dataIndex: 'originalAmount', align: 'center', width: 80, render: a => a.toLocaleString() } : null,
             ifShowDiscount ? { title: '折扣', dataIndex: 'discount', align: 'center', width: 50, render: discount => `${discount}%` } : null,
             { title: ifShowDiscount ? '折后价' : '金额', dataIndex: 'amount', align: 'center', width: 80, render: a => a.toLocaleString() },
+            { title: '预估重量', align: 'center', width: 80, render: (_, record) => Decimal(record.quantity).times(record.unitWeight).toLocaleString()},
             { title: '备注', dataIndex: 'remark', align: 'center', width: 100 },
             { title: '配送', dataIndex: 'delivered', align: 'center', width: 60, fixed: 'right', 
                 render: delivered => <span style={{ color: delivered ? 'black' : 'red' }}>{delivered ? '已配送' : '未配送'}</span>
