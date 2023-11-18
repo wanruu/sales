@@ -5,7 +5,7 @@ import Decimal from 'decimal.js'
 
 const { Item } = Form
 
-import { baseURL, UNIT_COEFF_DICT } from '../../utils/config'
+import { baseURL, UNIT_COEFF_DICT, invoiceSettings } from '../../utils/config'
 import { UnitInput } from '../common/PromptInput'
 
 /*
@@ -22,6 +22,7 @@ function ProductEditView(props) {
         const m = props.messageApi || messageApi
         const p = form.getFieldsValue()
         p.quantity = p.quantity || '0'
+        p.material = invoiceSettings.get('ifShowMaterial') === 'true' ? p.material : ''
         if (props.product !== undefined) {
             p.unitRatio = Decimal(UNIT_COEFF_DICT[p.unit]).div(UNIT_COEFF_DICT[props.product.unit]).toString()
         }
@@ -79,16 +80,14 @@ function ProductEditView(props) {
     const initForm = () => {
         form.setFieldsValue(props.product || { material: '', name: '', spec: '', quantity: '', unit:'' })
     }
-    useEffect(() => {
-        initForm()
-    }, [])
+    useEffect(initForm, [])
 
     return <>
         {contextHolder}
         <Form labelCol={{ span: 3 }} wrapperCol={{ span: 20 }} onFinish={upload} onReset={initForm} form={form}>
-            <Item label='材质' name='material' rules={materialRules}>
+            { invoiceSettings.get('ifShowMaterial') === 'true' ? <Item label='材质' name='material' rules={materialRules}>
                 <Input allowClear />
-            </Item>
+            </Item> : null }
             <Item label='名称' name='name' rules={nameRules}>
                 <Input allowClear />
             </Item>
@@ -99,7 +98,7 @@ function ProductEditView(props) {
                 <Row>
                     <Col span={12}>
                         <Item name='quantity' rules={quantityRules}>
-                            <InputNumber strngMode />
+                            <InputNumber stringMode />
                         </Item>
                     </Col>
                     <Col span={12}>

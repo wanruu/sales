@@ -4,35 +4,43 @@ import { FieldNumberOutlined } from '@ant-design/icons'
 
 import './Invoice.css'
 import digitUppercase from '../../utils/digitUppercase'
-import { printSettings } from '../../utils/config'
+import { printSettings, invoiceSettings } from '../../utils/config'
 
 
 /* type */
 function PreviewTable(props) {
-    const columns = [
-        { title: '材质', dataIndex: 'material', width: '5%' },
-        { title: '名称', dataIndex: 'name', width: '10%' },
-        { title: '规格', dataIndex: 'spec', width: '10%' },
-        { title: '数量', dataIndex: 'quantity', width: '8%' },
-        { title: '单位', dataIndex: 'unit', width: '6%' },
-        { title: '单价', dataIndex: 'price', width: '8%' },
-        { title: '金额', dataIndex: 'amount', width: '11%' },
-        { title: '备注', dataIndex: 'remark', width: '15%' }
-    ]
+    const getTableColumns = () => {
+        const ifShowMaterial = invoiceSettings.get('ifShowMaterial') === 'true'
+        // const ifShowDiscount = invoiceSettings.get('ifShowDiscount') === 'true'
+        return [
+            ifShowMaterial ? { title: '材质', dataIndex: 'material', width: '5%' } : null,
+            { title: '名称', dataIndex: 'name', width: '10%' },
+            { title: '规格', dataIndex: 'spec', width: '10%' },
+            { title: '数量', dataIndex: 'quantity', width: '8%', render: q => q.toLocaleString() },
+            { title: '单位', dataIndex: 'unit', width: '6%' },
+            { title: '单价', dataIndex: 'price', width: '8%', render: p => p.toLocaleString() },
+            { title: '金额', dataIndex: 'amount', width: '11%', render: a => a.toLocaleString() },
+            { title: '备注', dataIndex: 'remark', width: '15%' }
+        ].filter(i => i != null)
+    }
     return (
         <div style={{ fontSize: printSettings.get('tableFontSize') + 'px' }}>
             <table className='previewTable' style={{ width: '100%', height: '100%' }} >
                 <thead>
                     <tr>
                         <th style={{ width: '04.0%', }}>序号</th>
-                        { columns.map(col => <th key={ col.dataIndex } style={{ width: col.width }}>{ col.title }</th>)}
+                        { getTableColumns().map(col => <th key={ col.dataIndex } style={{ width: col.width }}>{ col.title }</th>)}
                     </tr>
                 </thead>
                 <tbody>
                     { props.invoice.items.map((item, itemIdx) =>
                         <tr key={item.productId}>
                             <td>{itemIdx+1}</td>
-                            { columns.map(col => <th key={ col.dataIndex }>{ item[col.dataIndex] }</th>)}
+                            { getTableColumns().map(col => 
+                                <th key={ col.dataIndex }>
+                                    { col.render ? col.render(item[col.dataIndex]) : item[col.dataIndex] }
+                                </th>
+                            )}
                         </tr>
                     )}
                     <tr>
@@ -41,7 +49,7 @@ function PreviewTable(props) {
                             <span style={{ marginLeft: '3px' }}>{digitUppercase(props.invoice.amount)}</span>
                         </td>
                         <td style={{ textAlign: 'left' }} colSpan={2}>
-                            <span style={{ marginLeft: '3px' }}>¥ {props.invoice.amount}</span>
+                            <span style={{ marginLeft: '3px' }}>¥ {props.invoice.amount.toLocaleString()}</span>
                         </td>
                     </tr>
                 </tbody>

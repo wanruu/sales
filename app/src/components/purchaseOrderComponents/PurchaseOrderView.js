@@ -9,13 +9,13 @@ import { useReactToPrint } from 'react-to-print'
 import { baseURL, invoiceSettings } from '../../utils/config'
 import { getExportData, exportExcel } from '../../utils/export'
 import InvoiceView from '../common/InvoiceView'
-import SalesOrderEditView from './SalesOrderEditView'
+import PurchaseOrderEditView from './PurchaseOrderEditView'
 import PartnerPopoverView from '../partnerComponents/PartnerPopoverView'
 
 /*
     Required: id, refresh, messageApi
 */
-export default function SalesOrderView(props) {
+export default function PurchaseOrderView(props) {
     const [order, setOrder] = useState(undefined)
     const [mode, setMode] = useState('view')
 
@@ -23,7 +23,7 @@ export default function SalesOrderView(props) {
         Axios({
             method: 'get',
             baseURL: baseURL(),
-            url: `salesOrder/id/${props.id}`,
+            url: `purchaseOrder/id/${props.id}`,
             'Content-Type': 'application/json',
         }).then(res => {
             const newOrder = res.data
@@ -41,7 +41,7 @@ export default function SalesOrderView(props) {
 
     return  <>
         <div style={{ display: mode === 'edit' ? 'block' : 'none' }}>
-            <SalesOrderEditView order={order} dismiss={_ => setMode('view')} messageApi={props.messageApi} refresh={_ => { load(); props.refresh() }} /> 
+            <PurchaseOrderEditView order={order} dismiss={_ => setMode('view')} messageApi={props.messageApi} refresh={_ => { load(); props.refresh() }} /> 
         </div>
         <div style={{ display: mode === 'view' ? 'block' : 'none'}}>
             <View order={order} setMode={setMode} refresh={load} />
@@ -70,6 +70,7 @@ function View(props) {
             ifShowDiscount ? { title: '金额', dataIndex: 'originalAmount', align: 'center', width: 80, render: a => a.toLocaleString() } : null,
             ifShowDiscount ? { title: '折扣', dataIndex: 'discount', align: 'center', width: 50, render: discount => `${discount}%` } : null,
             { title: ifShowDiscount ? '折后价' : '金额', dataIndex: 'amount', align: 'center', width: 80, render: d => d.toLocaleString() },
+            { title: '重量', dataIndex: 'weight', align: 'center' },
             { title: '备注', dataIndex: 'remark', align: 'center', width: 100 },
             { title: '配送', dataIndex: 'delivered', align: 'center', width: 60, fixed: 'right', render: delivered => 
                 <span style={{ color: delivered ? 'black' : 'red' }}>{delivered ? '已配送' : '未配送'}</span>
@@ -104,6 +105,7 @@ function View(props) {
             ifShowDiscount ? { title: '金额', dataIndex: 'originalAmount', summary: 'sum' } : null,
             ifShowDiscount ? { title: '折扣', dataIndex: 'discount', onExport: d => `${d}%` } : null,
             { title: ifShowDiscount ? '折后价' : '金额', dataIndex: 'amount', summary: 'sum' },
+            { title: '重量', dataIndex: 'weight' },
             { title: '备注', dataIndex: 'remark' },
             { title: '配送', dataIndex: 'delivered', onExport: d => d ? '已配送' : '未配送' },
             { title: '退货状态', width: 75, onExport: (_, record) => 
@@ -112,7 +114,7 @@ function View(props) {
                 Decimal(record.refundQuantity || 0).equals(0) ? null : '部分退货'
             )) }
         ].filter(i => i != null)
-        exportExcel(`销售单${props.order.id}`, getExportData(itemColumns, props.order.items))
+        exportExcel(`采购单${props.order.id}`, getExportData(itemColumns, props.order.items))
     }
     return !props.order ? null : <>
         <Space direction='vertical' style={{ width: '100%', marginTop: '10px', marginBottom: '15px' }}>
@@ -158,7 +160,7 @@ function PrintView(props) {
         <Space direction='vertical' size='middle' style={{ width: '100%', marginTop: '10px', marginBottom: '10px' }}>
             <Col align='middle' style={{ overflowX: 'auto', overflowY: 'clip' }}>
                 <div ref={componentRef} >
-                    {!props.order ? null : <InvoiceView invoice={props.order} type='salesOrder' />}
+                    {!props.order ? null : <InvoiceView invoice={props.order} type='purchaseOrder' />}
                 </div>
             </Col>
         </Space>

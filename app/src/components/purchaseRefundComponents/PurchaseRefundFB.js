@@ -1,39 +1,39 @@
-import React, { useEffect, useState, } from 'react'
+import React, { useState, } from 'react'
 import { Table, Modal, Button, message, FloatButton, Space, Popover } from 'antd'
 import { PlusOutlined, InboxOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 
 
 import { emptyInvoice } from '../../utils/invoiceUtils'
-import '../common/Invoice.css'
-import SalesOrderEditView from './SalesOrderEditView'
+import PurchaseRefundEditView from '../purchaseRefundComponents/PurchaseRefundEditView'
+
 
 /*
     Required: refresh, drafts, setDrafts
 */
-function SalesOrderFB(props) {
-    const [editOrder, setEditOrder] = useState(undefined)
-    
+function PurchaseRefundFB(props) {
+    const [editRefund, setEditRefund] = useState(undefined)
     const [messageApi, contextHolder] = message.useMessage()
 
     // draft
-    const saveDraft = (order) => {
-        var newDraftOrders = props.drafts
-        if (order.draftTime)
-            newDraftOrders = newDraftOrders.filter(o => o.draftTime !== order.draftTime)
-        order.draftTime = dayjs()
-        newDraftOrders.unshift(order)
-        props.setDrafts(newDraftOrders)
-        setEditOrder(undefined)
+    const saveDraft = (refund) => {
+        var newDraftRefunds = props.drafts
+        if (refund.draftTime !== undefined)
+            newDraftRefunds = newDraftRefunds.filter(r => r.draftTime !== refund.draftTime)
+        refund.draftTime = dayjs()
+        newDraftRefunds.unshift(refund)
+        props.setDrafts(newDraftRefunds)
+        setEditRefund(undefined)
     }
     const removeDraft = (draft) => {
-        if (draft.draftTime) props.setDrafts(props.drafts.filter(d => d.draftTime !== draft.draftTime))
+        if (draft.draftTime)
+            props.setDrafts(props.drafts.filter(d => d.draftTime !== draft.draftTime))
     }
 
     const columns = [
         { title: '保存时间', dataIndex: 'draftTime', align: 'center', render: time => time.format('HH:mm:ss') },
         { title: '客户', dataIndex: 'partner', align: 'center' },
-        { title: '产品数', dataIndex: 'items', align: 'center', render: items => items.length - 1 },
+        { title: '产品数', dataIndex: 'items', align: 'center', render: items => items.length },
         { title: '操作', align: 'center', render: (_, draft) => 
             <Space.Compact size='small'>
                 <Button type='link' size='small' onClick={_ => setEditOrder(draft)}>编辑</Button>
@@ -50,14 +50,14 @@ function SalesOrderFB(props) {
         } destroyTooltipOnHide>
             <FloatButton icon={<InboxOutlined />} style={{ right: 80 }} badge={{ count: props.drafts.length, color: 'blue' }} />
         </Popover>
-
-        <FloatButton icon={<PlusOutlined />} type='primary' onClick={_ => setEditOrder(emptyInvoice(1))} style={{ right: 24 }} />
-    
-        <Modal title='新建销售清单' open={editOrder} width={1000} centered onCancel={_ => setEditOrder(undefined)} footer={null} maskClosable={false}>
-            <SalesOrderEditView order={editOrder} dismiss={_ => setEditOrder(undefined)} messageApi={messageApi} 
+        
+        <FloatButton icon={<PlusOutlined />} type='primary' onClick={_ => setEditRefund(emptyInvoice(0))} style={{ right: 24 }} />
+        
+        <Modal title='新建采购退货' open={editRefund} width={1000} centered onCancel={_ => setEditRefund(undefined)} footer={null}>
+            <PurchaseRefundEditView refund={editRefund} messageApi={messageApi} dismiss={_ => setEditRefund(undefined)} 
                 refresh={props.refresh} saveDraft={saveDraft} removeDraft={removeDraft} />
         </Modal>
     </>)
 }
 
-export default SalesOrderFB
+export default PurchaseRefundFB

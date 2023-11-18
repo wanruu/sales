@@ -7,7 +7,7 @@ import _ from 'lodash'
 const { confirm } = Modal
 const { Item } = Form
 
-import { baseURL, DEFAULT_PAGINATION } from '../utils/config'
+import { baseURL, DEFAULT_PAGINATION, invoiceSettings } from '../utils/config'
 import ProductEditView from '../components/productComponents/ProductEditView'
 import { exportExcel, getExportData } from '../utils/export'
 
@@ -21,6 +21,9 @@ function ProductPage() {
     const [editProduct, setEditProduct] = useState(undefined)
     const [messageApi, contextHolder] = message.useMessage()
     const itemStyle = { marginTop: '8px', marginBottom: '8px', marginLeft: '10px', marginRight: '10px' }
+
+    // 否则不及时更新
+    const [ifShowMaterial, setIfShowMaterial] = useState(invoiceSettings.get('ifShowMaterial') === 'true')
 
     // load (table data)
     const load = () => {
@@ -36,23 +39,26 @@ function ProductPage() {
             filterProducts(res.data)
         }).catch(_ => { })
     }
-    const productTableColumns = [
-        { title: '序号', align: 'center', render: (_, __, idx) => idx + 1, fixed: 'left' },
-        { title: '材质', dataIndex: 'material', align: 'center', export: true },
-        { title: '名称', dataIndex: 'name', align: 'center', export: true },
-        { title: '规格', dataIndex: 'spec', align: 'center', export: true },
-        { title: '库存', dataIndex: 'quantity', align: 'center', export: true, render: quantity => <span style={{ color: quantity[0] == '-' ? 'red': 'black' }}>{quantity}</span> },
-        { title: '单位', dataIndex: 'unit', align: 'center', export: true },
-        { title: '操作', align: 'center', fixed: 'right', render: (_, record) => 
-            <Space.Compact size='small'>
-                <Button type='link' onClick={_ => setEditProduct(record)}>编辑</Button>
-                {record.invoiceNum > 0 ?
-                    <Button type='link'>查看</Button> :
-                    <Button type='link' danger onClick={_ => showDeleteConfirm([record])}>删除</Button>
-                }
-            </Space.Compact>
-        }
-    ]
+    const getTableColumns = () => {
+        // const isShowMaterial = invoiceSettings.get('isShowMaterial') === 'true'
+        return [
+            { title: '序号', align: 'center', render: (_, __, idx) => idx + 1, fixed: 'left' },
+            ifShowMaterial ? { title: '材质', dataIndex: 'material', align: 'center' } : null,
+            { title: '名称', dataIndex: 'name', align: 'center' },
+            { title: '规格', dataIndex: 'spec', align: 'center' },
+            { title: '库存', dataIndex: 'quantity', align: 'center', render: quantity => <span style={{ color: quantity < 0 ? 'red': 'black' }}>{quantity.toLocaleString()}</span> },
+            { title: '单位', dataIndex: 'unit', align: 'center' },
+            { title: '操作', align: 'center', fixed: 'right', render: (_, record) => 
+                <Space.Compact size='small'>
+                    <Button type='link' onClick={_ => setEditProduct(record)}>编辑</Button>
+                    {record.invoiceNum > 0 ?
+                        <Button type='link'>查看</Button> :
+                        <Button type='link' danger onClick={_ => showDeleteConfirm([record])}>删除</Button>
+                    }
+                </Space.Compact>
+            }
+        ].filter(i => i != null)
+    }
 
     // delete products
     const showDeleteConfirm = (products) => {
@@ -93,11 +99,21 @@ function ProductPage() {
 
     // export
     const exportProducts = () => {
+        const productTableColumns = [
+            ifShowMaterial ? { title: '材质', dataIndex: 'material' } : null,
+            { title: '名称', dataIndex: 'name' },
+            { title: '规格', dataIndex: 'spec' },
+            { title: '库存', dataIndex: 'quantity' },
+            { title: '单位', dataIndex: 'unit' },
+        ].filter(i => i != null)
         exportExcel('产品', getExportData(productTableColumns, filteredProducts))
     }
 
     // effect
     useEffect(load, [])
+    useEffect(() => {
+        setIfShowMaterial(invoiceSettings.get('ifShowMaterial') === 'true')
+    }, [invoiceSettings.get('ifShowMaterial')])
 
     return <>
         {contextHolder}
@@ -113,7 +129,8 @@ function ProductPage() {
         <Space direction='vertical' style={{ width: '100%' }}>
             {/* Function Box */}
             <Card size='small'><Form form={form} onFinish={_ => filterProducts(products)} layout='inline'>
-                <Item label='材质' name='material' style={itemStyle}><Input allowClear placeholder='材质' /></Item>
+                { ifShowMaterial ? 
+                    <Item label='材质' name='material' style={itemStyle}><Input allowClear placeholder='材质' /></Item> : null }
                 <Item label='名称' name='name' style={itemStyle}><Input allowClear placeholder='名称' /></Item>
                 <Item label='规格' name='spec' style={itemStyle}><Input allowClear placeholder='规格' /></Item>
                 <Space wrap style={itemStyle}>
@@ -126,7 +143,7 @@ function ProductPage() {
             </Form></Card>
 
             {/* Product Table */}
-            <Table dataSource={filteredProducts} size='small' bordered rowKey={record => record.id} columns={productTableColumns}
+            <Table dataSource={filteredProducts} size='small' bordered rowKey={record => record.id} columns={getTableColumns()}
                 pagination={DEFAULT_PAGINATION} scroll={{ x: 'max-content' }} />
         </Space>
     </>

@@ -8,14 +8,14 @@ import { FieldNumberOutlined, EditOutlined, SaveOutlined, DeleteOutlined, CloseO
 import { calItemAmount, calTotalAmount, dcInvoice, emptyInvoice } from '../../utils/invoiceUtils'
 import { baseURL, DATE_FORMAT, invoiceSettings } from '../../utils/config'
 import { DeliveredInput } from '../common/PromptInput'
-import SalesRefundItemSelectView from './SalesRefundItemSelectView'
+import PurchaseRefundItemSelectView from './PurchaseRefundItemSelectView'
 import '../common/Invoice.css'
 
 /*
     Required: dismiss, refresh, messageApi
     Optional: refund, saveDraft, removeDraft
 */
-export default function SalesRefundEditView(props) {
+export default function PurchaseRefundEditView(props) {
     const [refund, setRefund] = useState(emptyInvoice(0))
     const [isSelectionModalOpen, setSelectionModalOpen] = useState(false)
     
@@ -84,7 +84,7 @@ export default function SalesRefundEditView(props) {
         Axios({
             method: newRefund.id ? 'put' : 'post',
             baseURL: baseURL(),
-            url: newRefund.id ? `salesRefund/id/${newRefund.id}` : 'salesRefund',
+            url: newRefund.id ? `purchaseRefund/id/${newRefund.id}` : 'purchaseRefund',
             data: newRefund,
             'Content-Type': 'application/json',
         }).then(_ => {
@@ -109,7 +109,7 @@ export default function SalesRefundEditView(props) {
                     <DatePicker size='small' style={{ width: 150 }} value={refund.date} onChange={value => updateRefund('date', value)} />
                 </Col>
                 <Col style={{ width: '30%' }} align='right'>
-                    <Button type='primary' onClick={_ => setSelectionModalOpen(true)}>选择销售单及产品</Button>
+                    <Button type='primary' onClick={_ => setSelectionModalOpen(true)}>选择采购单及产品</Button>
                 </Col>
             </Row>
             <Row style={{ justifyContent: 'space-between' }} align='middle'>
@@ -135,8 +135,8 @@ export default function SalesRefundEditView(props) {
             </Space>
         </Col>
 
-        <Modal title='选择销售单及产品' open={isSelectionModalOpen} width={1000} center onCancel={_ => setSelectionModalOpen(false)} footer={null} destroyOnClose>
-            <SalesRefundItemSelectView editRefund={refund} setEditRefund={setRefund} dismiss={_ => setSelectionModalOpen(false)} />
+        <Modal title='选择采购单及产品' open={isSelectionModalOpen} width={1000} center onCancel={_ => setSelectionModalOpen(false)} footer={null} destroyOnClose>
+            <PurchaseRefundItemSelectView editRefund={refund} setEditRefund={setRefund} dismiss={_ => setSelectionModalOpen(false)} />
         </Modal>
     </>
 }

@@ -6,12 +6,12 @@ import dayjs from 'dayjs'
 
 import { emptyInvoice } from '../../utils/invoiceUtils'
 import '../common/Invoice.css'
-import SalesOrderEditView from './SalesOrderEditView'
+import PurchaseOrderEditView from './PurchaseOrderEditView'
 
 /*
     Required: refresh, drafts, setDrafts
 */
-function SalesOrderFB(props) {
+export default function PurchaseOrderFB(props) {
     const [editOrder, setEditOrder] = useState(undefined)
     
     const [messageApi, contextHolder] = message.useMessage()
@@ -53,11 +53,9 @@ function SalesOrderFB(props) {
 
         <FloatButton icon={<PlusOutlined />} type='primary' onClick={_ => setEditOrder(emptyInvoice(1))} style={{ right: 24 }} />
     
-        <Modal title='新建销售清单' open={editOrder} width={1000} centered onCancel={_ => setEditOrder(undefined)} footer={null} maskClosable={false}>
-            <SalesOrderEditView order={editOrder} dismiss={_ => setEditOrder(undefined)} messageApi={messageApi} 
+        <Modal title='新建采购清单' open={editOrder} width={1000} centered onCancel={_ => setEditOrder(undefined)} footer={null} maskClosable={false}>
+            <PurchaseOrderEditView order={editOrder} dismiss={_ => setEditOrder(undefined)} messageApi={messageApi} 
                 refresh={props.refresh} saveDraft={saveDraft} removeDraft={removeDraft} />
         </Modal>
     </>)
 }
-
-export default SalesOrderFB

@@ -10,19 +10,19 @@ const { Item } = Form
 const { RangePicker } = DatePicker
 
 
-import SalesOrderFB from '../components/salesOrderComponents/SalesOrderFB'
+import PurchaseOrderFB from '../components/purchaseOrderComponents/PurchaseOrderFB'
 import { baseURL, DATE_FORMAT, DEFAULT_PAGINATION } from '../utils/config'
 import { exportExcel, getExportData } from '../utils/export'
-import SalesOrderView from '../components/salesOrderComponents/SalesOrderView'
-import SalesRefundView from '../components/salesRefundComponents/SalesRefundView'
+import PurchaseOrderView from '../components/purchaseOrderComponents/PurchaseOrderView'
+import PurchaseRefundView from '../components/purchaseRefundComponents/PurchaseRefundView'
 
 
 /*
     Required: drafts, setDrafts
 */
-function SalesOrderPage(props) {
-    const [salesOrders, setSalesOrders] = useState([])
-    const [filteredSalesOrders, setFilteredSalesOrders] = useState([])
+function PurchaseOrderPage(props) {
+    const [purchaseOrders, setPurchaseOrders] = useState([])
+    const [filteredPurchaseOrders, setFilteredPurchaseOrders] = useState([])
     const [form] = Form.useForm()
 
     const [selectedOrderId, setSelectedOrderId] = useState(undefined)
@@ -32,12 +32,12 @@ function SalesOrderPage(props) {
 
     // load (table data)
     const load = () => {
-        setSalesOrders([])
-        setFilteredSalesOrders([])
+        setPurchaseOrders([])
+        setFilteredPurchaseOrders([])
         Axios({
             method: 'get',
             baseURL: baseURL(),
-            url: 'salesOrder',
+            url: 'purchaseOrder',
             'Content-Type': 'application/json',
         }).then(res => {
             const orders = res.data.map(order => {
@@ -45,8 +45,8 @@ function SalesOrderPage(props) {
                 order.unpaid = Decimal(order.amount).minus(order.paid).toNumber()
                 return order
             })
-            setSalesOrders(orders)
-            filterSalesOrders(orders)
+            setPurchaseOrders(orders)
+            filterPurchaseOrders(orders)
         }).catch(_ => { })
     }
 
@@ -73,16 +73,16 @@ function SalesOrderPage(props) {
 
     // delete
     const showDeleteConfirm = (orderIds) => {
-        const title = orderIds.length === 1 ? `是否删除销售清单 ${orderIds[0]} ?` : `是否删除 ${orderIds.length} 张销售清单?`
+        const title = orderIds.length === 1 ? `是否删除采购清单 ${orderIds[0]} ?` : `是否删除 ${orderIds.length} 张采购清单?`
         confirm({
             title: title, icon: <ExclamationCircleFilled />,
-            content: '确认删除后不可撤销，同时仓库中产品的库存会相应增加',
+            content: '确认删除后不可撤销，同时仓库中产品的库存会相应减少',
             okText: '删除', okType: 'danger', cancelText: '取消',
             onOk() {
                 Axios({
                     method: 'delete',
                     baseURL: baseURL(),
-                    url: `salesOrder`,
+                    url: `purchaseOrder`,
                     data: { ids: orderIds },
                     'Content-Type': 'application/json',
                 }).then(_ => {
@@ -96,9 +96,9 @@ function SalesOrderPage(props) {
     }
 
     // search (filter)
-    const filterSalesOrders = (salesOrders) => {
+    const filterPurchaseOrders = (purchaseOrders) => {
         const conds = form.getFieldsValue()
-        setFilteredSalesOrders(salesOrders.filter(o => 
+        setFilteredPurchaseOrders(purchaseOrders.filter(o => 
             (!conds.orderId || o.id.includes(conds.orderId)) &&
             (!conds.date || !conds.date[0] || o.date >= conds.date[0].format(DATE_FORMAT)) &&
             (!conds.date || !conds.date[1] || o.date <= conds.date[1].format(DATE_FORMAT)) &&
@@ -108,7 +108,7 @@ function SalesOrderPage(props) {
     }
 
     // export
-    const exportSalesOrders = () => {
+    const exportPurchaseOrders = () => {
         const orderTableColumns = [
             { title: '单号', dataIndex: 'id', summary: '总计' },
             { title: '客户', dataIndex: 'partner' },
@@ -121,46 +121,46 @@ function SalesOrderPage(props) {
             { title: '配送情况', dataIndex: 'delivered' },
             { title: '关联退货单', dataIndex: 'refundId' }
         ]
-        exportExcel('销售单', getExportData(orderTableColumns, filteredSalesOrders))
+        exportExcel('采购单', getExportData(orderTableColumns, filteredPurchaseOrders))
     }
 
     useEffect(load, [])
 
     return <>
         {contextHolder}
-        <SalesOrderFB refresh={load} drafts={props.drafts} setDrafts={props.setDrafts} />
+        <PurchaseOrderFB refresh={load} drafts={props.drafts} setDrafts={props.setDrafts} />
 
-        <Modal title={`销售清单 (${selectedOrderId})`} open={selectedOrderId !== undefined} width={900} destroyOnClose 
+        <Modal title={`采购清单 (${selectedOrderId})`} open={selectedOrderId !== undefined} width={900} destroyOnClose 
             onCancel={_ => setSelectedOrderId(undefined)} footer={null} maskClosable={false}>
-            <SalesOrderView id={selectedOrderId} refresh={load} messageApi={messageApi} />
+            <PurchaseOrderView id={selectedOrderId} refresh={load} messageApi={messageApi} />
         </Modal>
 
-        <Modal title={`销售退货单 (${selectedRefundId})`} open={selectedRefundId !== undefined} width={900} destroyOnClose 
+        <Modal title={`采购退货单 (${selectedRefundId})`} open={selectedRefundId !== undefined} width={900} destroyOnClose 
             onCancel={_ => setSelectedRefundId(undefined)} footer={null} maskClosable={false}>
-            <SalesRefundView id={selectedRefundId} refresh={load} messageApi={messageApi} />
+            <PurchaseRefundView id={selectedRefundId} refresh={load} messageApi={messageApi} />
         </Modal>
 
         <br />
         <Space direction='vertical' style={{ width: '100%' }}>
             {/* Function Box */}
-            <Card size='small'><Form form={form} onFinish={_ => filterSalesOrders(salesOrders)}><Row>
+            <Card size='small'><Form form={form} onFinish={_ => filterPurchaseOrders(purchaseOrders)}><Row>
                 <Item label='单号' name='orderId' style={itemStyle}><Input allowClear placeholder='单号' /></Item>
                 <Item label='客户' name='partner' style={itemStyle}><Input allowClear placeholder='客户' /></Item>
                 <Item label='日期' name='date' style={itemStyle}><RangePicker format={DATE_FORMAT} allowEmpty={[true, true]} /></Item>
                 <Item label='退货单号' name='refundId' style={itemStyle}><Input allowClear placeholder='退货单号' /></Item>
                 <Space wrap style={itemStyle}>
                     <Button icon={<SearchOutlined />} type='primary' htmlType='submit'>搜索</Button>
-                    <Button icon={<TableOutlined />} onClick={exportSalesOrders} disabled={filteredSalesOrders.length === 0}>批量导出</Button>
-                    <Button icon={<DeleteOutlined />} onClick={_ => showDeleteConfirm(filteredSalesOrders.map(o => o.id) || [])} danger disabled={filteredSalesOrders.length === 0}>批量删除</Button>
+                    <Button icon={<TableOutlined />} onClick={exportPurchaseOrders} disabled={filteredPurchaseOrders.length === 0}>批量导出</Button>
+                    <Button icon={<DeleteOutlined />} onClick={_ => showDeleteConfirm(filteredPurchaseOrders.map(o => o.id) || [])} danger disabled={filteredPurchaseOrders.length === 0}>批量删除</Button>
                 </Space>
             </Row></Form></Card>
 
-            {/* Sales Order Table */}
-            <Table dataSource={filteredSalesOrders} bordered size='small' rowKey={record => record.id} 
+            {/* Purchase Order Table */}
+            <Table dataSource={filteredPurchaseOrders} bordered size='small' rowKey={record => record.id} 
                 columns={getTableColumns()} pagination={DEFAULT_PAGINATION} scroll={{ x: 'max-content' }} />
         </Space>
     </>
 }
 
 
-export default SalesOrderPage
+export default PurchaseOrderPage

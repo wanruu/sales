@@ -65,8 +65,8 @@ const updateProductQuantityByInfo = (material, name, spec, unit, quantityChange)
     Insert partner. (Used when new partner was submitted)
     params oper: INSERT / INSERT OR REPLACE / INSERT OR IGNORE
  */
-const updatePartner = (oper, name, phone, address) => {
-    const query = `${oper} INTO partner (name, phone, address) VALUES ("${name}", "${phone}", "${address}");`
+const updatePartner = (oper, name, phone, address, folder) => {
+    const query = `${oper} INTO partner (name, phone, address, folder) VALUES ("${name}", "${phone}", "${address}", "${folder}");`
     return new Promise((resolve, reject) => { 
         db.run(query, err => {
             if (err) { reject(err) }

@@ -9,22 +9,22 @@ import { baseURL, invoiceSettings } from '../../utils/config'
 import { dcInvoice, calTotalAmount } from '../../utils/invoiceUtils'
 
 
-function SalesRefundItemSelectView(props) {
-    const [salesOrders, setSalesOrders] = useState([])
+function PurchaseRefundItemSelectView(props) {
+    const [purchaseOrders, setPurchaseOrders] = useState([])
     const [selectedItems, setSelectedItems] = useState(props.editRefund.items)
     
 
     const load = () => {
-        setSalesOrders([])
+        setPurchaseOrders([])
         Axios({
             method: 'get',
             baseURL: baseURL(),
-            url: 'salesOrder/detailed',
+            url: 'purchaseOrder/detailed',
             params: { refundId: props.editRefund.id },
             'Content-Type': 'application/json',
         }).then(res => {
             var orders = res.data
-            setSalesOrders(orders)
+            setPurchaseOrders(orders)
             updateFilters(orders, { id: null, partner: null })
         }).catch(_ => { })
     }
@@ -48,7 +48,7 @@ function SalesRefundItemSelectView(props) {
         })
         newEditRefund.amount = calTotalAmount(newEditRefund.items)
         if (selectedItems.length > 0) {
-            newEditRefund.partner = salesOrders.find(o => o.id === selectedItems[0].orderId).partner
+            newEditRefund.partner = purchaseOrders.find(o => o.id === selectedItems[0].orderId).partner
         }
         props.setEditRefund(newEditRefund)
         props.dismiss()
@@ -72,7 +72,7 @@ function SalesRefundItemSelectView(props) {
         setIdFilters(newIdFilters)
     }
     const onTableChange = (pagination, filters, sorter, extra) => {
-        updateFilters(salesOrders, filters)
+        updateFilters(purchaseOrders, filters)
     }
     // ------------------------------------------
 
@@ -105,7 +105,7 @@ function SalesRefundItemSelectView(props) {
         </Row>
         <br/>
         
-        <Table dataSource={salesOrders} size='small' rowKey={record => record.id} onChange={onTableChange}
+        <Table dataSource={purchaseOrders} size='small' rowKey={record => record.id} onChange={onTableChange}
         pagination={false} style={{height: 400}} scroll={{x: 'max-content', y: 400 }}
         expandable={{
             expandedRowRender: (record) => (
@@ -115,7 +115,7 @@ function SalesRefundItemSelectView(props) {
             rowExpandable: (record) => record.items !== undefined,
             defaultExpandedRowKeys: props.editRefund.items.length === 0 ? [] : [props.editRefund.items[0].orderId]
         }}>
-            <Column title='销售单号' dataIndex='id' width={180} 
+            <Column title='采购单号' dataIndex='id' width={180} 
                 filterSearch onFilter={(value, record) => record.id.includes(value)} filters={idFilters}
                 sorter={(a, b) =>  a.id > b.id} 
             /> 
@@ -129,4 +129,4 @@ function SalesRefundItemSelectView(props) {
 }
 
 
-export default SalesRefundItemSelectView
+export default PurchaseRefundItemSelectView

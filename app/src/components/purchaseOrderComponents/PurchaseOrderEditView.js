@@ -15,7 +15,7 @@ import '../common/Invoice.css'
     Required: dismiss, refresh, messageApi
     Optional: order, saveDraft, removeDraft
 */
-export default function SalesOrderEditView(props) {
+export default function PurchaseOrderEditView(props) {
     const [order, setOrder] = useState(emptyInvoice(1))
     
     // Order
@@ -58,7 +58,7 @@ export default function SalesOrderEditView(props) {
         Axios({
             method: newOrder.id ? 'put' : 'post',
             baseURL: baseURL(),
-            url: newOrder.id ? `salesOrder/id/${newOrder.id}` : 'salesOrder',
+            url: newOrder.id ? `purchaseOrder/id/${newOrder.id}` : 'purchaseOrder',
             data: newOrder,
             'Content-Type': 'application/json',
         }).then(_ => {
@@ -110,6 +110,10 @@ export default function SalesOrderEditView(props) {
                     formatter={(value) => `${value}%`} parser={(value) => value.replace('%', '')} />
             } : null,
             { title: ifShowDiscount ? '折后价' : '金额', dataIndex: 'amount', align: 'center', width: 80, render: a => parseFloat(a).toLocaleString() },
+            { title: '重量', dataIndex: 'weight', align: 'center', width: 80, render: (_, record, idx) => 
+                <InputNumber min={0} stringMode keyboard={false} size='small' controls={false} style={{width: '100%'}} 
+                    value={record.weight} onChange={value => updateRow(idx, 'weight', value)} />
+            },
             { title: '备注', dataIndex: 'remark', align: 'center', width: 100, render: (_, record, idx) => 
                 <Input size='small' style={{ width: '100%' }} value={record.remark} onChange={e => updateRow(idx, 'remark', e.target.value)} />
             },

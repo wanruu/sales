@@ -8,8 +8,8 @@ const { formatInsert, getNextInvoiceId, updateProductByInvoiceItems,
 } = require('./utils.js')
 
 
-const prefix = 'XT'
-const typeStr = 'salesRefund'
+const prefix = 'CT'
+const typeStr = 'purchaseRefund'
 const typeInt = INVOICE_TYPE_2_INT[typeStr]
 
 
@@ -88,7 +88,7 @@ router.post('/', async (req, res) => {
         res.status(500).send(err)
     })
     
-    // 2. insert salesRefund
+    // 2. insert purchase refund
     const refundId = await getNextInvoiceId(req.body.date, prefix).catch(err => {
         console.error(err)
         res.status(500).send(err)
@@ -116,7 +116,7 @@ router.post('/', async (req, res) => {
         res.status(500).send(err)
     })
 
-    // 4. insert salesRefundItem
+    // 4. insert purchaseRefundItem
     const refundItemDictArray = productDictArray.map(productDict => {
         return {
             productId: productDict.id,
@@ -160,7 +160,7 @@ router.delete('/', async (req, res) => {
             res.status(500).send(err)
             return
         }
-        // 2. delete sales refund
+        // 2. delete purchase refund
         const deleteInvoice = `DELETE FROM invoice WHERE id IN (${ids})`
         db.run(deleteInvoice, err => {
             if (err) {
@@ -246,7 +246,7 @@ router.put('/id/:id', async (req, res) => {
         res.status(500).send(err)
     })
 
-    // 5. insert salesRefundItem
+    // 5. insert purchaseRefundItem
     const refundItemDictArray = productDictArray.map(productDict => {
         return {
             productId: productDict.id,

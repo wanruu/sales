@@ -8,7 +8,9 @@ import dayjs from 'dayjs'
 import uuid from 'react-uuid'
 
 
-import { baseURL, DATE_FORMAT, printSettings, DEFAULT_PRINT_SETTINGS } from '../utils/config'
+import { baseURL, DATE_FORMAT, printSettings, DEFAULT_PRINT_SETTINGS,
+    invoiceSettings
+} from '../utils/config'
 import InvoiceView from '../components/common/InvoiceView'
 import './SettingPage.css'
 
@@ -18,10 +20,23 @@ const { Title } = Typography
 
 
 function InvoiceSetting() {
+    const [ifShowDiscount, setIfShowDiscount] = useState(invoiceSettings.get('ifShowDiscount'))
+    const [ifShowMaterial, setIfShowMaterial] = useState(invoiceSettings.get('ifShowMaterial'))
+
     return <Card size='small'>
-        <Form layout='inline'>
-            <Item label='折扣'><Switch /></Item>
-            <Item label='材质'><Switch /></Item>
+        <Form layout='horizontal'>
+            <Item label='材质' extra='若开关关闭，原有数据不会发生更改，只是隐藏材质项。请勿频繁更改。'>
+                <Switch checked={ifShowMaterial === 'true'} onChange={val => {
+                    setIfShowMaterial(`${val}`)
+                    invoiceSettings.set('ifShowMaterial', `${val}`)
+                }} />
+            </Item>
+            <Item label='折扣' extra='若开关关闭，原有数据不会发生更改，只是隐藏折扣及折前金额。请勿频繁更改。'>
+                <Switch checked={ifShowDiscount === 'true'} onChange={val => {
+                    setIfShowDiscount(`${val}`)
+                    invoiceSettings.set('ifShowDiscount', `${val}`)
+                }} />
+            </Item>
         </Form>
     </Card>
 }

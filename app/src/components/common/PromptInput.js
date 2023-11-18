@@ -7,7 +7,7 @@ import { LineChartOutlined, CloseOutlined } from '@ant-design/icons'
 import ReactEcharts from 'echarts-for-react'
 
 
-import { baseURL, UNIT_OPTIONS } from '../../utils/config'
+import { baseURL, UNIT_OPTIONS, invoiceSettings } from '../../utils/config'
 
 
 export function PartnerInput(props) {
@@ -68,16 +68,25 @@ export function UnitInput(props) {
 
     const load = () => {
         setUnit(undefined)
-        if (props.material === '' || props.name === '' || props.spec === '') { 
-            return 
-        }
         if (props.material === undefined || props.name === undefined || props.spec === undefined) { 
-            return 
+            return
         }
+        const ifShowMaterial = invoiceSettings.get('ifShowMaterial') === 'true'
+        if (ifShowMaterial) {
+            if (props.material === '' || props.name === '' || props.spec === '') { 
+                return
+            }
+        } else {
+            if (props.name === '' || props.spec === '') { 
+                return
+            }
+        }
+        
         Axios({
             method: 'get',
             baseURL: baseURL(),
-            url: `product/unit/${props.material}/${props.name}/${props.spec}`,
+            url: `product/unit`,
+            params: { material: props.material, name: props.name, spec: props.spec },
             'Content-Type': 'application/json',
         }).then(res => {
             const _unit = res.data.unit

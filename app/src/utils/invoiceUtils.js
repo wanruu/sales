@@ -55,5 +55,5 @@ export const calItemAmount = (itemDict) => {
 }
 
 export const calTotalAmount = (items) => {
-    return items.reduce((previous, current) => previous.plus(current.amount), Decimal(0)).toString()
+    return items.reduce((previous, current) => previous.plus(current.amount), Decimal(0)).toFixed(2, Decimal.ROUND_HALF_UP)
 }

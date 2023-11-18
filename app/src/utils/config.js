@@ -23,6 +23,15 @@ export const printSettings = {
     set: (key, value) => localStorage.setItem(key, value)
 }
 
+export const DEFAULT_INVOICE_SETTINGS = {
+    ifShowDiscount: 'true', ifShowMaterial: 'true'
+}
+
+export const invoiceSettings = {
+    get: (key) =>  localStorage.getItem(key) || DEFAULT_INVOICE_SETTINGS[key],
+    set: (key, value) => localStorage.setItem(key, value)
+}
+
 export const UNIT_OPTIONS = [
     { label: '-', value: '' },
     { label: '千件', value: '千件' },

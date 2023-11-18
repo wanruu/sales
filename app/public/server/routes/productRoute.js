@@ -23,9 +23,12 @@ router.get('/', async (req, res) => {
 })
 
 
-router.get('/unit/:material/:name/:spec', (req, res) => {
+router.get('/unit', (req, res) => {
+    const material = req.query.material
+    const name = req.query.name
+    const spec = req.query.spec
     const query = `SELECT unit FROM product 
-        WHERE material="${req.params.material}" AND name="${req.params.name}" AND spec="${req.params.spec}"`
+        WHERE material="${material}" AND name="${name}" AND spec="${spec}"`
     db.all(query, (err, rows) => {
         if (err) {
             console.error(err)

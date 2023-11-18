@@ -6,7 +6,7 @@ import { EditOutlined, PrinterOutlined, TableOutlined, RollbackOutlined } from '
 import { useReactToPrint } from 'react-to-print'
 
 
-import { baseURL } from '../../utils/config'
+import { baseURL, invoiceSettings } from '../../utils/config'
 import { getExportData, exportExcel } from '../../utils/export'
 import InvoiceView from '../common/InvoiceView'
 import SalesRefundEditView from '../salesRefundComponents/SalesRefundEditView'
@@ -32,7 +32,7 @@ export default function SalesRefundView(props) {
                 item.orderId = newRefund.orderId
                 return item
             })
-            newRefund.unpaid = Decimal(newRefund.amount).minus(newRefund.payment).toString()
+            newRefund.unpaid = Decimal(newRefund.amount).minus(newRefund.payment).toNumber()
             setRefund(newRefund)
         }).catch(_ => { })
     }
@@ -57,42 +57,62 @@ export default function SalesRefundView(props) {
     Required: refund, setMode
 */
 function View(props) {
-    const itemColumns = [
-        { title: '', align: 'center', width: 30, fixed: 'left', render: (_, __, idx) => idx + 1 },
-        { title: '材质', dataIndex: 'material', align: 'center', width: 50, export: true, summary: '总计' },
-        { title: '名称', dataIndex: 'name', align: 'center', width: 150, export: true },
-        { title: '规格', dataIndex: 'spec', align: 'center', width: 70, export: true },
-        { title: '数量', dataIndex: 'quantity', align: 'center', width: 70, export: true },
-        { title: '单位', dataIndex: 'unit', align: 'center', width: 50, export: true },
-        { title: '单价', dataIndex: 'price', align: 'center', width: 70, export: true },
-        { title: '金额', dataIndex: 'originalAmount', align: 'center', width: 80, export: true, summary: 'sum' },
-        { title: '折扣', dataIndex: 'discount', align: 'center', width: 50, export: true, onExport: d => `${d}%`, render: discount => `${discount}%` },
-        { title: '折后价', dataIndex: 'amount', align: 'center', width: 80, export: true, summary: 'sum' },
-        { title: '备注', dataIndex: 'remark', align: 'center', width: 100, export: true },
-        { title: '配送', dataIndex: 'delivered', align: 'center', width: 60, fixed: 'right', export: true, onExport: d => d ? '已配送' : '未配送', 
-            render: delivered => <span style={{ color: delivered ? 'black' : 'red' }}>{delivered ? '已配送' : '未配送'}</span>
-        }
-    ]
+    const getTableColumns = () => {
+        const ifShowMaterial = invoiceSettings.get('ifShowMaterial') === 'true'
+        const ifShowDiscount = invoiceSettings.get('ifShowDiscount') === 'true'
+        return [
+            { title: '', align: 'center', width: 30, fixed: 'left', render: (_, __, idx) => idx + 1 },
+            ifShowMaterial ? { title: '材质', dataIndex: 'material', align: 'center', width: 50 } : null,
+            { title: '名称', dataIndex: 'name', align: 'center', width: 150 },
+            { title: '规格', dataIndex: 'spec', align: 'center', width: 70 },
+            { title: '数量', dataIndex: 'quantity', align: 'center', width: 70, render: q => q.toLocaleString() },
+            { title: '单位', dataIndex: 'unit', align: 'center', width: 50 },
+            { title: '单价', dataIndex: 'price', align: 'center', width: 70, render: p => p.toLocaleString() },
+            ifShowDiscount ? { title: '金额', dataIndex: 'originalAmount', align: 'center', width: 80, render: a => a.toLocaleString() } : null,
+            ifShowDiscount ? { title: '折扣', dataIndex: 'discount', align: 'center', width: 50, render: discount => `${discount}%` } : null,
+            { title: ifShowDiscount ? '折后价' : '金额', dataIndex: 'amount', align: 'center', width: 80, render: a => a.toLocaleString() },
+            { title: '备注', dataIndex: 'remark', align: 'center', width: 100 },
+            { title: '配送', dataIndex: 'delivered', align: 'center', width: 60, fixed: 'right', 
+                render: delivered => <span style={{ color: delivered ? 'black' : 'red' }}>{delivered ? '已配送' : '未配送'}</span>
+            }
+        ].filter(i => i != null)
+    }
     const exportFile = () => {
+        const ifShowMaterial = invoiceSettings.get('ifShowMaterial') === 'true'
+        const ifShowDiscount = invoiceSettings.get('ifShowDiscount') === 'true'
+        const itemColumns = [
+            ifShowMaterial ? { title: '材质', dataIndex: 'material', summary: '总计' } : null,
+            { title: '名称', dataIndex: 'name', summary: ifShowMaterial ? '' : '总计' },
+            { title: '规格', dataIndex: 'spec' },
+            { title: '数量', dataIndex: 'quantity' },
+            { title: '单位', dataIndex: 'unit' },
+            { title: '单价', dataIndex: 'price' },
+            ifShowDiscount ? { title: '金额', dataIndex: 'originalAmount', summary: 'sum' } : null,
+            ifShowDiscount ? { title: '折扣', dataIndex: 'discount', onExport: d => `${d}%` } : null,
+            { title: ifShowDiscount ? '折后价' : '金额', dataIndex: 'amount', summary: 'sum' },
+            { title: '备注', dataIndex: 'remark' },
+            { title: '配送', dataIndex: 'delivered', onExport: d => d ? '已配送' : '未配送' }
+        ].filter(i => i != null)
         exportExcel(`销售退货单${props.refund.id}`, getExportData(itemColumns, props.refund.items))
     }
+
     return !props.refund ? null : <>
         <Space direction='vertical' style={{ width: '100%', marginTop: '10px', marginBottom: '15px' }}>
-            <Row style={{ justifyContent: 'space-between' }}>
-                <div>客户：{props.refund.partner}</div>
-                <div>日期：{props.refund.date}</div>
-                <div>关联销售单：{props.refund.orderId || '无'}</div>
+            <Row>
+                <Col span={8}>客户：{props.refund.partner}</Col>
+                <Col span={8}>日期：{props.refund.date}</Col>
+                <Col span={8}>关联销售单：{props.refund.orderId || '无'}</Col>
             </Row>
-            <Row style={{ justifyContent: 'space-between' }}>
-                <div>总金额：{props.refund.amount}</div>
-                <div align='right'>已付：{props.refund.payment}</div>
-                <div align='right'>未付：
-                    <span style={{ color: props.refund.unpaid === '0' ? 'black' : 'red' }}>{props.refund.unpaid}</span>
-                </div>
+            <Row>
+                <Col span={8}>总金额：{props.refund.amount.toLocaleString()}</Col>
+                <Col span={8}>已付：{props.refund.payment.toLocaleString()}</Col>
+                <Col span={8}>未付：
+                    <span style={{ color: props.refund.unpaid === 0 ? 'black' : 'red' }}>{props.refund.unpaid.toLocaleString()}</span>
+                </Col>
             </Row>
         </Space>
 
-        <Table dataSource={props.refund.items} columns={itemColumns} size='small' bordered style={{ height: 400 }} 
+        <Table dataSource={props.refund.items} columns={getTableColumns()} size='small' bordered style={{ height: 400 }} 
             rowKey={record => record.refundItemId} scroll={{x: 'max-content', y: 400 }} pagination={false} />
 
         <Divider />

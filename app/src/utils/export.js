@@ -7,15 +7,14 @@ import Decimal from 'decimal.js'
     export col.title -> col.value
 */
 export const getExportData = (columns, data) => {
-    const exportColumns = columns.filter(col => col.export === true)
-    const rows = data.map(o => {
-        const pairs = exportColumns.map(col => [col.title, col.onExport ? col.onExport(o[col.dataIndex]) : o[col.dataIndex]])
+    const rows = data.map((o, idx) => {
+        const pairs = columns.map(col => [col.title, col.onExport ? col.onExport(o[col.dataIndex], o, idx) : o[col.dataIndex]])
         return _.fromPairs(pairs)
     })
-    const summary = _.fromPairs(exportColumns.map(col => {
+    const summary = _.fromPairs(columns.map(col => {
         var val = col.summary || ''
         if (col.summary === 'sum') {
-            val = parseFloat(data.reduce((pre, cur) => pre.plus(cur[col.dataIndex]) , Decimal(0)).toString())
+            val = data.reduce((pre, cur) => pre.plus(cur[col.dataIndex]) , Decimal(0)).toNumber()
         }
         return [col.title, val]
     }))

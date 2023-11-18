@@ -9,8 +9,8 @@ const { updatePartner, updateProductByInvoiceItems,
 } = require('./utils.js')
 
 
-const prefix = 'XS'
-const typeStr = 'salesOrder'
+const prefix = 'CG'
+const typeStr = 'purchaseOrder'
 const typeInt = INVOICE_TYPE_2_INT[typeStr]
 
 
@@ -42,7 +42,7 @@ router.post('/', async (req, res) => {
         res.status(500).send(err)
     })
 
-    // 2. insert salesOrder
+    // 2. insert purchse order
     const orderId = await getNextInvoiceId(date, prefix).catch(err => {
         console.error(err)
         res.status(500).send(err)
@@ -59,7 +59,7 @@ router.post('/', async (req, res) => {
         res.status(500).send(err)
     })
 
-    // 2. insert/update products, insert salesOrderItem
+    // 2. insert/update products, insert purchase order item
     if (items.length > 0) {
         const productDictArray = await updateProductByInvoiceItems(items, typeStr).catch(err => {
             console.error(err)
@@ -73,6 +73,7 @@ router.post('/', async (req, res) => {
                 quantity: productDict.info.quantity,
                 originalAmount: productDict.info.originalAmount,
                 amount: productDict.info.amount,
+                weight: productDict.info.weight,
                 remark: productDict.info.remark,
                 delivered: productDict.info.delivered,
                 invoiceId: orderId
@@ -118,7 +119,7 @@ router.put('/id/:id', async (req, res) => {
         res.status(500).send(err)
     })
     
-    // 2. update salesOrder
+    // 2. update purchase order
     const updateOrder = `UPDATE invoice SET partner="${partner}", date="${date}", amount="${amount}", 
         prepayment="${prepayment}", payment="${payment}" WHERE id="${orderId}"`
     await new Promise((resolve, reject) => {
@@ -164,6 +165,7 @@ router.put('/id/:id', async (req, res) => {
                 quantity: productDict.info.quantity,
                 originalAmount: productDict.info.originalAmount,
                 amount: productDict.info.amount,
+                weight: productDict.info.weight,
                 remark: productDict.info.remark,
                 delivered: productDict.info.delivered,
                 invoiceId: orderId
@@ -325,18 +327,10 @@ router.delete('/', (req, res) => {
         FROM invoiceItem AS ri, invoiceRelation AS r
         WHERE r.orderId IN (${ids}) AND r.refundId=ri.invoiceId
         GROUP BY productId`
-    // const overallQuan = `SELECT o.productId, IFNULL(o.quantity,0)-IFNULL(r.quantity,0) AS quantity
-    //     FROM (${orderQuan}) AS o LEFT OUTER JOIN (${refundQuan}) AS r ON o.productId=r.productId`
     const updateProduct = `UPDATE product
         SET quantity=product.quantity${getQuantitySign(typeStr, true)}IFNULL(o.quantity,0)${getQuantitySign(typeStr, false)}IFNULL(r.quantity,0)
         FROM (${orderQuan}) AS o LEFT OUTER JOIN (${refundQuan}) AS r ON o.productId=r.productId
         WHERE o.productId=product.id`
-    // db.all(overallQuan, (err, rows) => {
-    //     if (err) {
-    //         console.error(err)
-    //     }
-    //     res.send(rows)
-    // })
 
     db.run(updateProduct, err => {
         if (err) {
@@ -344,7 +338,7 @@ router.delete('/', (req, res) => {
             res.status(500).send(err)
             return
         }
-        // 2. delete sales order & sales refund (if any)
+        // 2. delete purchase order & purchase refund (if any)
         const deleteInvoice = `DELETE FROM invoice 
             WHERE id IN (${ids}) OR id IN (SELECT refundId AS id FROM invoiceRelation WHERE orderId IN (${ids}))`
         db.run(deleteInvoice, err => {
