@@ -49,7 +49,7 @@ export default function MyFloatButton(props) {
         }
     ]
 
-    return (<>
+    return <>
         {contextHolder}
         <Popover title={`草稿箱 (${props.drafts.length})`} placement='topLeft' zIndex={999} trigger='click' content={
             <Table className='draftTable' dataSource={props.drafts} size='small' pagination={{pageSize: 5, size: 'small'}} 
@@ -70,5 +70,5 @@ export default function MyFloatButton(props) {
             { props.type === 'purchaseRefund' ? <PurchaseRefundEditView refund={editInvoice} messageApi={messageApi} dismiss={_ => setEditInvoice(undefined)} 
                 refresh={props.refresh} saveDraft={saveDraft} removeDraft={removeDraft} /> : null }
         </Modal>
-    </>)
+    </>
 }

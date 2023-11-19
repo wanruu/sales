@@ -9,10 +9,11 @@ import { baseURL, UNIT_COEFF_DICT, invoiceSettings } from '../../utils/config'
 import { UnitInput } from '../common/PromptInput'
 
 /*
-    Required fields: (empty)
+    Required fields: product
     Optional fields: product, messageApi, dismiss, refresh
-    1. new product: (empty)
-    2. edit product: product
+    
+    1. new product: product.id === undefined
+    2. edit product: product.id !== undefined
 */
 function ProductEditView(props) {
     const [messageApi, contextHolder] = message.useMessage()
@@ -23,13 +24,13 @@ function ProductEditView(props) {
         const p = form.getFieldsValue()
         p.quantity = p.quantity || '0'
         p.material = invoiceSettings.get('ifShowMaterial') === 'true' ? p.material : ''
-        if (props.product !== undefined) {
+        if (props.product.id !== undefined) {
             p.unitRatio = Decimal(UNIT_COEFF_DICT[p.unit]).div(UNIT_COEFF_DICT[props.product.unit]).toString()
         }
         Axios({
-            method: props.product === undefined ? 'post' : 'put',
+            method: props.product.id === undefined ? 'post' : 'put',
             baseURL: baseURL(),
-            url: props.product === undefined ? '/product' : `/product/id/${props.product.id}`,
+            url: props.product.id === undefined ? '/product' : `/product/id/${props.product.id}`,
             data: p,
             'Content-Type': 'application/json',
         }).then(res => {
@@ -49,36 +50,36 @@ function ProductEditView(props) {
     const materialRules = [
         { required: true }, { whitespace: true },
         { warningOnly: true, validator: async (rule, value) => {
-            if (props.product && value !== props.product.material) throw new Error()
+            if (props.product.id && value !== props.product.material) throw new Error()
         }}
     ]
     const nameRules = [
         { required: true }, { whitespace: true },
         { warningOnly: true, validator: async (rule, value) => {
-            if (props.product && value !== props.product.name) throw new Error()
+            if (props.product.id && value !== props.product.name) throw new Error()
         }}
     ]
     const specRules = [
         { required: true }, { whitespace: true },
         { warningOnly: true, validator: async (rule, value) => {
-            if (props.product && value !== props.product.spec) throw new Error()
+            if (props.product.id && value !== props.product.spec) throw new Error()
         }}
     ]
     const quantityRules = [
         { warningOnly: true, validator: async (rule, value) => {
-            if (props.product && value !== props.product.quantity) throw new Error()
+            if (props.product.id && value !== props.product.quantity) throw new Error()
         }}
     ]
     const unitRules = [
         { required: true, message: '请选择单位' },
         { warningOnly: true, validator: async (rule, value) => {
-            if (props.product && value !== props.product.unit) throw new Error()
+            if (props.product.id && value !== props.product.unit) throw new Error()
         }}
     ]
 
     // initialize form
     const initForm = () => {
-        form.setFieldsValue(props.product || { material: '', name: '', spec: '', quantity: '', unit:'' })
+        form.setFieldsValue(props.product)
     }
     useEffect(initForm, [])
 

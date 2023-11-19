@@ -8,8 +8,9 @@ const { confirm } = Modal
 const { Item } = Form
 
 import { baseURL, DEFAULT_PAGINATION, invoiceSettings } from '../utils/config'
-import ProductEditView from '../components/productComponents/ProductEditView'
 import { exportExcel, getExportData } from '../utils/export'
+import ProductEditView from '../components/productComponents/ProductEditView'
+import ProductView from '../components/productComponents/ProductView'
 
 
 function ProductPage() {
@@ -17,7 +18,7 @@ function ProductPage() {
     const [filteredProducts, setFilteredProducts] = useState([])
     const [form] = Form.useForm()
 
-    const [newProduct, setNewProduct] = useState(false)
+    const [selectedProductId, setSelectedProductId] = useState(undefined)
     const [editProduct, setEditProduct] = useState(undefined)
     const [messageApi, contextHolder] = message.useMessage()
     const itemStyle = { marginTop: '8px', marginBottom: '8px', marginLeft: '10px', marginRight: '10px' }
@@ -40,7 +41,6 @@ function ProductPage() {
         }).catch(_ => { })
     }
     const getTableColumns = () => {
-        // const isShowMaterial = invoiceSettings.get('isShowMaterial') === 'true'
         return [
             { title: '序号', align: 'center', render: (_, __, idx) => idx + 1, fixed: 'left' },
             ifShowMaterial ? { title: '材质', dataIndex: 'material', align: 'center' } : null,
@@ -48,11 +48,12 @@ function ProductPage() {
             { title: '规格', dataIndex: 'spec', align: 'center' },
             { title: '库存', dataIndex: 'quantity', align: 'center', render: quantity => <span style={{ color: quantity < 0 ? 'red': 'black' }}>{quantity.toLocaleString()}</span> },
             { title: '单位', dataIndex: 'unit', align: 'center' },
+            { title: '预估重量', dataIndex: 'estimatedWeight', align: 'center', render: w => w == null ? null : w.toLocaleString() },
             { title: '操作', align: 'center', fixed: 'right', render: (_, record) => 
                 <Space>
                     <Button type='primary' ghost onClick={_ => setEditProduct(record)}>编辑</Button>
                     {record.invoiceNum > 0 ?
-                        <Button>查看</Button> :
+                        <Button onClick={_ => setSelectedProductId(record.id)}>查看</Button> :
                         <Button danger onClick={_ => showDeleteConfirm([record])}>删除</Button>
                     }
                 </Space>
@@ -117,12 +118,12 @@ function ProductPage() {
 
     return <>
         {contextHolder}
-        <Modal open={editProduct !== undefined} onCancel={_ => setEditProduct(undefined)} title='编辑产品' footer={null} destroyOnClose>
+        <Modal open={editProduct !== undefined} onCancel={_ => setEditProduct(undefined)} title={editProduct && editProduct.id ? '编辑产品' : '新增产品'} footer={null} destroyOnClose>
             <ProductEditView product={editProduct} dismiss={_ => setEditProduct(undefined)} refresh={load} messageApi={messageApi} />
         </Modal>
 
-        <Modal open={newProduct} onCancel={_ => setNewProduct(false)} title='新建产品' footer={null} destroyOnClose>
-            <ProductEditView dismiss={_ => setNewProduct(false)} refresh={load} messageApi={messageApi} />
+        <Modal open={selectedProductId !== undefined} onCancel={_ => setSelectedProductId(undefined)} title='产品详情' footer={null} destroyOnClose width={900}>
+            <ProductView id={selectedProductId} dismiss={_ => setSelectedProductId(undefined)} />
         </Modal>
 
         <br />
@@ -135,7 +136,7 @@ function ProductPage() {
                 <Item label='规格' name='spec' style={itemStyle}><Input allowClear placeholder='规格' /></Item>
                 <Space wrap style={itemStyle}>
                     <Button icon={<SearchOutlined />} type='primary' htmlType='submit'>搜索</Button>
-                    <Button icon={<PlusOutlined />} onClick={_ => setNewProduct(true)}>新增产品</Button>
+                    <Button icon={<PlusOutlined />} onClick={_ => setEditProduct({material: '', name: '', spec: '', quantity: '', unit:''})}>新增产品</Button>
                     <Button icon={<TableOutlined />} disabled={filteredProducts.length === 0} onClick={exportProducts}>批量导出</Button>
                     <Button icon={<ClearOutlined />} type='dashed' disabled={filteredProducts.filter(p => !p.invoiceNum > 0).length === 0}
                         onClick={_ => showDeleteConfirm(filteredProducts.filter(p => !p.invoiceNum > 0))} danger>批量清理</Button>

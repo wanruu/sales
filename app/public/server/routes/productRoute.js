@@ -3,15 +3,20 @@ const router = express.Router()
 const crypto = require('crypto')
 
 const db = require('../db')
-const { INVOICE_TYPE_2_INT } = require('./utils')
+const { INVOICE_TYPE_2_INT, INT_2_INVOICE_TYPE } = require('./utils')
 
 
-router.get('/', async (req, res) => {
-    const t1 = `(SELECT p.id, COUNT(*) AS invoiceNum 
-        FROM product AS p, invoiceItem AS ii 
-        WHERE p.id=ii.productId GROUP BY p.id)`
-    const query = `SELECT p.id, material, name, spec, unit, quantity, invoiceNum
-        FROM product AS p LEFT JOIN ${t1} AS t ON p.id=t.id`
+router.get('/', (req, res) => {
+    const invoiceItemNum = `SELECT productId, COUNT(*) AS invoiceNum 
+        FROM invoiceItem GROUP BY productId`
+    const unitWeight = `SELECT productId, IFNULL(SUM(weight)/SUM(quantity),0) AS unitWeight
+        FROM invoiceItem
+        WHERE weight IS NOT NULL
+        GROUP BY productId`
+    const query = `SELECT p.id, material, name, spec, unit, quantity, invoiceNum, quantity*unitWeight AS estimatedWeight
+        FROM product AS p 
+        LEFT JOIN (${invoiceItemNum}) AS t ON p.id=t.productId
+        LEFT JOIN (${unitWeight}) AS u ON p.id=u.productId`
     db.all(query, (err, products) => {
         if (err) {
             console.error(err)
@@ -19,6 +24,35 @@ router.get('/', async (req, res) => {
             return
         }
         res.send(products)
+    })
+})
+
+router.get('/id/:id', (req, res) => {
+    const productId = req.params.id
+    
+    const selectProduct = `SELECT * FROM product WHERE id="${productId}"`
+    db.each(selectProduct, (err, product) => {
+        if (err) {
+            console.error(err)
+            res.status(500).send(err)
+            return
+        }
+        const selectItems = `SELECT i.partner, i.type,
+            ii.invoiceId, ii.price, ii.quantity, ii.originalAmount, ii.discount, ii.amount, ii.remark, ii.weight
+            FROM invoiceItem AS ii, invoice AS i
+            WHERE ii.productId="${productId}" AND i.id=ii.invoiceId`
+        db.all(selectItems, (err, items) => {
+            if (err) {
+                console.error(err)
+                res.status(500).send(err)
+                return
+            }
+            product.items = items.map(item => {
+                item.type = INT_2_INVOICE_TYPE[item.type]
+                return item
+            })
+            res.send(product)
+        })
     })
 })
 
