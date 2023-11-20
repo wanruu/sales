@@ -1,7 +1,7 @@
 import Decimal from 'decimal.js'
 
 export const baseURL = () => {
-    return 'http://localhost:8888/'
+    return `http://${window.electronAPI.queryServerIp()}:${window.electronAPI.queryServerPort()}`
 }
 
 export const DATE_FORMAT = 'YYYY-MM-DD'

@@ -1,6 +1,8 @@
 const express = require('express')
 const router = express.Router()
 
+
+
 const db = require('../db')
 
 
@@ -23,6 +25,7 @@ router.get('/salesRefundItem', (req, res) => {
         res.send(rows)
     })
 })
+
 
 
 module.exports = router

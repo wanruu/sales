@@ -1,9 +1,9 @@
 {
-    "name": "sales",
+    "name": "invoice",
     "version": "0.0.1",
     "private": true,
     "main": "public/electron.js",
-    "description": "Designed for invoice management.",
+    "description": "清单管理~",
     "author": {
         "name": "wanruuu",
         "email": "wanruuu@gmail.com"
@@ -58,7 +58,7 @@
     },
     "build": {
         "productName": "清单管理",
-        "appId": "com.wanruuu.sales.hsz",
+        "appId": "com.wanruuu.invoice",
         "files": [
             "build/**/*",
             "node_modules/**/*"

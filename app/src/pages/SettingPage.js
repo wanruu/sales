@@ -8,10 +8,9 @@ import dayjs from 'dayjs'
 import uuid from 'react-uuid'
 
 
-import { baseURL, DATE_FORMAT, printSettings, DEFAULT_PRINT_SETTINGS,
-    invoiceSettings
-} from '../utils/config'
+import { baseURL, DATE_FORMAT, printSettings, DEFAULT_PRINT_SETTINGS, invoiceSettings } from '../utils/config'
 import InvoiceView from '../components/common/InvoiceView'
+import PhoneAccessView from '../components/common/PhoneAccessView'
 import './SettingPage.css'
 
 
@@ -313,6 +312,7 @@ export default function SettingPage() {
     }
 
     return <div className='setting'>
+        <PhoneAccessView />
         <Title level={2}>开单设置</Title>
         <InvoiceSetting />
         <Title level={2}>打印设置</Title>
