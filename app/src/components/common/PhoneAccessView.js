@@ -29,7 +29,7 @@ export default function PhoneAccessView() {
                     <font style={{ color: 'gray' }}>加载失败</font>
                 </Space>
             </div> :
-            <QRCode value={`${baseURL()}/mobile/test`} size={size} /> 
+            <QRCode value={`${baseURL()}/index.html`} size={size} /> 
         }
         <Row align='center'>
         { window.electronAPI.queryServerIp() == 'localhost' ?
