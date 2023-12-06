@@ -18,7 +18,6 @@ function PartnerPage() {
 
     const [messageApi, contextHolder] = message.useMessage()
     const [editPartner, setEditPartner] = useState(undefined)
-    const [newPartner, setNewPartner] = useState(false)
     const itemStyle = { marginTop: '8px', marginBottom: '8px', marginLeft: '10px', marginRight: '10px' }
     
     // load
@@ -101,12 +100,8 @@ function PartnerPage() {
     return <>
         {contextHolder}
 
-        <Modal title='编辑交易对象' open={editPartner !== undefined} destroyOnClose onCancel={_ => setEditPartner(undefined)} footer={null}>
+        <Modal title={editPartner && editPartner.name !== '' ? '编辑交易对象' : '新增交易对象'} open={editPartner !== undefined} destroyOnClose onCancel={_ => setEditPartner(undefined)} footer={null}>
             <PartnerEditView partner={editPartner} dismiss={_ => setEditPartner(undefined)} refresh={load} messageApi={messageApi} />
-        </Modal>
-
-        <Modal title='新增交易对象' open={newPartner} destroyOnClose onCancel={_ => setNewPartner(false)} footer={null} >
-            <PartnerEditView dismiss={_ => setNewPartner(false)} refresh={load} messageApi={messageApi} />
         </Modal>
 
         <br />
@@ -120,7 +115,7 @@ function PartnerPage() {
                     <Item label='地址' name='address' style={itemStyle}><Input allowClear placeholder='地址' style={{ width: '300px' }} /></Item>
                     <Space wrap style={itemStyle}>
                         <Button icon={<SearchOutlined />} type='primary' htmlType='submit'>搜索</Button>
-                        <Button icon={<PlusOutlined />} onClick={_ => setNewPartner(true)}>新增对象</Button>
+                        <Button icon={<PlusOutlined />} onClick={_ => setEditPartner({ name: '', phone: '', address: '', folder: '' })}>新增对象</Button>
                         <Button icon={<TableOutlined />} onClick={exportPartners} disabled={filteredPartners.length === 0}>批量导出</Button>
                         <Button icon={<ClearOutlined />} type='dashed' danger disabled={filteredPartners.filter(p => !p.invoiceNum > 0).length === 0}
                             onClick={_ => showDeleteConfirm(filteredPartners.filter(p => !p.invoiceNum > 0).map(p => p.name))}>批量清理</Button>

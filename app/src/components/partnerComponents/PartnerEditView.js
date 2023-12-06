@@ -7,10 +7,11 @@ const { Item } = Form
 import { baseURL } from '../../utils/config'
 
 /*
-    Required fields: (empty)
-    Optional fields: partner, messageApi, dismiss, refresh
-    1. new partner: (empty)
-    2. edit partner: partner
+    Required fields: partner
+    Optional fields: messageApi, dismiss, refresh
+
+    1. new partner: partner.name === ''
+    2. edit partner: partner.name !== ''
 */
 function PartnerEditView(props) {
     const [messageApi, contextHolder] = message.useMessage()
@@ -19,9 +20,9 @@ function PartnerEditView(props) {
     const upload = () => {
         const m = props.messageApi || messageApi
         Axios({
-            method: props.partner === undefined ? 'post' : 'put',
+            method: props.partner.name === '' ? 'post' : 'put',
             baseURL: baseURL(),
-            url: props.partner === undefined ? '/partner' : `/partner/name/${props.partner.name}`,
+            url: props.partner.name === '' ? '/partner' : `/partner/name/${props.partner.name}`,
             data: form.getFieldsValue(),
             'Content-Type': 'application/json',
         }).then(res => {
@@ -41,32 +42,33 @@ function PartnerEditView(props) {
     const nameRules = [
         { required: true }, { whitespace: true },
         { warningOnly: true, validator: async (rule, value) => {
-            if (props.partner && value !== props.partner.name) throw new Error()
+            if (props.partner.name !== '' && value !== props.partner.name) throw new Error()
         }}
     ]
     const phoneRules = [
         // { pattern: new RegExp('^[0-9]{11}$', 'g'), message: '电话不是11位数字', warningOnly: true },
         { whitespace: true },
         { warningOnly: true, validator: async (rule, value) => {
-            if (props.partner && value !== props.partner.phone) throw new Error()
+            if (props.partner.name !== '' && value !== props.partner.phone) throw new Error()
         }}
     ]
     const addressRules = [
         { whitespace: true },
         { warningOnly: true, validator: async (rule, value) => {
-            if (props.partner && value !== props.partner.address) throw new Error()
+            if (props.partner.name !== '' && value !== props.partner.address) throw new Error()
         }}
     ]
     const folderRules = [
         { whitespace: true },
         { warningOnly: true, validator: async (rule, value) => {
-            if (props.partner && value !== props.partner.folder) throw new Error()
+            if (props.partner.name !== '' && value !== props.partner.folder) throw new Error()
         }}
     ]
 
     // initialize form
     const initForm = () => {
-        form.setFieldsValue(props.partner || { name: '', phone: '', address: '', folder: '' })
+        form.setFieldsValue(props.partner)
+        // { name: '', phone: '', address: '', folder: '' }
     }
     useEffect(initForm, [])
 

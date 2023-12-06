@@ -10,7 +10,7 @@ import { UnitInput } from '../common/PromptInput'
 
 /*
     Required fields: product
-    Optional fields: product, messageApi, dismiss, refresh
+    Optional fields: messageApi, dismiss, refresh
     
     1. new product: product.id === undefined
     2. edit product: product.id !== undefined
