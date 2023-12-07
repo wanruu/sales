@@ -192,7 +192,7 @@ router.put('/id/:id', async (req, res) => {
             originalAmount=invoiceItem.quantity*oi.newPrice*oi.unitRatio,
             amount=invoiceItem.quantity*oi.newPrice*oi.unitRatio*oi.newDiscount/100
         FROM (${orderItemTable}) AS oi, invoiceRelation AS r
-        WHERE invoiceItem.invoiceId=r.refundId AND "${orderId}"=r.orderId`
+        WHERE invoiceItem.invoiceId=r.refundId AND "${orderId}"=r.orderId AND oi.productId=invoiceItem.productId`
     const updateRefund = `UPDATE invoice 
         SET amount=(SELECT SUM(amount) FROM invoiceItem AS ri WHERE ri.invoiceId=invoice.id)
         FROM invoiceRelation AS r

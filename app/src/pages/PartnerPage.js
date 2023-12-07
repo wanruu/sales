@@ -6,8 +6,10 @@ import { ExclamationCircleFilled, PlusOutlined, TableOutlined, ClearOutlined, Se
 const { confirm } = Modal
 const { Item } = Form
 
-import { baseURL, DEFAULT_PAGINATION } from '../utils/config'
+
 import PartnerEditView from '../components/partnerComponents/PartnerEditView'
+import PartnerView from '../components/partnerComponents/PartnerView'
+import { baseURL, DEFAULT_PAGINATION } from '../utils/config'
 import { exportExcel } from '../utils/export'
 
 
@@ -18,6 +20,7 @@ function PartnerPage() {
 
     const [messageApi, contextHolder] = message.useMessage()
     const [editPartner, setEditPartner] = useState(undefined)
+    const [selectedPartnerName, setSelectedPartnerName] = useState(undefined)
     const itemStyle = { marginTop: '8px', marginBottom: '8px', marginLeft: '10px', marginRight: '10px' }
     
     // load
@@ -88,7 +91,7 @@ function PartnerPage() {
             <Space>
                 <Button type='primary' ghost onClick={_ => setEditPartner(record)}>编辑</Button>
                 {record.invoiceNum > 0 ?
-                    <Button>查看</Button> :
+                    <Button onClick={_ => setSelectedPartnerName(record.name)}>查看</Button> :
                     <Button danger onClick={_ => showDeleteConfirm([record.name])}>删除</Button>
                 }
             </Space>
@@ -102,6 +105,10 @@ function PartnerPage() {
 
         <Modal title={editPartner && editPartner.name !== '' ? '编辑交易对象' : '新增交易对象'} open={editPartner !== undefined} destroyOnClose onCancel={_ => setEditPartner(undefined)} footer={null}>
             <PartnerEditView partner={editPartner} dismiss={_ => setEditPartner(undefined)} refresh={load} messageApi={messageApi} />
+        </Modal>
+
+        <Modal open={selectedPartnerName !== undefined} onCancel={_ => setSelectedPartnerName(undefined)} title='交易对象详情' footer={null} destroyOnClose width={900}>
+            <PartnerView name={selectedPartnerName} dismiss={_ => setSelectedPartnerName(undefined)} />
         </Modal>
 
         <br />
