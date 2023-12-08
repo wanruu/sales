@@ -141,13 +141,13 @@ export default function ProductView(props) {
                 <Table.Summary.Row>
                     <Table.Summary.Cell index={0} align='center'>总计</Table.Summary.Cell>
                     <Table.Summary.Cell index={1} colSpan={2} />
-                    <Table.Summary.Cell index={2} align='center'>均价 { summaryInfo.price.toNumber().toLocaleString() }</Table.Summary.Cell>
-                    <Table.Summary.Cell index={3} align='center'>{ summaryInfo.quantity.toNumber().toLocaleString() }</Table.Summary.Cell>
-                    <Table.Summary.Cell index={4} align='center'>{ summaryInfo.originalAmount.toNumber().toLocaleString() }</Table.Summary.Cell>
-                    <Table.Summary.Cell index={5} />
-                    <Table.Summary.Cell index={6} align='center'>{ summaryInfo.amount.toNumber().toLocaleString() }</Table.Summary.Cell>
-                    <Table.Summary.Cell index={7} align='center'>均重 { summaryInfo.weight.toNumber().toLocaleString() }</Table.Summary.Cell>
-                    <Table.Summary.Cell index={8} />
+                    <Table.Summary.Cell index={3} align='center'>均价 { summaryInfo.price.toNumber().toLocaleString() }</Table.Summary.Cell>
+                    <Table.Summary.Cell index={4} align='center'>{ summaryInfo.quantity.toNumber().toLocaleString() }</Table.Summary.Cell>
+                    <Table.Summary.Cell index={5} align='center'>{ summaryInfo.originalAmount.toNumber().toLocaleString() }</Table.Summary.Cell>
+                    <Table.Summary.Cell index={6} />
+                    <Table.Summary.Cell index={7} align='center'>{ summaryInfo.amount.toNumber().toLocaleString() }</Table.Summary.Cell>
+                    <Table.Summary.Cell index={8} align='center'>均重 { summaryInfo.weight.toNumber().toLocaleString() }</Table.Summary.Cell>
+                    <Table.Summary.Cell index={9} />
                     <Table.Summary.Cell index={10} />
                 </Table.Summary.Row>
             </Table.Summary>
@@ -156,11 +156,11 @@ export default function ProductView(props) {
             <Table.Summary.Row>
                 <Table.Summary.Cell index={0} align='center'>总计</Table.Summary.Cell>
                 <Table.Summary.Cell index={1} colSpan={2} />
-                <Table.Summary.Cell index={2} align='center'>均价 { summaryInfo.price.toNumber().toLocaleString() }</Table.Summary.Cell>
-                <Table.Summary.Cell index={3} align='center'>{ summaryInfo.quantity.toNumber().toLocaleString() }</Table.Summary.Cell>
-                <Table.Summary.Cell index={4} align='center'>{ summaryInfo.amount.toNumber().toLocaleString() }</Table.Summary.Cell>
-                <Table.Summary.Cell index={5} align='center'>均重 { summaryInfo.weight.toNumber().toLocaleString() }</Table.Summary.Cell>
-                <Table.Summary.Cell index={6} />
+                <Table.Summary.Cell index={3} align='center'>均价 { summaryInfo.price.toNumber().toLocaleString() }</Table.Summary.Cell>
+                <Table.Summary.Cell index={4} align='center'>{ summaryInfo.quantity.toNumber().toLocaleString() }</Table.Summary.Cell>
+                <Table.Summary.Cell index={5} align='center'>{ summaryInfo.amount.toNumber().toLocaleString() }</Table.Summary.Cell>
+                <Table.Summary.Cell index={6} align='center'>均重 { summaryInfo.weight.toNumber().toLocaleString() }</Table.Summary.Cell>
+                <Table.Summary.Cell index={7} />
                 <Table.Summary.Cell index={8} />
             </Table.Summary.Row>
         </Table.Summary>

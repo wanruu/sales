@@ -60,9 +60,14 @@ router.get('/name/:name', (req, res) => {
         ON oi.id=r.orderId AND ri.id=r.refundId
         WHERE oi.type IN (${salesOrderType}, ${purchaseOrderType}) AND oi.partner="${name}"`
     // InvoiceItems
-    const selectInvoiceItems = `SELECT *
-        FROM invoice AS i, invoiceItem AS ii
-        WHERE i.partner="${name}" AND i.id=ii.invoiceId`
+    const selectInvoiceItems = `SELECT CASE WHEN oi.type=${salesOrderType} THEN 'sales' ELSE 'purchase' END AS type,
+        p.id AS productId, p.material, p.name, p.spec, p.unit, 
+        oii.invoiceId AS orderId, oii.quantity AS orderQuantity, oii.price, oii.discount, oii.originalAmount AS orderOriginalAmount, oii.amount AS orderAmount, oii.remark AS orderRemark,
+        rii.invoiceId AS refundId, rii.quantity AS refundQuantity, rii.originalAmount AS refundOriginalAmount, rii.amount AS refundAmount, rii.remark AS refundRemark
+        FROM invoice AS oi, invoiceItem AS oii, product AS p
+        LEFT JOIN (invoiceRelation r, invoiceItem AS rii)
+        ON r.orderId=oi.id AND r.refundId=rii.invoiceId AND rii.productId=p.id 
+        WHERE oi.type IN (${salesOrderType}, ${purchaseOrderType}) AND oi.partner="${name}" AND oi.id=oii.invoiceId AND oii.productId=p.id`
     
     db.each(`SELECT * FROM partner WHERE name="${name}"`, (err, partner) => {
         if (err) {
@@ -84,7 +89,15 @@ router.get('/name/:name', (req, res) => {
                     return
                 }
                 partner.invoices = invoices
-                res.send(partner)
+                db.all(selectInvoiceItems, (err, invoiceItems) => {
+                    if (err) {
+                        console.error(err)
+                        res.status(500).send(err)
+                        return
+                    }
+                    partner.invoiceItems = invoiceItems
+                    res.send(partner)
+                })
             })
         })
     })

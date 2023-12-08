@@ -116,21 +116,21 @@ function View(props) {
     }
     return !props.order ? null : <>
         <Space direction='vertical' style={{ width: '100%', marginTop: '10px', marginBottom: '15px' }}>
-            <Row style={{ justifyContent: 'space-between' }}>
-                <div>客户：<PartnerPopoverView refresh={props.refresh}
+            <Row>
+                <Col span={8}>客户：<PartnerPopoverView refresh={props.refresh}
                     partner={_.fromPairs(['name', 'folder', 'phone', 'address'].map(key => [key, props.order[key]]))} />
-                </div>
-                <div>日期：{props.order.date}</div>
-                <div>关联退货单：{props.order.refundId || '无'}</div>
+                </Col>
+                <Col span={8}>日期：{props.order.date}</Col>
+                <Col span={8}>关联退货单：{props.order.refundId || '无'}</Col>
             </Row>
             <Row style={{ justifyContent: 'space-between' }}>
-                <div>总金额：{props.order.amount.toLocaleString()}</div>
-                <div align='center'>订金：{props.order.prepayment.toLocaleString()}</div>
-                <div align='right'>尾款：{props.order.payment.toLocaleString()}</div>
-                <div align='right'>已付：{props.order.paid.toLocaleString()}</div>
-                <div align='right'>未付：
+                <Col span={8}>总金额：{props.order.amount.toLocaleString()}</Col>
+                <Col span={8}>
+                    已付：{props.order.paid.toLocaleString()}（订金：{props.order.prepayment.toLocaleString()}，尾款：{props.order.payment.toLocaleString()}）
+                </Col>
+                <Col span={8}>未付：
                     <span style={{ color: props.order.unpaid === 0 ? 'black' : 'red' }}>{props.order.unpaid.toLocaleString()}</span>
-                </div>
+                </Col>
             </Row>
         </Space>
 

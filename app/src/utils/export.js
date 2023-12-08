@@ -60,4 +60,142 @@ export const exportExcelMultiSheet = (filename, jsas, sheetnames=[]) => {
         }
     }
     XLSX.writeFile(wb, filename + '.xlsx')
+} 
+
+
+String.prototype.getLength = function() {
+    var realLength = 0, len = this.length, charCode = -1
+    for (var i = 0; i < len; i ++) {
+        charCode = this.charCodeAt(i)
+        realLength += charCode >= 0 && charCode <= 128 ? 1 : 2
+    }
+    return realLength
+}
+
+
+export class MyWorkBook {
+    constructor (filename) {
+        this.filename = filename
+        this.book = XLSX.utils.book_new()
+    }
+    writeSheet (sheet, sheetName) {
+        XLSX.utils.book_append_sheet(this.book, sheet.sheet, sheetName)
+    }
+    save () {
+        XLSX.writeFile(this.book, this.filename + '.xlsx')
+    }
+}
+
+
+export class MyWorkSheet {
+    constructor () {
+        this.sheet = XLSX.utils.json_to_sheet([])
+        this.nextRow = 1  // Start from 1
+    }
+
+    // ONLY SUPPORT 2 LEVELS
+    writeHeaders (headers) {
+        // headers format: [{title: '名称'}] or [{title: '名称', children: [{title: 'xx'}]}]
+        // 1. Write Flat Headers
+        var nHeaderRow = headers.find(header => header.children?.length > 0) == null ? 1 : 2
+        var flatHeaders = headers.reduce((result, l1Header) => {
+            if (l1Header.children?.length > 0) {
+                const placeholder = [...Array(l1Header.children.length-1)].map(_ => '')
+                const l2Headers = l1Header.children.map(h => h.title)
+                return [[...result[0], l1Header.title,...placeholder], [...result[1], ...l2Headers]]
+            }
+            return [[...result[0], l1Header.title], [...result[1], '']]
+        }, [[], []])
+        flatHeaders = nHeaderRow === 1 ? [flatHeaders[0]] : flatHeaders  // pure string list
+        XLSX.utils.sheet_add_aoa(this.sheet, flatHeaders, { origin: `A${this.nextRow}` })
+        // 2. Merge Headers
+        if (nHeaderRow === 2) {
+            var curCol = 0
+            const merges = headers.map(l1Header => {
+                let merge
+                if (l1Header.children?.length > 0) {
+                    merge = { s: { r: this.nextRow-1, c: curCol}, e: { r: this.nextRow-1, c: curCol + l1Header.children.length - 1 } }
+                    curCol += l1Header.children.length
+                } else {
+                    merge = { s: { r: this.nextRow-1, c: curCol}, e: { r: this.nextRow, c: curCol } }
+                    curCol += 1
+                }
+                return merge
+            })
+            this.sheet['!merges'] = this.sheet['!merges'] ? [...this.sheet['!merges'], ...merges] : merges
+        }
+        this.nextRow += nHeaderRow
+        // 3. Update Width
+        this.updateColsWidth(flatHeaders)
+    }
+
+    // ONLY SUPPORT 2 LEVELS
+    writeJson (headers, data) {
+        // headers format: [{title: '名称', dataIndex: 'name'}] or [{title: '名称', children: [{title, dataIndex}]}]
+        // 1. Write Headers
+        this.writeHeaders(headers)
+        // 2. Write Data
+        var nHeaderRow = headers.find(header => header.children?.length > 0) == null ? 1 : 2
+        const headerDicts = nHeaderRow === 1 ? headers : headers.reduce((result, l1Header) => {
+            if (l1Header.children?.length > 0) {
+                return [...result, ...l1Header.children]
+            }
+            return [...result, l1Header]
+        }, [])
+        const flatData = data.map((record, idx) => {
+            return headerDicts.map(header => {
+                if (header.render) {
+                    return header.render(record[header.dataIndex], record, idx)
+                }
+                return record[header.dataIndex]
+            })
+        })
+        XLSX.utils.sheet_add_aoa(this.sheet, flatData, { origin: `A${this.nextRow}` })
+        // 3. Merge Data
+        const dataIndexes = headerDicts.map(d => d.dataIndex)
+        data.forEach((record, idx) => {
+            const spanedDataIndexes = Object.keys(record.rowSpan ?? {})
+            spanedDataIndexes.forEach(dataIndex => {
+                const col = dataIndexes.indexOf(dataIndex)
+                const rowSpan = record.rowSpan[dataIndex]
+                this.sheet['!merges'].push({ 
+                    s: { r: this.nextRow+idx-1, c: col}, 
+                    e: { r: this.nextRow+idx+rowSpan-2, c: col } 
+                })
+            })
+        })
+        this.nextRow += flatData.length
+        // 4. Update Width
+        this.updateColsWidth(flatData)
+    }
+
+    updateColsWidth (flatData) {
+        if (!(flatData?.length > 0)) {
+            return
+        }
+        const oldNCol = this.sheet['!cols']?.length ?? 0
+        const newNCol = flatData[0].length
+        const initCols = [...Array(Math.max(oldNCol, newNCol))].map((_, idx) => idx < oldNCol ? this.sheet['!cols'][idx] : { })
+        this.sheet['!cols'] = flatData.reduce((result, row) => {
+            return result.map((col, idx) => {
+                col.wch = Math.max((col.wch || 0), (row[idx] || '').toString().getLength())
+                return col
+            })
+        }, initCols)
+    }
+
+    // alignCenter () {
+    //     for (const key in this.sheet) {
+    //         if (key.at(0) !== '!') {
+    //             this.sheet[key].s = { alignment: { vertical: 'center', horizontal: 'center' } }
+    //         }
+    //     }
+    // }
+
+    // save () {
+    //     var wb = XLSX.utils.book_new()
+    //     XLSX.utils.book_append_sheet(wb, this.sheet)
+    //     XLSX.writeFile(wb, 'text.xlsx')
+    //     console.log(this.sheet)
+    // }
 }
