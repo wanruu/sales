@@ -78,17 +78,18 @@ export class MyWorkBook {
         this.filename = filename
         this.book = XLSX.utils.book_new()
     }
-    writeSheet (sheet, sheetName) {
-        XLSX.utils.book_append_sheet(this.book, sheet.sheet, sheetName)
+    writeSheet (sheet) {
+        XLSX.utils.book_append_sheet(this.book, sheet.sheet, sheet.name)
     }
     save () {
-        XLSX.writeFile(this.book, this.filename + '.xlsx')
+        XLSX.writeFile(this.book, `${this.filename}.xlsx`)
     }
 }
 
 
 export class MyWorkSheet {
-    constructor () {
+    constructor (sheetName) {
+        this.name = sheetName
         this.sheet = XLSX.utils.json_to_sheet([])
         this.nextRow = 1  // Start from 1
     }
@@ -126,11 +127,18 @@ export class MyWorkSheet {
         }
         this.nextRow += nHeaderRow
         // 3. Update Width
-        this.updateColsWidth(flatHeaders)
+        this.autoUpdateColsWidth(flatHeaders)
+    }
+
+    writeRow (row) {
+        if (row) {
+            XLSX.utils.sheet_add_aoa(this.sheet, [row], { origin: `A${this.nextRow}` })
+            this.nextRow += 1
+        }
     }
 
     // ONLY SUPPORT 2 LEVELS
-    writeJson (headers, data) {
+    writeJson (data, headers) {
         // headers format: [{title: '名称', dataIndex: 'name'}] or [{title: '名称', children: [{title, dataIndex}]}]
         // 1. Write Headers
         this.writeHeaders(headers)
@@ -156,32 +164,33 @@ export class MyWorkSheet {
         data.forEach((record, idx) => {
             const spanedDataIndexes = Object.keys(record.rowSpan ?? {})
             spanedDataIndexes.forEach(dataIndex => {
-                const col = dataIndexes.indexOf(dataIndex)
                 const rowSpan = record.rowSpan[dataIndex]
-                this.sheet['!merges'].push({ 
-                    s: { r: this.nextRow+idx-1, c: col}, 
-                    e: { r: this.nextRow+idx+rowSpan-2, c: col } 
-                })
+                if (rowSpan > 1) {
+                    const col = dataIndexes.indexOf(dataIndex)
+                    this.sheet['!merges'].push({ 
+                        s: { r: this.nextRow+idx-1, c: col}, 
+                        e: { r: this.nextRow+idx+rowSpan-2, c: col } 
+                    })
+                }
             })
         })
         this.nextRow += flatData.length
         // 4. Update Width
-        this.updateColsWidth(flatData)
+        this.autoUpdateColsWidth(flatData)
     }
 
-    updateColsWidth (flatData) {
-        if (!(flatData?.length > 0)) {
-            return
+    autoUpdateColsWidth (flatData) {
+        if (flatData?.length > 0) {
+            const oldNCol = this.sheet['!cols']?.length ?? 0
+            const newNCol = flatData[0].length
+            const initCols = [...Array(Math.max(oldNCol, newNCol))].map((_, idx) => idx < oldNCol ? this.sheet['!cols'][idx] : { })
+            this.sheet['!cols'] = flatData.reduce((result, row) => {
+                return result.map((col, idx) => {
+                    col.wch = Math.max((col.wch || 0), (row[idx] || '').toString().getLength())
+                    return col
+                })
+            }, initCols)
         }
-        const oldNCol = this.sheet['!cols']?.length ?? 0
-        const newNCol = flatData[0].length
-        const initCols = [...Array(Math.max(oldNCol, newNCol))].map((_, idx) => idx < oldNCol ? this.sheet['!cols'][idx] : { })
-        this.sheet['!cols'] = flatData.reduce((result, row) => {
-            return result.map((col, idx) => {
-                col.wch = Math.max((col.wch || 0), (row[idx] || '').toString().getLength())
-                return col
-            })
-        }, initCols)
     }
 
     // alignCenter () {
@@ -190,12 +199,5 @@ export class MyWorkSheet {
     //             this.sheet[key].s = { alignment: { vertical: 'center', horizontal: 'center' } }
     //         }
     //     }
-    // }
-
-    // save () {
-    //     var wb = XLSX.utils.book_new()
-    //     XLSX.utils.book_append_sheet(wb, this.sheet)
-    //     XLSX.writeFile(wb, 'text.xlsx')
-    //     console.log(this.sheet)
     // }
 }

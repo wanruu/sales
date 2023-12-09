@@ -132,7 +132,7 @@ function PurchaseOrderPage(props) {
 
         <Modal title={`采购清单 (${selectedOrderId})`} open={selectedOrderId !== undefined} width={900} destroyOnClose 
             onCancel={_ => setSelectedOrderId(undefined)} footer={null} maskClosable={false}>
-            <PurchaseOrderView id={selectedOrderId} refresh={load} messageApi={messageApi} />
+            <PurchaseOrderView id={selectedOrderId} refresh={load} messageApi={messageApi} allowEditPartner={true} />
         </Modal>
 
         <Modal title={`采购退货单 (${selectedRefundId})`} open={selectedRefundId !== undefined} width={900} destroyOnClose 

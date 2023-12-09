@@ -44,7 +44,7 @@ export default function SalesOrderView(props) {
             <SalesOrderEditView order={order} dismiss={_ => setMode('view')} messageApi={props.messageApi} refresh={_ => { load(); props.refresh() }} /> 
         </div>
         <div style={{ display: mode === 'view' ? 'block' : 'none'}}>
-            <View order={order} setMode={setMode} refresh={load} />
+            <View order={order} setMode={setMode} refresh={load} allowEditPartner={props.allowEditPartner} />
         </div>
         <div style={{ display: mode === 'print' ? 'block' : 'none'}}>
             <PrintView order={order} setMode={setMode} />
@@ -54,6 +54,7 @@ export default function SalesOrderView(props) {
 
 /*
     Required: order, setMode
+    Optional: allowEditPartner
 */
 function View(props) {
     const getTableColumns = () => {
@@ -117,9 +118,11 @@ function View(props) {
     return !props.order ? null : <>
         <Space direction='vertical' style={{ width: '100%', marginTop: '10px', marginBottom: '15px' }}>
             <Row>
-                <Col span={8}>客户：<PartnerPopoverView refresh={props.refresh}
-                    partner={_.fromPairs(['name', 'folder', 'phone', 'address'].map(key => [key, props.order[key]]))} />
-                </Col>
+                <Col span={8}>客户：{
+                    props.allowEditPartner ?
+                    <PartnerPopoverView refresh={props.refresh} partner={_.fromPairs(['name', 'folder', 'phone', 'address'].map(key => [key, props.order[key]]))} />
+                    : props.order.name
+                }</Col>
                 <Col span={8}>日期：{props.order.date}</Col>
                 <Col span={8}>关联退货单：{props.order.refundId || '无'}</Col>
             </Row>

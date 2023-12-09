@@ -132,7 +132,7 @@ function SalesOrderPage(props) {
 
         <Modal title={`销售清单 (${selectedOrderId})`} open={selectedOrderId !== undefined} width={900} destroyOnClose 
             onCancel={_ => setSelectedOrderId(undefined)} footer={null} maskClosable={false}>
-            <SalesOrderView id={selectedOrderId} refresh={load} messageApi={messageApi} />
+            <SalesOrderView id={selectedOrderId} refresh={load} messageApi={messageApi} allowEditPartner={true} />
         </Modal>
 
         <Modal title={`销售退货单 (${selectedRefundId})`} open={selectedRefundId !== undefined} width={900} destroyOnClose 

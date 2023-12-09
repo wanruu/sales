@@ -28,8 +28,16 @@ router.get('/', (req, res) => {
 })
 
 
-router.get('/name/:name', (req, res) => {
-    const name = req.params.name
+router.get('/summary', (req, res) => {
+    const name = req.query.name
+    const getDateCondition = (dbName) => {
+        const s = req.query.startDate ? `${dbName}.date >= "${req.query.startDate}"` : null
+        const e = req.query.endDate ? `${dbName}.date <= "${req.query.endDate}"` : null
+        if (s == null && e == null) {
+            return ''
+        }
+        return ' AND ' + [s, e].filter(_ => _ != null).join(' AND ')
+    }
     // Products
     const selectItems = `SELECT ii.productId, ii.quantity, ii.amount,
         CASE WHEN i.type=${salesOrderType} THEN ii.quantity ELSE 0 END AS salesOrderQuantity,
@@ -41,7 +49,7 @@ router.get('/name/:name', (req, res) => {
         CASE WHEN i.type=${purchaseOrderType} THEN ii.amount ELSE 0 END AS purchaseOrderAmount,
         CASE WHEN i.type=${purchaseRefundType} THEN ii.amount ELSE 0 END AS purchaseRefundAmount
         FROM invoice AS i, invoiceItem AS ii
-        WHERE i.partner="${name}" AND i.id=ii.invoiceId`
+        WHERE i.partner="${name}" AND i.id=ii.invoiceId ${getDateCondition('i')}`
     const selectProducts = `SELECT p.id, p.material, p.name, p.spec, p.unit,
         SUM(ii.salesOrderQuantity-ii.salesRefundQuantity) AS salesQuantity,
         SUM(ii.salesRefundQuantity) AS salesRefundQuantity,
@@ -58,7 +66,7 @@ router.get('/name/:name', (req, res) => {
         ri.id AS refundId, ri.amount AS refundAmount, ri.prepayment AS refundPrepayment, ri.payment AS refundPayment
         FROM invoice AS oi LEFT JOIN (invoiceRelation AS r, invoice AS ri)
         ON oi.id=r.orderId AND ri.id=r.refundId
-        WHERE oi.type IN (${salesOrderType}, ${purchaseOrderType}) AND oi.partner="${name}"`
+        WHERE oi.type IN (${salesOrderType}, ${purchaseOrderType}) AND oi.partner="${name}" ${getDateCondition('oi')}`
     // InvoiceItems
     const selectInvoiceItems = `SELECT CASE WHEN oi.type=${salesOrderType} THEN 'sales' ELSE 'purchase' END AS type,
         p.id AS productId, p.material, p.name, p.spec, p.unit, 
@@ -67,7 +75,7 @@ router.get('/name/:name', (req, res) => {
         FROM invoice AS oi, invoiceItem AS oii, product AS p
         LEFT JOIN (invoiceRelation r, invoiceItem AS rii)
         ON r.orderId=oi.id AND r.refundId=rii.invoiceId AND rii.productId=p.id 
-        WHERE oi.type IN (${salesOrderType}, ${purchaseOrderType}) AND oi.partner="${name}" AND oi.id=oii.invoiceId AND oii.productId=p.id`
+        WHERE oi.type IN (${salesOrderType}, ${purchaseOrderType}) AND oi.partner="${name}" AND oi.id=oii.invoiceId AND oii.productId=p.id ${getDateCondition('oi')}`
     
     db.each(`SELECT * FROM partner WHERE name="${name}"`, (err, partner) => {
         if (err) {

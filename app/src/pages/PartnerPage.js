@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Table, Button, Space, message, Modal, Form, Input, Card, Row } from 'antd'
+import { Table, Button, Space, message, Modal, Form, Input, Card } from 'antd'
 import Axios from 'axios'
 import { ExclamationCircleFilled, PlusOutlined, TableOutlined, ClearOutlined, SearchOutlined } from '@ant-design/icons'
 
@@ -103,12 +103,13 @@ function PartnerPage() {
     return <>
         {contextHolder}
 
-        <Modal title={editPartner && editPartner.name !== '' ? '编辑交易对象' : '新增交易对象'} open={editPartner !== undefined} destroyOnClose onCancel={_ => setEditPartner(undefined)} footer={null}>
+        <Modal title={editPartner && editPartner.name !== '' ? '编辑交易对象' : '新增交易对象'} open={editPartner !== undefined} destroyOnClose 
+            onCancel={_ => setEditPartner(undefined)} footer={null}>
             <PartnerEditView partner={editPartner} dismiss={_ => setEditPartner(undefined)} refresh={load} messageApi={messageApi} />
         </Modal>
 
         <Modal open={selectedPartnerName !== undefined} onCancel={_ => setSelectedPartnerName(undefined)} title='交易对象详情' footer={null} destroyOnClose width={900}>
-            <PartnerView name={selectedPartnerName} dismiss={_ => setSelectedPartnerName(undefined)} />
+            <PartnerView name={selectedPartnerName} dismiss={_ => setSelectedPartnerName(undefined)} refresh={load} />
         </Modal>
 
         <br />
