@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import Axios from 'axios'
 import Decimal from 'decimal.js'
 import { Table, Button, DatePicker, Col, Row, InputNumber, Input, Divider, Space, Modal } from 'antd'
-import { FieldNumberOutlined, EditOutlined, SaveOutlined, DeleteOutlined, CloseOutlined, InboxOutlined } from '@ant-design/icons'
+import { EditOutlined, SaveOutlined, DeleteOutlined, CloseOutlined, InboxOutlined } from '@ant-design/icons'
 
 
 import { calItemAmount, calTotalAmount, dcInvoice, emptyInvoice } from '../../utils/invoiceUtils'
@@ -41,6 +41,7 @@ export default function SalesRefundEditView(props) {
     const getTableColumns = () => {
         const ifShowMaterial = invoiceSettings.get('ifShowMaterial') === 'true'
         const ifShowDiscount = invoiceSettings.get('ifShowDiscount') === 'true'
+        const ifShowDelivered = invoiceSettings.get('ifShowDelivered') === 'true'
         return [
             { title: '', align: 'center', width: 30, fixed: 'left', render: (_, __, idx) => idx + 1 },
             ifShowMaterial ? { title: '材质', dataIndex: 'material', align: 'center', width: 50 } : null,
@@ -59,10 +60,10 @@ export default function SalesRefundEditView(props) {
             { title: '备注', dataIndex: 'remark', align: 'center', width: 100, render: (_, record, idx) => 
                 <Input size='small' style={{ width: '100%' }} value={record.remark} onChange={e => updateRow(idx, 'remark', e.target.value)} />
             },
-            { title: '配送', dataIndex: 'delivered', align: 'center', width: 60, fixed: 'right', render: (_, record, idx) => 
+            ifShowDelivered ? { title: '配送', dataIndex: 'delivered', align: 'center', width: 60, fixed: 'right', render: (_, record, idx) => 
                 <DeliveredInput size='small' align='center' style={{ width: '100%' }} value={record.delivered} 
                     onChange={value => updateRow(idx, 'delivered', value)} />
-            },
+            } : null,
             { title: '', align: 'center', width: 30, fixed: 'right', render: (_, __, idx) => 
                 <Button type='link' size='small' danger onClick={_ => {
                     const newRefund = dcInvoice(refund)

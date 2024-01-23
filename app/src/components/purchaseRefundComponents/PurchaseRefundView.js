@@ -60,6 +60,7 @@ function View(props) {
     const getTableColumns = () => {
         const ifShowMaterial = invoiceSettings.get('ifShowMaterial') === 'true'
         const ifShowDiscount = invoiceSettings.get('ifShowDiscount') === 'true'
+        const ifShowDelivered = invoiceSettings.get('ifShowDelivered') === 'true'
         return [
             { title: '', align: 'center', width: 30, fixed: 'left', render: (_, __, idx) => idx + 1 },
             ifShowMaterial ? { title: '材质', dataIndex: 'material', align: 'center', width: 50 } : null,
@@ -73,9 +74,9 @@ function View(props) {
             { title: ifShowDiscount ? '折后价' : '金额', dataIndex: 'amount', align: 'center', width: 80, render: a => a.toLocaleString() },
             { title: '预估重量', align: 'center', width: 80, render: (_, record) => Decimal(record.quantity).times(record.unitWeight).toLocaleString()},
             { title: '备注', dataIndex: 'remark', align: 'center', width: 100 },
-            { title: '配送', dataIndex: 'delivered', align: 'center', width: 60, fixed: 'right', 
+            ifShowDelivered ? { title: '配送', dataIndex: 'delivered', align: 'center', width: 60, fixed: 'right', 
                 render: delivered => <span style={{ color: delivered ? 'black' : 'red' }}>{delivered ? '已配送' : '未配送'}</span>
-            }
+            } : null
         ].filter(i => i != null)
     }
     const exportFile = () => {

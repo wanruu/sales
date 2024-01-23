@@ -21,19 +21,26 @@ const { Title } = Typography
 function InvoiceSetting() {
     const [ifShowDiscount, setIfShowDiscount] = useState(invoiceSettings.get('ifShowDiscount'))
     const [ifShowMaterial, setIfShowMaterial] = useState(invoiceSettings.get('ifShowMaterial'))
+    const [ifShowDelivered, setIfShowDelivered] = useState(invoiceSettings.get('ifShowDelivered'))
 
     return <Card size='small'>
         <Form layout='horizontal'>
-            <Item label='材质' extra='若开关关闭，原有数据不会发生更改，只是隐藏材质项。请勿频繁更改。'>
+            <Item label='显示材质' extra='若开关关闭，原有数据不会发生更改，只是隐藏材质项。请勿频繁更改。'>
                 <Switch checked={ifShowMaterial === 'true'} onChange={val => {
                     setIfShowMaterial(`${val}`)
                     invoiceSettings.set('ifShowMaterial', `${val}`)
                 }} />
             </Item>
-            <Item label='折扣' extra='若开关关闭，原有数据不会发生更改，只是隐藏折扣及折前金额。请勿频繁更改。'>
+            <Item label='显示折扣' extra='若开关关闭，原有数据不会发生更改，只是隐藏折扣及折前金额。请勿频繁更改。'>
                 <Switch checked={ifShowDiscount === 'true'} onChange={val => {
                     setIfShowDiscount(`${val}`)
                     invoiceSettings.set('ifShowDiscount', `${val}`)
+                }} />
+            </Item>
+            <Item label='显示配送'>
+                <Switch checked={ifShowDelivered === 'true'} onChange={val => {
+                    setIfShowDelivered(`${val}`)
+                    invoiceSettings.set('ifShowDelivered', `${val}`)
                 }} />
             </Item>
         </Form>
@@ -126,6 +133,8 @@ function PrintSettingView() {
                     <Input placeholder={DEFAULT_PRINT_SETTINGS.purchaseRefundSubtitle} value={purchaseRefundSubtitle} style={{ width: '130px' }}
                         onChange={e => { printSettings.set('purchaseRefundSubtitle', e.target.value); setPurchaseRefundSubtitle(e.target.value) }} />
                 </Item>
+            </Form>
+            <Form layout='inline'>
                 <Item label='副标题样式'>
                     <Select options={subtitleStyleOptions} value={subtitleStyle} onChange={val => { printSettings.set('subtitleStyle', val); setSubtitleStyle(val) }} />
                 </Item>
@@ -312,7 +321,7 @@ export default function SettingPage() {
     }
 
     return <div className='setting'>
-        <PhoneAccessView />
+        {/* <PhoneAccessView /> */}
         <Title level={2}>开单设置</Title>
         <InvoiceSetting />
         <Title level={2}>打印设置</Title>

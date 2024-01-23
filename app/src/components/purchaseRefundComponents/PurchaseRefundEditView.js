@@ -41,6 +41,7 @@ export default function PurchaseRefundEditView(props) {
     const getTableColumns = () => {
         const ifShowMaterial = invoiceSettings.get('ifShowMaterial') === 'true'
         const ifShowDiscount = invoiceSettings.get('ifShowDiscount') === 'true'
+        const ifShowDelivered = invoiceSettings.get('ifShowDelivered') === 'true'
         const getQuantityStatus = (quantity, maxQuantity) => {
             return maxQuantity == null ? 'error' : (Decimal(quantity||0).gt(maxQuantity) ? 'warning' : '')
         }
@@ -66,10 +67,10 @@ export default function PurchaseRefundEditView(props) {
             { title: '备注', dataIndex: 'remark', align: 'center', width: 100, render: (_, record, idx) => 
                 <Input size='small' style={{ width: '100%' }} value={record.remark} onChange={e => updateRow(idx, 'remark', e.target.value)} />
             },
-            { title: '配送', dataIndex: 'delivered', align: 'center', width: 60, fixed: 'right', render: (_, record, idx) => 
+            ifShowDelivered ? { title: '配送', dataIndex: 'delivered', align: 'center', width: 60, fixed: 'right', render: (_, record, idx) => 
                 <DeliveredInput size='small' align='center' style={{ width: '100%' }} value={record.delivered} 
                     onChange={value => updateRow(idx, 'delivered', value)} />
-            },
+            } : null,
             { title: '', align: 'center', width: 30, fixed: 'right', render: (_, __, idx) => 
                 <Button type='link' size='small' danger onClick={_ => {
                     const newRefund = dcInvoice(refund)

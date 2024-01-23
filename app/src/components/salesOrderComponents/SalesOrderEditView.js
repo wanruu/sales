@@ -79,6 +79,7 @@ export default function SalesOrderEditView(props) {
     const getTableColumns = () => {
         const ifShowDiscount = invoiceSettings.get('ifShowDiscount') === 'true'
         const ifShowMaterial = invoiceSettings.get('ifShowMaterial') === 'true'
+        const ifShowDelivered = invoiceSettings.get('ifShowDelivered') === 'true'
         return [
             { title: '', align: 'center', width: 30, fixed: 'left', render: (_, __, idx) => idx + 1 },
             ifShowMaterial ? { title: '材质', dataIndex: 'material', align: 'center', width: 50, render: (_, record, idx) =>
@@ -117,10 +118,10 @@ export default function SalesOrderEditView(props) {
             { title: '备注', dataIndex: 'remark', align: 'center', width: 100, render: (_, record, idx) => 
                 <Input size='small' style={{ width: '100%' }} value={record.remark} onChange={e => updateRow(idx, 'remark', e.target.value)} />
             },
-            { title: '配送', dataIndex: 'delivered', align: 'center', width: 60, fixed: 'right', render: (_, record, idx) => 
+            ifShowDelivered ? { title: '配送', dataIndex: 'delivered', align: 'center', width: 60, fixed: 'right', render: (_, record, idx) => 
                 <DeliveredInput size='small' align='center' style={{ width: '100%' }} value={record.delivered} 
                     onChange={value => updateRow(idx, 'delivered', value)} />
-            },
+            } : null,
             { title: '', align: 'center', width: 30, fixed: 'right', render: (_, __, idx) => 
                 <Button type='link' size='small' danger onClick={_ => {
                     const newOrder = dcInvoice(order)

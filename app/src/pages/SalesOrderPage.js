@@ -10,7 +10,7 @@ const { Item } = Form
 const { RangePicker } = DatePicker
 
 
-import { baseURL, DATE_FORMAT, DEFAULT_PAGINATION } from '../utils/config'
+import { baseURL, DATE_FORMAT, DEFAULT_PAGINATION, invoiceSettings } from '../utils/config'
 import { exportExcel, getExportData } from '../utils/export'
 import SalesOrderView from '../components/salesOrderComponents/SalesOrderView'
 import SalesRefundView from '../components/salesRefundComponents/SalesRefundView'
@@ -51,6 +51,7 @@ function SalesOrderPage(props) {
     }
 
     const getTableColumns = () => {
+        const ifShowDelivered = invoiceSettings.get('ifShowDelivered') == 'true'
         return [
             { title: '序号', align: 'center', render: (_, __, idx) => idx + 1, fixed: 'left' },
             { title: '单号', dataIndex: 'id', align: 'center', render: id => <a onClick={_ => setSelectedOrderId(id)}>{id}</a> },
@@ -61,14 +62,14 @@ function SalesOrderPage(props) {
             { title: '未付', dataIndex: 'unpaid', align: 'center', render: unpaid => 
                 <span style={{ color: unpaid === 0 ? 'black' : 'red' }}>{unpaid.toLocaleString()}</span>
             },
-            { title: '配送情况', dataIndex: 'delivered', align: 'center' },
+            ifShowDelivered ? { title: '配送情况', dataIndex: 'delivered', align: 'center' } : null,
             { title: '关联退货单', dataIndex: 'refundId', align: 'center', render: id => id ? <a onClick={_ => setSelectedRefundId(id)}>{id}</a> : null },
             { title: '操作', align: 'center', fixed: 'right', render: (_, record) => (
                 <Space.Compact>
                     <Button onClick={_ => showDeleteConfirm([record.id])} danger>删除</Button>
                 </Space.Compact>
             ) }
-        ]
+        ].filter(i => i != null)
     }
 
     // delete

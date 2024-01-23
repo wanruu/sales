@@ -24,7 +24,8 @@ export const printSettings = {
 }
 
 export const DEFAULT_INVOICE_SETTINGS = {
-    ifShowDiscount: 'true', ifShowMaterial: 'true'
+    ifShowDiscount: 'true', ifShowMaterial: 'true',
+    ifShowDelivered: 'true'
 }
 
 export const invoiceSettings = {
@@ -32,22 +33,34 @@ export const invoiceSettings = {
     set: (key, value) => localStorage.setItem(key, value)
 }
 
+// export const UNIT_OPTIONS = [
+//     { label: '-', value: '' },
+//     { label: '千件', value: '千件' },
+//     { label: '只', value: '只' },
+//     { label: '包', value: '包' },
+//     { label: '斤', value: '斤' },
+//     { label: '套', value: '套' }
+// ]
+
 export const UNIT_OPTIONS = [
     { label: '-', value: '' },
-    { label: '千件', value: '千件' },
-    { label: '只', value: '只' },
-    { label: '包', value: '包' },
-    { label: '斤', value: '斤' },
-    { label: '套', value: '套' }
+    { label: '千只', value: '千只' },
+    { label: '只', value: '只' }
 ]
+
+// export const UNIT_COEFF_DICT = {
+//     '': new Decimal(0),
+//     '千件': new Decimal(1000),
+//     '只': new Decimal(1),
+//     '包': new Decimal(1),
+//     '斤': new Decimal(1),
+//     '套': new Decimal(1),
+// }
 
 export const UNIT_COEFF_DICT = {
     '': new Decimal(0),
-    '千件': new Decimal(1000),
-    '只': new Decimal(1),
-    '包': new Decimal(1),
-    '斤': new Decimal(1),
-    '套': new Decimal(1),
+    '千只': new Decimal(1),
+    '只': new Decimal(1)
 }
 
 export const DEFAULT_PAGINATION = {

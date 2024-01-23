@@ -30,7 +30,7 @@
     "scripts": {
         "react-start": "set NODE_OPTIONS=--openssl-legacy-provider && react-scripts start",
         "react-build": "set NODE_OPTIONS=--openssl-legacy-provider && react-scripts build",
-        "electron-start": "APP_DEV=true electron public/electron.js",
+        "electron-start": "set APP_DEV=true && electron public/electron.js",
         "electron-build": "electron-builder"
     },
     "browserslist": {

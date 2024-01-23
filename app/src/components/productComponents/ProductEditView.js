@@ -95,7 +95,7 @@ function ProductEditView(props) {
             <Item label='规格' name='spec' rules={specRules}>
                 <Input allowClear />
             </Item>
-            <Item label='数量'>
+            <Item label='库存'>
                 <Row>
                     <Col span={12}>
                         <Item name='quantity' rules={quantityRules}>

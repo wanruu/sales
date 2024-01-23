@@ -198,7 +198,12 @@ function PriceHistory(props) {
         Axios({
             method: 'get',
             baseURL: baseURL(),
-            url: `product/price/${props.material}/${props.name}/${props.spec}`,
+            url: `product/price`,
+            params: {
+                material: props.material,
+                name: props.name,
+                spec: props.spec
+            },
             'Content-Type': 'application/json',
         }).then(res => {
             setPrices(res.data)
@@ -245,25 +250,28 @@ export function PriceInput(props) {
     const [showHistory, setShowHistory] = useState(false)
 
     const getButtonDisabled = () => {
-        if (!props.material || !props.name || !props.spec)
+        if (invoiceSettings.get('ifShowMaterial') === 'true') {
+            if (!props.material || !props.name || !props.spec) {
+                return true
+            }
+        } else if (!props.name || !props.spec) {
             return true
+        }
         return false
     }
 
-    return <>
+    return <Space.Compact size={props.size || 'small'}>
         <Modal open={showHistory} onCancel={_ => setShowHistory(false)} title='历史价格' width={900} destroyOnClose 
             footer={<Button type='primary' ghost onClick={_ => setShowHistory(false)} icon={<CloseOutlined/>}>关闭</Button>}>
             <PriceHistory partner={props.partner} material={props.material} name={props.name} spec={props.spec} 
                 setPrice={val => { props.onChange(val); setShowHistory(false) }} />
         </Modal>
-    
-        <Space.Compact size={props.size || 'small'} style={props.style || {}}>
-            <InputNumber controls={props.controls === undefined ? true : props.controls}
-                value={props.value} onChange={props.onChange} min={props.min || Number.MIN_SAFE_INTEGER}
-                stringMode={props.stringMode === undefined ? false : props.stringMode}
-                keyboard={props.keyboard === undefined ? true : props.keyboard} />
-            <Button icon={<LineChartOutlined />} disabled={getButtonDisabled()}
-                onClick={_ => setShowHistory(true)} />
-        </Space.Compact>
-    </>
+        <InputNumber controls={props.controls === undefined ? true : props.controls}
+            style={props.style || {}}
+            value={props.value} onChange={props.onChange} min={props.min || Number.MIN_SAFE_INTEGER}
+            stringMode={props.stringMode === undefined ? false : props.stringMode}
+            keyboard={props.keyboard === undefined ? true : props.keyboard} />
+        <Button icon={<LineChartOutlined />} disabled={getButtonDisabled()}
+            onClick={_ => setShowHistory(true)} />
+    </Space.Compact>
 }

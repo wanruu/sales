@@ -75,11 +75,11 @@ router.get('/unit', (req, res) => {
 })
 
 
-router.get('/price/:material/:name/:spec', (req, res) => {
+router.get('/price', (req, res) => {
     // data
-    const material = req.params.material
-    const name = req.params.name
-    const spec = req.params.spec
+    const material = req.query.material
+    const name = req.query.name
+    const spec = req.query.spec
     const salesOrderType = INVOICE_TYPE_2_INT.salesOrder
     const purchaseOrderType = INVOICE_TYPE_2_INT.purchaseOrder
     // sales order
@@ -136,7 +136,7 @@ router.put('/id/:id', async (req, res) => {
     // 2. update invoice & invoice items (order & refund)
     if (req.body.unitRatio !== '1') {
         // update invoice items: amount & originalAmount
-        const unitRatio = req.body.unit === '千件' ? 1000 : 1
+        const unitRatio = req.body.unitRatio
         const updateInvoiceItem = `UPDATE invoiceItem
             SET originalAmount=invoiceItem.quantity*price*${unitRatio},
                 amount=invoiceItem.quantity*price*${unitRatio}*discount/100

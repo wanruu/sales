@@ -49,6 +49,15 @@ export default function MyFloatButton(props) {
         }
     ]
 
+    const getTitle = (type) => {
+        switch (type) {
+            case 'salesOrder': return '新建销售清单'
+            case 'salesRefund': return '新建销售退货'
+            case 'purchaseOrder': return '新建采购清单'
+            case 'purchaseRefund': return '新建采购退货'
+            default: return ''
+        }
+    }
     return <>
         {contextHolder}
         <Popover title={`草稿箱 (${props.drafts.length})`} placement='topLeft' zIndex={999} trigger='click' content={
@@ -60,7 +69,7 @@ export default function MyFloatButton(props) {
         
         <FloatButton icon={<PlusOutlined />} type='primary' onClick={_ => setEditInvoice(emptyInvoice(0))} style={{ right: 24 }} />
         
-        <Modal title='新建销售退货' open={editInvoice} width={1000} centered onCancel={_ => setEditInvoice(undefined)} footer={null}>
+        <Modal title={getTitle(props.type)} open={editInvoice} width={1000} centered onCancel={_ => setEditInvoice(undefined)} footer={null}>
             { props.type === 'salesOrder' ? <SalesOrderEditView order={editInvoice} messageApi={messageApi} dismiss={_ => setEditInvoice(undefined)} 
                 refresh={props.refresh} saveDraft={saveDraft} removeDraft={removeDraft} /> : null }
             { props.type === 'salesRefund' ? <SalesRefundEditView refund={editInvoice} messageApi={messageApi} dismiss={_ => setEditInvoice(undefined)} 
