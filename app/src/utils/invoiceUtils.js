@@ -3,7 +3,7 @@ import Decimal from 'decimal.js'
 import uuid from 'react-uuid'
 
 
-import { UNIT_COEFF_DICT, invoiceSettings } from './config'
+import { invoiceSettings } from './config'
 
 
 export const dcInvoice = (invoice) => {
@@ -45,10 +45,9 @@ export const emptyInvoice = (itemsNum) => {
 export const calItemAmount = (itemDict) => {
     const quantity = Decimal(itemDict.quantity || 0)
     const price = Decimal(itemDict.price || 0)
-    const unitRatio = Decimal(UNIT_COEFF_DICT[itemDict.unit])
     const discount = Decimal(itemDict.discount || 0)
 
-    const originalAmount = quantity.times(price).times(unitRatio)
+    const originalAmount = quantity.times(price)
     const amount = originalAmount.times(discount).dividedBy(100)
 
     return { originalAmount: originalAmount.toString(), amount: amount.toString()}

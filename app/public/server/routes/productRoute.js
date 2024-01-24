@@ -120,50 +120,17 @@ router.put('/id/:id', async (req, res) => {
     const updates = ['material', 'name', 'spec', 'unit', 'quantity'].map(key => `${key}="${req.body[key]}"`).join(', ')
     const query = `UPDATE product SET ${updates} WHERE id="${productId}"`
     
-    // 1. update product
-    const data = await new Promise((resolve, reject) => {
-        db.run(query, err => {
-            if (err && err.errno === 19) { 
-                resolve({ changes: 0, prompt: '产品重复' } )
-            }
-            if (err) {
-                reject(err)
-            }
-            resolve({ changes: 1 })
-        })
+    // update product
+    db.run(query, err => {
+        if (err && err.errno === 19) { 
+            res.send({ changes: 0, prompt: '产品重复' } )
+        } else if (err) {
+            console.error(err)
+            res.status(500).send(err)
+        } else {
+            res.send({ changes: 1 })
+        }
     })
-    
-    // 2. update invoice & invoice items (order & refund)
-    if (req.body.unitRatio !== '1') {
-        // update invoice items: amount & originalAmount
-        const unitRatio = req.body.unitRatio
-        const updateInvoiceItem = `UPDATE invoiceItem
-            SET originalAmount=invoiceItem.quantity*price*${unitRatio},
-                amount=invoiceItem.quantity*price*${unitRatio}*discount/100
-            FROM product AS p WHERE invoiceItem.productId=p.id`
-        // update invoice: amount
-        const updateInvoice = `UPDATE invoice
-            SET amount=(SELECT SUM(amount) FROM invoiceItem WHERE invoiceItem.invoiceId=invoice.id)
-            FROM invoiceItem AS ii
-            WHERE ii.productId="${productId}" AND invoice.id=ii.invoiceId`
-        db.run(updateInvoiceItem, err => {
-            if (err) { 
-                console.error(err)
-                res.status(500).send(err)
-                return
-            }
-            db.run(updateInvoice, err => {
-                if (err) { 
-                    console.error(err)
-                    res.status(500).send(err)
-                    return
-                }
-                res.send(data)
-            })
-        })
-    } else {
-        res.send(data)
-    }
 })
 
 

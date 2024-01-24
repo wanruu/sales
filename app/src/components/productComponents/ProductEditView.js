@@ -1,11 +1,10 @@
 import React, { useEffect } from 'react'
 import { Input, Space, Button, Form, InputNumber, message, Col, Row } from 'antd'
 import  Axios  from 'axios'
-import Decimal from 'decimal.js'
 
 const { Item } = Form
 
-import { baseURL, UNIT_COEFF_DICT, invoiceSettings } from '../../utils/config'
+import { baseURL, invoiceSettings } from '../../utils/config'
 import { UnitInput } from '../common/PromptInput'
 
 /*
@@ -24,9 +23,6 @@ function ProductEditView(props) {
         const p = form.getFieldsValue()
         p.quantity = p.quantity || '0'
         p.material = invoiceSettings.get('ifShowMaterial') === 'true' ? p.material : ''
-        if (props.product.id !== undefined) {
-            p.unitRatio = Decimal(UNIT_COEFF_DICT[p.unit]).div(UNIT_COEFF_DICT[props.product.unit]).toString()
-        }
         Axios({
             method: props.product.id === undefined ? 'post' : 'put',
             baseURL: baseURL(),

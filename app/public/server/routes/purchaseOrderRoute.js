@@ -184,13 +184,13 @@ router.put('/id/:id', async (req, res) => {
     }
 
     // 5. update refund & refund items if any
-    const orderItemTable = `SELECT oi.productId, p.unit, CASE WHEN p.unit='千件' THEN 1000 ELSE 1 END AS unitRatio, oi.price AS newPrice, oi.discount AS newDiscount
+    const orderItemTable = `SELECT oi.productId, p.unit, oi.price AS newPrice, oi.discount AS newDiscount
         FROM invoiceItem AS oi, product AS p 
         WHERE oi.invoiceId="${orderId}" AND oi.productId=p.id`
     const updateRefundItems = `UPDATE invoiceItem 
         SET price=oi.newPrice, discount=oi.newDiscount,
-            originalAmount=invoiceItem.quantity*oi.newPrice*oi.unitRatio,
-            amount=invoiceItem.quantity*oi.newPrice*oi.unitRatio*oi.newDiscount/100
+            originalAmount=invoiceItem.quantity*oi.newPrice,
+            amount=invoiceItem.quantity*oi.newPrice*oi.newDiscount/100
         FROM (${orderItemTable}) AS oi, invoiceRelation AS r
         WHERE invoiceItem.invoiceId=r.refundId AND "${orderId}"=r.orderId AND oi.productId=invoiceItem.productId`
     const updateRefund = `UPDATE invoice 
