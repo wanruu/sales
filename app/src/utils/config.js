@@ -1,4 +1,3 @@
-import Decimal from 'decimal.js'
 
 export const baseURL = () => {
     return `http://${window.electronAPI.queryServerIp()}:${window.electronAPI.queryServerPort()}`
@@ -18,29 +17,13 @@ export const DEFAULT_PRINT_SETTINGS = {
     tableFontSize: 14
 }
 
-export const printSettings = {
-    get: (key) =>  localStorage.getItem(key) || DEFAULT_PRINT_SETTINGS[key],
-    set: (key, value) => localStorage.setItem(key, value)
-}
-
-export const DEFAULT_INVOICE_SETTINGS = {
-    ifShowDiscount: 'true', ifShowMaterial: 'true',
-    ifShowDelivered: 'true'
-}
-
-export const invoiceSettings = {
-    get: (key) =>  localStorage.getItem(key) || DEFAULT_INVOICE_SETTINGS[key],
-    set: (key, value) => localStorage.setItem(key, value)
-}
-
 export const UNIT_OPTIONS = [
-    { label: '-', value: '' },
-    { label: '千只', value: '千只' },
-    { label: '千件', value: '千件' },
-    { label: '只', value: '只' },
-    { label: '包', value: '包' },
-    { label: '斤', value: '斤' },
-    { label: '套', value: '套' }
+    { key: '只', label: '只', value: '只', default: true, showing: true },
+    { key: '千只', label: '千只', value: '千只', default: false, showing: true },
+    { key: '千件', label: '千件', value: '千件', default: false, showing: false },
+    { key: '包', label: '包', value: '包', default: false, showing: false },
+    { key: '斤', label: '斤', value: '斤', default: false, showing: false },
+    { key: '套', label: '套', value: '套', default: false, showing: false }
 ]
 
 
@@ -50,3 +33,22 @@ export const DEFAULT_PAGINATION = {
     showQuickJumper: true, 
     showSizeChanger: true
 }
+
+
+export const DEFAULT_INVOICE_SETTINGS = {
+    ifShowDiscount: 'true', ifShowMaterial: 'true',
+    ifShowDelivered: 'true', 
+    unitOptions: JSON.stringify(UNIT_OPTIONS)
+}
+
+export const invoiceSettings = {
+    get: (key) =>  localStorage.getItem(key) || DEFAULT_INVOICE_SETTINGS[key],
+    set: (key, value) => localStorage.setItem(key, value)
+}
+
+
+export const printSettings = {
+    get: (key) =>  localStorage.getItem(key) || DEFAULT_PRINT_SETTINGS[key],
+    set: (key, value) => localStorage.setItem(key, value)
+}
+

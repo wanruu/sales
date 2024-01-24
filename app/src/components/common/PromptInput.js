@@ -7,7 +7,7 @@ import { LineChartOutlined, CloseOutlined } from '@ant-design/icons'
 import ReactEcharts from 'echarts-for-react'
 
 
-import { baseURL, UNIT_OPTIONS, invoiceSettings } from '../../utils/config'
+import { baseURL, invoiceSettings } from '../../utils/config'
 
 
 export function PartnerInput(props) {
@@ -108,7 +108,9 @@ export function UnitInput(props) {
 
     useEffect(load, [props.material, props.name, props.spec])
 
-    return unit === undefined ? <Select size={props.size || 'small'} options={UNIT_OPTIONS} disabled={props.disabled || false}
+    return unit === undefined ? <Select size={props.size || 'small'} 
+        options={JSON.parse(invoiceSettings.get('unitOptions')).filter(unit => unit.showing)} 
+        disabled={props.disabled || false}
         align={props.align || 'center'} style={props.style || {}} value={props.value} 
         onChange={props.onChange} status={getStatus()}
     /> : unit

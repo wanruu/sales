@@ -20,9 +20,11 @@ export const dcInvoice = (invoice) => {
 }
 
 export const emptyInvoiceItem = () => {
+    const unitOptions = JSON.parse(invoiceSettings.get('unitOptions'))
+    const defaultUnit = unitOptions.filter(o => o.default)[0].label
     return {
         id: uuid(),
-        material: '', name: '', spec: '', unit: '',
+        material: '', name: '', spec: '', unit: defaultUnit,
         quantity: null, price: null, originalAmount: '0', 
         discount: 100, amount: '0', remark: '', 
         delivered: false, weight: null
@@ -62,10 +64,10 @@ export const isOrderItemEmpty = (item) => {
     const ifShowMaterial = invoiceSettings.get('ifShowMaterial') === 'true'
     if (ifShowMaterial) 
         return item.material === '' && item.name === '' && item.spec === '' && 
-            item.quantity === null && item.unit === '' && item.price === null && item.remark === '' && 
+            item.quantity === null && item.price === null && item.remark === '' && 
             (item.discount === 100 || item.discount === null)
     return item.name === '' && item.spec === '' && 
-        item.quantity === null && item.unit === '' && item.price === null && item.remark === '' && 
+        item.quantity === null && item.price === null && item.remark === '' && 
         (item.discount === 100 || item.discount === null)
 }
 

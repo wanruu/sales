@@ -1,14 +1,26 @@
 import { Input, Upload, InputNumber, Space, Select, Checkbox, Card, Form, Radio, Row,
-    Switch, Typography 
+    Switch, Typography, Table, Button, 
 } from 'antd'
-import React, { useState, } from 'react'
+import React, { useEffect, useState, } from 'react'
 import * as XLSX from 'xlsx'
 import Axios from 'axios'
 import dayjs from 'dayjs'
 import uuid from 'react-uuid'
 
 
-import { baseURL, DATE_FORMAT, printSettings, DEFAULT_PRINT_SETTINGS, invoiceSettings } from '../utils/config'
+import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
+import {
+    SortableContext,
+    arrayMove,
+    useSortable,
+    verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+
+
+import { DATE_FORMAT, DEFAULT_PRINT_SETTINGS,
+    printSettings, baseURL, invoiceSettings } from '../utils/config'
 import InvoiceView from '../components/common/InvoiceView'
 import PhoneAccessView from '../components/common/PhoneAccessView'
 import './SettingPage.css'
@@ -18,32 +30,111 @@ const { Item } = Form
 const { Title } = Typography
 
 
+const TableRow = (props) => {
+    const { attributes, listeners, setNodeRef,
+        transform, transition, isDragging
+    } = useSortable({ id: props['data-row-key'] })
+    const style = { ...props.style,
+        transform: CSS.Transform.toString(transform && { ...transform, scaleY: 1 }),
+        transition,
+        cursor: 'move',
+        ...(isDragging ? { position: 'relative', zIndex: 9999 } : {})
+    }
+    return <tr {...props} ref={setNodeRef} style={style} {...attributes} {...listeners} />
+}
+
 function InvoiceSetting() {
     const [ifShowDiscount, setIfShowDiscount] = useState(invoiceSettings.get('ifShowDiscount'))
     const [ifShowMaterial, setIfShowMaterial] = useState(invoiceSettings.get('ifShowMaterial'))
     const [ifShowDelivered, setIfShowDelivered] = useState(invoiceSettings.get('ifShowDelivered'))
+    const [unitOptions, setUnitOptions] = useState(JSON.parse(invoiceSettings.get('unitOptions')))
+
+    // UNIT
+    const unitColumns = [
+        { title: '单位', dataIndex: 'label', width: '200px' },
+        { title: '状态', dataIndex: 'default', width: '150px', align: 'center', render: (_, curUnit) => 
+            curUnit.default ? <b>当前默认单位</b> :
+            <Button size='small' onClick={_ => {
+                const newUnitData = JSON.parse(JSON.stringify(unitOptions))
+                for (const unit of newUnitData) {
+                    unit.default = unit.label === curUnit.label
+                }
+                setUnitOptions(newUnitData)
+            }}>设为默认</Button>
+        }
+    ]
+    const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 1, } }))
+    const onDragEnd = ({ active, over }) => {
+        if (active.id !== over?.id) {
+            setUnitOptions((prev) => {
+                const activeIndex = prev.findIndex((i) => i.key === active.id)
+                const overIndex = prev.findIndex((i) => i.key === over?.id)
+                return arrayMove(prev, activeIndex, overIndex)
+            })
+        }
+    }
+    const rowSelection = {
+        selectedRowKeys: unitOptions.filter(unit => unit.showing).map(unit => unit.key),
+        onChange: (selectedRowKeys, selectedRows) => {
+            const newUnitData = JSON.parse(JSON.stringify(unitOptions))
+            for (const unit of newUnitData) {
+                unit.showing = selectedRowKeys.includes(unit.key)
+            }
+            setUnitOptions(newUnitData)
+        },
+        getCheckboxProps: (record) => ({
+            name: record.name,
+        })
+    }
+
+    useEffect(() => {
+        invoiceSettings.set('unitOptions', JSON.stringify(unitOptions))
+    }, [unitOptions])
+
 
     return <Card size='small'>
-        <Form layout='horizontal'>
-            <Item label='显示材质' extra='若开关关闭，原有数据不会发生更改，只是隐藏材质项。请勿频繁更改。'>
-                <Switch checked={ifShowMaterial === 'true'} onChange={val => {
-                    setIfShowMaterial(`${val}`)
-                    invoiceSettings.set('ifShowMaterial', `${val}`)
-                }} />
-            </Item>
-            <Item label='显示折扣' extra='若开关关闭，原有数据不会发生更改，只是隐藏折扣及折前金额。请勿频繁更改。'>
-                <Switch checked={ifShowDiscount === 'true'} onChange={val => {
-                    setIfShowDiscount(`${val}`)
-                    invoiceSettings.set('ifShowDiscount', `${val}`)
-                }} />
-            </Item>
-            <Item label='显示配送'>
-                <Switch checked={ifShowDelivered === 'true'} onChange={val => {
-                    setIfShowDelivered(`${val}`)
-                    invoiceSettings.set('ifShowDelivered', `${val}`)
-                }} />
-            </Item>
-        </Form>
+        <Space direction='vertical' size={0} style={{ width: '100%' }}>
+            <div className='itemTitle'>产品材质</div>
+            <Form layout='inline'>
+                <Item label='显示材质' extra='若开关关闭，原有数据不会发生更改，只是隐藏材质项。请勿频繁更改。'>
+                    <Switch checked={ifShowMaterial === 'true'} onChange={val => {
+                        setIfShowMaterial(`${val}`)
+                        invoiceSettings.set('ifShowMaterial', `${val}`)
+                    }} />
+                </Item>
+            </Form>
+
+            <div className='itemTitle'>产品单位</div>
+            <Form layout='vertical'>
+                <Item label='选择显示的单位' extra='（1）勾选的单位将会显示在开单页面、产品编辑页面的单位选择列表中，不勾选则不显示。
+                    （2）拖动列表项目可以为单位排序。'>
+                    <DndContext sensors={sensors} modifiers={[restrictToVerticalAxis]} onDragEnd={onDragEnd}>
+                        <SortableContext items={unitOptions.map(i => i.key)} strategy={verticalListSortingStrategy}>
+                            <Table size='small' rowKey='key' columns={unitColumns} dataSource={unitOptions}
+                                pagination={false} components={{ body: { row: TableRow } }} 
+                                rowSelection={rowSelection}
+                            />
+                        </SortableContext>
+                    </DndContext>
+                </Item>
+            </Form>
+
+            <div className='itemTitle'>折扣、配送</div>
+            <Form layout='horizontal'>
+                <Item label='显示折扣' extra='若开关关闭，原有数据不会发生更改，只是隐藏折扣及折前金额。请勿频繁更改。'>
+                    <Switch checked={ifShowDiscount === 'true'} onChange={val => {
+                        setIfShowDiscount(`${val}`)
+                        invoiceSettings.set('ifShowDiscount', `${val}`)
+                    }} />
+                </Item>
+                <Item label='显示配送'>
+                    <Switch checked={ifShowDelivered === 'true'} onChange={val => {
+                        setIfShowDelivered(`${val}`)
+                        invoiceSettings.set('ifShowDelivered', `${val}`)
+                    }} />
+                </Item>
+            </Form>
+        </Space>
     </Card>
 }
 
@@ -84,7 +175,7 @@ function PrintSettingView() {
     }
     return <Card size='small'>
         <Space direction='vertical' size={0} style={{ width: '100%' }}>
-            <div className='itemTitle'>整体</div>
+            <div className='itemTitle'>清单整体</div>
             <Form layout='inline'>
                 <Item label='宽度'>
                     <InputNumber keyboard={false} placeholder={DEFAULT_PRINT_SETTINGS.width}
@@ -104,7 +195,7 @@ function PrintSettingView() {
                 </Item>
             </Form>
 
-            <div className='itemTitle'>标题及副标题</div>
+            <div className='itemTitle'>标题</div>
             <Form layout='inline'>
                 <Item label='标题'>
                     <Input placeholder={DEFAULT_PRINT_SETTINGS.title} value={title}
@@ -116,6 +207,8 @@ function PrintSettingView() {
                             printSettings.set('titleFontSize', inputNum2Str(val)); setTitleFontSize(inputNum2Str(val)) }}/>
                 </Item>
             </Form>
+
+            <div className='itemTitle'>副标题</div>
             <Form layout='inline'>
                 <Item label='副标题'>
                     <Input placeholder={DEFAULT_PRINT_SETTINGS.salesOrderSubtitle} value={salesOrderSubtitle} style={{ width: '130px' }}
@@ -138,13 +231,16 @@ function PrintSettingView() {
                 <Item label='副标题样式'>
                     <Select options={subtitleStyleOptions} value={subtitleStyle} onChange={val => { printSettings.set('subtitleStyle', val); setSubtitleStyle(val) }} />
                 </Item>
-                <Item label='副标题字号'>
-                    <InputNumber keyboard={false} placeholder={DEFAULT_PRINT_SETTINGS.subtitleFontSize} disabled={subtitleStyle === 'inline'}
-                        value={subtitleFontSize} onChange={val => { printSettings.set('subtitleFontSize', inputNum2Str(val)); setSubtitleFontSize(inputNum2Str(val)) }} />
+                <Item label='副标题字号' extra={subtitleStyle === 'inline' ? '当样式为“另起一行“时才可指定字号。' : ''}>
+                    { subtitleStyle === 'inline' ?
+                        <InputNumber disabled={true} value={titleFontSize || DEFAULT_PRINT_SETTINGS.titleFontSize} /> :
+                        <InputNumber keyboard={false} placeholder={DEFAULT_PRINT_SETTINGS.subtitleFontSize} value={subtitleFontSize} 
+                            onChange={val => { printSettings.set('subtitleFontSize', inputNum2Str(val)); setSubtitleFontSize(inputNum2Str(val)) }} />   
+                    }
                 </Item>
             </Form>
 
-            <div className='itemTitle'>头部（单据信息）</div>
+            <div className='itemTitle'>清单基本信息</div>
             <Form layout='inline'>
                 <Item label='客户/供应商'>
                     <Checkbox checked={ifShowPhone==='true'} onChange={e => { 
