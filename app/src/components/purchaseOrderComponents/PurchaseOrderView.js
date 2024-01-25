@@ -73,7 +73,7 @@ function View(props) {
             ifShowDiscount ? { title: '折扣', dataIndex: 'discount', align: 'center', width: 50, render: discount => `${discount}%` } : null,
             { title: ifShowDiscount ? '折后价' : '金额', dataIndex: 'amount', align: 'center', width: 80, render: d => d.toLocaleString() },
             { title: '重量', dataIndex: 'weight', align: 'center', width: 80 },
-            { title: '备注', dataIndex: 'remark', align: 'center', width: 100 },
+            { title: '备注', dataIndex: 'remark', align: 'center', width: 180 },
             ifShowItemDelivered ? { title: '配送', dataIndex: 'delivered', align: 'center', width: 60, fixed: 'right', render: delivered => {
                 const text = delivered ? '已配送' : '未配送'
                 return <Tag color={DELIVER_COLORS[text]}>{text}</Tag>
