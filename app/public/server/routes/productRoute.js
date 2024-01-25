@@ -37,7 +37,7 @@ router.get('/id/:id', (req, res) => {
             res.status(500).send(err)
             return
         }
-        const selectItems = `SELECT i.partner, i.type,
+        const selectItems = `SELECT i.partner, i.type, i.date,
             ii.invoiceId, ii.price, ii.quantity, ii.originalAmount, ii.discount, ii.amount, ii.remark, ii.weight
             FROM invoiceItem AS ii, invoice AS i
             WHERE ii.productId="${productId}" AND i.id=ii.invoiceId`
