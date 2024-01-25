@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react'
 import Axios from 'axios'
-import { Table, Space, Button, message, Modal, Form, Row, Input, DatePicker, Card } from 'antd'
+import { Table, Space, Button, message, Modal, Form, Row, Input, Card, Tag } from 'antd'
 import Decimal from 'decimal.js'
 import { ExclamationCircleFilled, DeleteOutlined, TableOutlined, SearchOutlined } from '@ant-design/icons'
 
 
 const { confirm } = Modal
 const { Item } = Form
-const { RangePicker } = DatePicker
 
 
-import { baseURL, DATE_FORMAT, DEFAULT_PAGINATION, invoiceSettings } from '../utils/config'
+import { baseURL, DATE_FORMAT, DEFAULT_PAGINATION, DELIVER_COLORS, invoiceSettings } from '../utils/config'
 import { exportExcel, getExportData } from '../utils/export'
+import { DateRangeItem, DeliverItem } from '../components/common/SearchBoxItem'
 import PurchaseRefundView from '../components/purchaseRefundComponents/PurchaseRefundView'
 import PurchaseOrderView from '../components/purchaseOrderComponents/PurchaseOrderView'
 import MyFloatButton from '../components/common/MyFloatButton'
@@ -29,8 +29,8 @@ function PurchaseRefundPage(props) {
     const [selectedOrderId, setSelectedOrderId] = useState(undefined)
 
     const [messageApi, contextHolder] = message.useMessage()
-    const itemStyle = { marginTop: '8px', marginBottom: '8px', marginLeft: '10px', marginRight: '10px' }
-    
+
+
     // load
     const load = () => {
         setPurchaseRefunds([])
@@ -51,7 +51,7 @@ function PurchaseRefundPage(props) {
     }
 
     const getTableColumns = () => {
-        const ifShowDelivered = invoiceSettings.get('ifShowDelivered') == 'true'
+        const ifShowInvoiceDelivered = invoiceSettings.get('ifShowInvoiceDelivered') == 'true'
         return [
             { title: '序号', align: 'center', render: (_, __, idx) => idx + 1, fixed: 'left' },
             { title: '单号', dataIndex: 'id', align: 'center', render: id => <a onClick={_ => setSelectedRefundId(id)}>{id}</a> },
@@ -60,7 +60,9 @@ function PurchaseRefundPage(props) {
             { title: '金额', dataIndex: 'amount', align: 'center', render: amount => amount.toLocaleString() },
             { title: '已付', dataIndex: 'payment', align: 'center', render: payment => payment.toLocaleString() },
             { title: '未付', dataIndex: 'unpaid', align: 'center', render: unpaid => <span style={{ color: unpaid === 0 ? 'black' : 'red' }}>{unpaid.toLocaleString()}</span> },
-            ifShowDelivered ? { title: '配送情况', dataIndex: 'delivered', align: 'center' } : null,
+            ifShowInvoiceDelivered ? { 
+                title: '配送情况', dataIndex: 'delivered', align: 'center', render: d => <Tag color={DELIVER_COLORS[d]}>{d}</Tag>
+            } : null,
             { title: '关联采购单', dataIndex: 'orderId', align: 'center', render: id => <a onClick={_ => setSelectedOrderId(id)}>{id}</a> },
             { title: '操作', align: 'center', fixed: 'right', render: (_, record) => 
                 <Space.Compact>
@@ -102,6 +104,7 @@ function PurchaseRefundPage(props) {
             (!conds.date || !conds.date[0] || o.date >= conds.date[0].format(DATE_FORMAT)) &&
             (!conds.date || !conds.date[1] || o.date <= conds.date[1].format(DATE_FORMAT)) &&
             (!conds.partner || o.partner.includes(conds.partner)) &&
+            (!conds.delivered || conds.delivered.length === 0 || conds.delivered.includes(o.delivered)) &&
             (!conds.orderId || (o.orderId != null && o.orderId.includes(conds.orderId)))
         ))
     }
@@ -140,12 +143,13 @@ function PurchaseRefundPage(props) {
         <br />
         <Space direction='vertical' style={{ width: '100%' }}>
             {/* Function Box */}
-            <Card size='small'><Form form={form} onFinish={_ => filterPurchaseRefunds(purchaseRefunds)}><Row>
-                <Item label='单号' name='refundId' style={itemStyle}><Input allowClear placeholder='单号' /></Item>
-                <Item label='供应商' name='partner' style={itemStyle}><Input allowClear placeholder='供应商' /></Item>
-                <Item label='日期' name='date' style={itemStyle}><RangePicker format={DATE_FORMAT} allowEmpty={[true, true]} /></Item>
-                <Item label='采购单号' name='orderId' style={itemStyle}><Input allowClear placeholder='采购单号' /></Item>
-                <Space wrap style={itemStyle}>
+            <Card size='small'><Form className='search-box' form={form} onFinish={_ => filterPurchaseRefunds(purchaseRefunds)}><Row>
+                <Item label='单号' name='refundId'><Input allowClear placeholder='单号' /></Item>
+                <Item label='供应商' name='partner'><Input allowClear placeholder='供应商' /></Item>
+                <DateRangeItem />
+                <DeliverItem />
+                <Item label='采购单号' name='orderId'><Input allowClear placeholder='采购单号' /></Item>
+                <Space wrap>
                     <Button icon={<SearchOutlined />} type='primary' htmlType='submit'>搜索</Button>
                     <Button icon={<TableOutlined />} onClick={exportPurchaseRefunds} disabled={filteredPurchaseRefunds.length === 0}>批量导出</Button>
                     <Button danger icon={<DeleteOutlined />} onClick={_ => showDeleteConfirm(filteredPurchaseRefunds.map(f => f.id) || [])} disabled={filteredPurchaseRefunds.length === 0}>批量删除</Button>

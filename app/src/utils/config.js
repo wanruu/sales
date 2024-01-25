@@ -37,9 +37,22 @@ export const DEFAULT_PAGINATION = {
 
 export const DEFAULT_INVOICE_SETTINGS = {
     ifShowDiscount: 'true', ifShowMaterial: 'true',
-    ifShowDelivered: 'true', 
+    ifShowDelivered: 'true', ifShowInvoiceDelivered: 'true', ifShowItemDelivered: 'true',
     unitOptions: JSON.stringify(UNIT_OPTIONS)
 }
+
+
+export const INVOICE_DELIVER_OPTIONS = [
+    '未配送', '部分配送', '全部配送'
+].map(val => ({ value: val, label: val }))
+
+export const DELIVER_COLORS = {
+    '全部配送': 'green',
+    '已配送': 'green',
+    '未配送': 'red',
+    '部分配送': 'gold'
+}
+
 
 export const invoiceSettings = {
     get: (key) =>  localStorage.getItem(key) || DEFAULT_INVOICE_SETTINGS[key],

@@ -125,13 +125,15 @@ export default function InvoiceSettingView() {
     const [ifShowDiscount, setIfShowDiscount] = useState(invoiceSettings.get('ifShowDiscount'))
     const [ifShowMaterial, setIfShowMaterial] = useState(invoiceSettings.get('ifShowMaterial'))
     const [ifShowDelivered, setIfShowDelivered] = useState(invoiceSettings.get('ifShowDelivered'))
+    const [ifShowInvoiceDelivered, setIfShowInvoiceDelivered] = useState(invoiceSettings.get('ifShowInvoiceDelivered'))
+    const [ifShowItemDelivered, setIfShowItemDelivered] = useState(invoiceSettings.get('ifShowItemDelivered'))
 
 
     return <Card size='small'>
         <Space direction='vertical' size={0} style={{ width: '100%' }}>
             <div className='itemTitle'>产品材质</div>
             <Form layout='inline'>
-                <Item label='显示材质' extra='若开关关闭，原有数据不会发生更改，只是隐藏材质项。请勿频繁更改。'>
+                <Item label='显示材质' extra='该开关不会影响原有数据，只是显示或隐藏材质项。'>
                     <Switch checked={ifShowMaterial === 'true'} onChange={val => {
                         setIfShowMaterial(`${val}`)
                         invoiceSettings.set('ifShowMaterial', `${val}`)
@@ -141,18 +143,34 @@ export default function InvoiceSettingView() {
 
             <UnitSettingView />
 
-            <div className='itemTitle'>折扣、配送</div>
+            <div className='itemTitle'>折扣</div>
             <Form layout='horizontal'>
-                <Item label='显示折扣' extra='若开关关闭，原有数据不会发生更改，只是隐藏折扣及折前金额。请勿频繁更改。'>
+                <Item label='折扣功能' extra='该开关不会影响原有数据，只是显示或隐藏折扣及折前金额。'>
                     <Switch checked={ifShowDiscount === 'true'} onChange={val => {
                         setIfShowDiscount(`${val}`)
                         invoiceSettings.set('ifShowDiscount', `${val}`)
                     }} />
                 </Item>
-                <Item label='显示配送'>
+            </Form>
+
+            <div className='itemTitle'>配送功能</div>
+            <Form layout='horizontal'>
+                <Item label='配送功能' extra='若开关打开，则可以在开单页面显示并更改配送情况。'>
                     <Switch checked={ifShowDelivered === 'true'} onChange={val => {
                         setIfShowDelivered(`${val}`)
                         invoiceSettings.set('ifShowDelivered', `${val}`)
+                    }} />
+                </Item>
+                <Item label='显示整体配送情况' extra='若开关打开，清单列表中配送情况将会显示为”未配送“、”部分配送“或”全部配送“；否则，将隐藏配送情况一栏。'>
+                    <Switch checked={ifShowInvoiceDelivered === 'true'} onChange={val => {
+                        setIfShowInvoiceDelivered(`${val}`)
+                        invoiceSettings.set('ifShowInvoiceDelivered', `${val}`)
+                    }} />
+                </Item>
+                <Item label='显示单个产品配送情况' extra='若开关打开，产品配送情况将会显示为”未配送“或”已配送“；否则，将隐藏配送情况一栏。'>
+                    <Switch checked={ifShowItemDelivered === 'true'} onChange={val => {
+                        setIfShowItemDelivered(`${val}`)
+                        invoiceSettings.set('ifShowItemDelivered', `${val}`)
                     }} />
                 </Item>
             </Form>
