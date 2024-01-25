@@ -108,7 +108,7 @@ export default function SettingPage() {
 
     return <div className='setting'>
         {/* <PhoneAccessView /> */}
-        <Title level={2}>开单设置</Title>
+        <Title level={2}>清单设置</Title>
         <InvoiceSettingView />
         <Title level={2}>打印设置</Title>
         <PrintSettingView />
