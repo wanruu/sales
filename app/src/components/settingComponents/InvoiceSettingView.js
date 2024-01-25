@@ -18,15 +18,26 @@ import { invoiceSettings } from '../../utils/config'
 const { Item } = Form
 
 
-export default function InvoiceSettingView() {
-    const [ifShowDiscount, setIfShowDiscount] = useState(invoiceSettings.get('ifShowDiscount'))
-    const [ifShowMaterial, setIfShowMaterial] = useState(invoiceSettings.get('ifShowMaterial'))
-    const [ifShowDelivered, setIfShowDelivered] = useState(invoiceSettings.get('ifShowDelivered'))
+function UnitSettingView() {
     const [unitOptions, setUnitOptions] = useState(JSON.parse(invoiceSettings.get('unitOptions')))
+    const [isEditing, setIsEditing] = useState(false)
 
-    // UNIT
-    const unitColumns = [
-        { title: '单位', dataIndex: 'label', width: '200px' },
+    const editTableColumns = [
+        { title: '单位', dataIndex: 'label', width: '100px', align: 'center' },
+        { title: '状态', dataIndex: 'default', width: '150px', align: 'center', render: (_, curUnit) => 
+            curUnit.default ? <b>当前默认单位</b> :
+            <Button size='small' onClick={_ => {
+                const newUnitData = JSON.parse(JSON.stringify(unitOptions))
+                for (const unit of newUnitData) {
+                    unit.default = unit.label === curUnit.label
+                }
+                setUnitOptions(newUnitData)
+            }}>设为默认</Button>
+        }
+    ]
+    const viewTableColumns = [
+        { title: '序号', width: '32px', align: 'center', render: (_, __, idx) => idx + 1 },
+        { title: '单位', dataIndex: 'label', width: '100px', align: 'center' },
         { title: '状态', dataIndex: 'default', width: '150px', align: 'center', render: (_, curUnit) => 
             curUnit.default ? <b>当前默认单位</b> :
             <Button size='small' onClick={_ => {
@@ -79,6 +90,43 @@ export default function InvoiceSettingView() {
     }, [unitOptions])
 
 
+    return <Space direction='vertical' size={0} style={{ width: '100%' }}>
+        <div className='itemTitle'>产品单位</div>
+        {
+            isEditing ? 
+            <Form layout='vertical'>
+                <Item extra='（1）勾选的单位将会显示在开单页面、产品编辑页面的单位选择列表中，不勾选则不显示。
+                    （2）拖动列表项目可以为单位排序。
+                    （3）无需手动保存。'>
+                    <DndContext sensors={sensors} modifiers={[restrictToVerticalAxis]} onDragEnd={onDragEnd}>
+                        <SortableContext items={unitOptions.map(i => i.key)} strategy={verticalListSortingStrategy}>
+                            <Table size='small' rowKey='key' columns={editTableColumns} dataSource={unitOptions}
+                                pagination={false} components={{ body: { row: TableRow } }} 
+                                rowSelection={rowSelection}
+                                footer={_ =>
+                                    <Button size='small' onClick={_ => setIsEditing(false)}>收起</Button>
+                                }
+                            />
+                        </SortableContext>
+                    </DndContext>
+                </Item>
+            </Form> :
+            <Table size='small' rowKey='key' columns={viewTableColumns} pagination={false}
+                dataSource={unitOptions.filter(o => o.showing)}
+                footer={_ => <Button size='small' onClick={_ => setIsEditing(true)}>编辑</Button>}
+            />
+        }
+        
+    </Space>
+}
+
+
+export default function InvoiceSettingView() {
+    const [ifShowDiscount, setIfShowDiscount] = useState(invoiceSettings.get('ifShowDiscount'))
+    const [ifShowMaterial, setIfShowMaterial] = useState(invoiceSettings.get('ifShowMaterial'))
+    const [ifShowDelivered, setIfShowDelivered] = useState(invoiceSettings.get('ifShowDelivered'))
+
+
     return <Card size='small'>
         <Space direction='vertical' size={0} style={{ width: '100%' }}>
             <div className='itemTitle'>产品材质</div>
@@ -91,20 +139,7 @@ export default function InvoiceSettingView() {
                 </Item>
             </Form>
 
-            <div className='itemTitle'>产品单位</div>
-            <Form layout='vertical'>
-                <Item label='选择显示的单位' extra='（1）勾选的单位将会显示在开单页面、产品编辑页面的单位选择列表中，不勾选则不显示。
-                    （2）拖动列表项目可以为单位排序。'>
-                    <DndContext sensors={sensors} modifiers={[restrictToVerticalAxis]} onDragEnd={onDragEnd}>
-                        <SortableContext items={unitOptions.map(i => i.key)} strategy={verticalListSortingStrategy}>
-                            <Table size='small' rowKey='key' columns={unitColumns} dataSource={unitOptions}
-                                pagination={false} components={{ body: { row: TableRow } }} 
-                                rowSelection={rowSelection}
-                            />
-                        </SortableContext>
-                    </DndContext>
-                </Item>
-            </Form>
+            <UnitSettingView />
 
             <div className='itemTitle'>折扣、配送</div>
             <Form layout='horizontal'>
