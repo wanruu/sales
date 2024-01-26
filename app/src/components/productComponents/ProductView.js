@@ -92,6 +92,8 @@ function FilterBarView(props) {
 function InvoiceItemTableView(props) {
     const getTableColumns = () => {
         const ifShowDiscount = invoiceSettings.get('ifShowDiscount') === 'true'
+        const ifShowAmountSign = invoiceSettings.get('ifShowAmountSign') === 'true'
+        const amountSign = invoiceSettings.get('amountSign')
         return [
             { title: '序号', align: 'center', fixed: 'left', width: 50, render: (_, __, idx) => idx + 1 },
             { title: '单号', dataIndex: 'invoiceId', align: 'center', width: 140,
@@ -101,17 +103,23 @@ function InvoiceItemTableView(props) {
             { title: '日期', dataIndex: 'date', align: 'center', width: 100, 
                 sorter: (a, b) => a.date > b.date ? 1 : (a.date < b.date ? -1 : 0) 
             },
-            { title: '单价', dataIndex: 'price', align: 'center', width: 90, render: p => p.toLocaleString(),
+            { title: '单价', dataIndex: 'price', align: 'center', width: 90, 
+                render: p => (ifShowAmountSign ? amountSign : '') + p.toLocaleString(),
                 sorter: (a, b) => a.price - b.price
             },
             { title: '数量', dataIndex: 'quantity', align: 'center', width: 80, render: q =>  q.toLocaleString(),
                 sorter: (a, b) => a.quantity - b.quantity 
             },
-            ifShowDiscount ? { title: '金额', dataIndex: 'originalAmount', align: 'center', width: 90, render: a => a.toLocaleString(),
+            ifShowDiscount ? 
+            { 
+                title: '金额', dataIndex: 'originalAmount', align: 'center', width: 90, 
+                render: a => (ifShowAmountSign ? amountSign : '') + a.toLocaleString(),
                 sorter: (a, b) => a.originalAmount - b.originalAmount
             } : null,
             ifShowDiscount ? { title: '折扣', dataIndex: 'discount', align: 'center', width: 50, render: d => `${d}%` } : null,
-            { title: ifShowDiscount ? '折后价' : '金额', dataIndex: 'amount', align: 'center', width: 90, render: a => a.toLocaleString(),
+            { 
+                title: ifShowDiscount ? '折后价' : '金额', dataIndex: 'amount', align: 'center', width: 90, 
+                render: a => (ifShowAmountSign ? amountSign : '') + a.toLocaleString(),
                 sorter: (a, b) => a.amount - b.amount
             },
             { title: '重量', dataIndex: 'weight', align: 'center', width: 80, render: w => w ? w.toLocaleString() : null },

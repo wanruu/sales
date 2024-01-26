@@ -5,7 +5,8 @@ import uuid from 'react-uuid'
 
 
 import { DATE_FORMAT, DEFAULT_PRINT_SETTINGS, printSettings } from '../../utils/config'
-import InvoiceView from '../common/InvoiceView'
+import InvoicePrintView from '../common/InvoicePrintView'
+import SettingSwitchItem from './SettingSwitchItem'
 
 
 const { Item } = Form
@@ -32,6 +33,7 @@ export default function PrintSettingView() {
     const [ifShowAddress, setIfShowAddress] = useState(printSettings.get('ifShowAddress'))  // str: true / false
     // Table
     const [tableFontSize, setTableFontSize] = useState(printSettings.get('tableFontSize'))
+    const [ifShowPrintAmountSign, setIfShowPrintAmountSign] = useState(printSettings.get('ifShowPrintAmountSign'))
     // Footer
     const [footer, setFooter] = useState(localStorage.getItem('footer'))
     const [footerFontSize, setFooterFontSize] = useState(localStorage.getItem('footerFontSize'))
@@ -113,44 +115,42 @@ export default function PrintSettingView() {
             </Form>
 
             <div className='itemTitle'>清单基本信息</div>
-            <Form layout='inline'>
-                <Item label='客户/供应商'>
-                    <Checkbox checked={ifShowPhone==='true'} onChange={e => { 
-                        setIfShowPhone(`${e.target.checked}`); 
-                        printSettings.set('ifShowPhone', e.target.checked) 
-                    }}>显示电话 (如有)</Checkbox>
-                    <Checkbox checked={ifShowAddress==='true'} onChange={e => {
-                        setIfShowAddress(`${e.target.checked}`)
-                        printSettings.set('ifShowAddress', e.target.checked) 
-                    }}>显示地址 (如有)</Checkbox>
-                </Item>
-            </Form>
-            <Form layout='inline'>
-                <Item label='字号'>
-                    <InputNumber keyboard={false} placeholder={DEFAULT_PRINT_SETTINGS.headerFontSize} disabled={subtitleStyle === 'inline'}
-                        value={headerFontSize} onChange={val => { printSettings.set('headerFontSize', inputNum2Str(val)); setHeaderFontSize(inputNum2Str(val)) }} />
-                </Item>
-            </Form>
+            <Item label='客户/供应商'>
+                <Checkbox checked={ifShowPhone==='true'} onChange={e => { 
+                    setIfShowPhone(`${e.target.checked}`); 
+                    printSettings.set('ifShowPhone', e.target.checked) 
+                }}>显示电话 (如有)</Checkbox>
+                <Checkbox checked={ifShowAddress==='true'} onChange={e => {
+                    setIfShowAddress(`${e.target.checked}`)
+                    printSettings.set('ifShowAddress', e.target.checked) 
+                }}>显示地址 (如有)</Checkbox>
+            </Item>
+        
+        
+            <Item label='字号'>
+                <InputNumber keyboard={false} placeholder={DEFAULT_PRINT_SETTINGS.headerFontSize} disabled={subtitleStyle === 'inline'}
+                    value={headerFontSize} onChange={val => { printSettings.set('headerFontSize', inputNum2Str(val)); setHeaderFontSize(inputNum2Str(val)) }} />
+            </Item>
             
+
             <div className='itemTitle'>表格</div>
-            <Form layout='inline'>
-                <Item label='字号'>
-                    <InputNumber keyboard={false} placeholder={DEFAULT_PRINT_SETTINGS.tableFontSize} 
-                        value={tableFontSize} onChange={val => { printSettings.set('tableFontSize', inputNum2Str(val)); setTableFontSize(inputNum2Str(val)) }}/>
-                </Item>
-            </Form>
+            <Item label='字号'>
+                <InputNumber keyboard={false} placeholder={DEFAULT_PRINT_SETTINGS.tableFontSize} 
+                    value={tableFontSize} onChange={val => { printSettings.set('tableFontSize', inputNum2Str(val)); setTableFontSize(inputNum2Str(val)) }}/>
+            </Item>
+            <SettingSwitchItem keyy='ifShowPrintAmountSign' value={ifShowPrintAmountSign} setValue={setIfShowPrintAmountSign} 
+                label='显示金额符号' help='若开关打开，金额将会显示￥符号前缀，例如￥88；否则，只显示数字。' />
 
             <div className='itemTitle'>脚注</div>
-            <Form layout='horizontal'>
-                <Item label='脚注' extra='以回车键分行，每行脚注将依次列在单据脚注位置，单据脚注为两列。'>
-                    <Input.TextArea style={{ maxWidth: '600px' }} placeholder={DEFAULT_PRINT_SETTINGS.footer} autoSize
-                        value={footer} onChange={e => { setFooter(e.target.value); printSettings.set('footer', e.target.value) }} />
-                </Item>
-                <Item label='字号'>
-                    <InputNumber keyboard={false} placeholder={DEFAULT_PRINT_SETTINGS.footerFontSize}
-                        value={footerFontSize} onChange={val => { printSettings.set('footerFontSize', inputNum2Str(val)); setFooterFontSize(inputNum2Str(val)) }} />
-                </Item>
-            </Form>
+            <Item label='脚注' extra='以回车键分行，每行脚注将依次列在单据脚注位置，单据脚注为两列。'>
+                <Input.TextArea style={{ maxWidth: '600px' }} placeholder={DEFAULT_PRINT_SETTINGS.footer} autoSize
+                    value={footer} onChange={e => { setFooter(e.target.value); printSettings.set('footer', e.target.value) }} />
+            </Item>
+            <Item label='字号'>
+                <InputNumber keyboard={false} placeholder={DEFAULT_PRINT_SETTINGS.footerFontSize}
+                    value={footerFontSize} onChange={val => { printSettings.set('footerFontSize', inputNum2Str(val)); setFooterFontSize(inputNum2Str(val)) }} />
+            </Item>
+
 
             <div className='itemTitle'>预览</div>
             <PrintPreview/>
@@ -195,7 +195,7 @@ function PrintPreview() {
             
             { previewType ?
             <div style={{ overflowX: 'auto', overflowY: 'clip' }}>
-                <InvoiceView type={previewType} invoice={initInvoiceForPreview(previews[previewType].prefix, previewItemNum)} />
+                <InvoicePrintView type={previewType} invoice={initInvoiceForPreview(previews[previewType].prefix, previewItemNum)} />
             </div> : null }
         </Item>
     </Form>

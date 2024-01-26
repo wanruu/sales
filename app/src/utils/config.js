@@ -14,7 +14,7 @@ export const DEFAULT_PRINT_SETTINGS = {
     subtitleFontSize: 20, subtitleStyle: 'inline',
     headerFontSize: 14, ifShowPhone: 'false', ifShowAddress: 'false',
     footer: '脚注1\n脚注2\n脚注3', footerFontSize: 12,
-    tableFontSize: 14
+    tableFontSize: 14, ifShowPrintAmountSign: 'true', printAmountSign: '￥',
 }
 
 export const UNIT_OPTIONS = [
@@ -38,6 +38,7 @@ export const DEFAULT_PAGINATION = {
 export const DEFAULT_INVOICE_SETTINGS = {
     ifShowDiscount: 'true', ifShowMaterial: 'true',
     ifShowDelivered: 'true', ifShowInvoiceDelivered: 'true', ifShowItemDelivered: 'true',
+    ifShowAmountSign: 'true', amountSign: '￥',
     unitOptions: JSON.stringify(UNIT_OPTIONS)
 }
 

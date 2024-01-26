@@ -134,13 +134,29 @@ function InvoiceTable(props) {
             <Table.Summary.Row>
                 <Table.Summary.Cell index={0} align='center'>总计</Table.Summary.Cell>
                 <Table.Summary.Cell index={1} />
-                <Table.Summary.Cell index={2} align='center'>{orderAmount.toNumber().toLocaleString()}</Table.Summary.Cell>
-                <Table.Summary.Cell index={3} align='center'>{orderPaid.toNumber().toLocaleString()}</Table.Summary.Cell>
-                <Table.Summary.Cell index={4} align='center'><font color={orderUnpaid.equals(0) ? 'black' : 'red'}>{orderUnpaid.toNumber().toLocaleString()}</font></Table.Summary.Cell>
+                <Table.Summary.Cell index={2} align='center'>
+                    {amountSign + orderAmount.toNumber().toLocaleString()}
+                </Table.Summary.Cell>
+                <Table.Summary.Cell index={3} align='center'>
+                    {amountSign + orderPaid.toNumber().toLocaleString()}
+                </Table.Summary.Cell>
+                <Table.Summary.Cell index={4} align='center'>
+                    <font color={orderUnpaid.equals(0) ? 'black' : 'red'}>
+                        {amountSign + orderUnpaid.toNumber().toLocaleString()}
+                    </font>
+                </Table.Summary.Cell>
                 <Table.Summary.Cell index={5} />
-                <Table.Summary.Cell index={6} align='center'>{refundAmount.toNumber().toLocaleString()}</Table.Summary.Cell>
-                <Table.Summary.Cell index={7} align='center'>{refundPaid.toNumber().toLocaleString()}</Table.Summary.Cell>
-                <Table.Summary.Cell index={8} align='center'><font color={refundUnpaid.equals(0) ? 'black' : 'red'}>{refundUnpaid.toNumber().toLocaleString()}</font></Table.Summary.Cell>
+                <Table.Summary.Cell index={6} align='center'>
+                    {amountSign + refundAmount.toNumber().toLocaleString()}
+                </Table.Summary.Cell>
+                <Table.Summary.Cell index={7} align='center'>
+                    {amountSign + refundPaid.toNumber().toLocaleString()}
+                </Table.Summary.Cell>
+                <Table.Summary.Cell index={8} align='center'>
+                    <font color={refundUnpaid.equals(0) ? 'black' : 'red'}>
+                        {amountSign + refundUnpaid.toNumber().toLocaleString()}
+                    </font>
+                </Table.Summary.Cell>
                 <Table.Summary.Cell index={9} align='center'>
                     <Button type='primary' ghost onClick={_ => exportExcel([[items, INVOICE_TABLE_HEADERS, summaryRow]], '清单总览')}>导出</Button>
                 </Table.Summary.Cell>
@@ -150,6 +166,8 @@ function InvoiceTable(props) {
     const getFooter = () => {
         return '注意：当“销售单”与“采购单”混合显示时，总计金额不能代表实际应付、已付、未付的金额，请筛选后再查看。'
     }
+
+    const amountSign = invoiceSettings.get('ifShowAmountSign') === 'true' ? invoiceSettings.get('amountSign') : ''
 
     return <>
         <Modal title={selectedInvoiceType ? `${INVOICE_TYPE_2_DICT[selectedInvoiceType].str} (${selectedInvoiceId})` : ''} 
@@ -162,22 +180,29 @@ function InvoiceTable(props) {
                 <Column title='单号' dataIndex='orderId' align='center' width={130} render={(id, r) => 
                     <a onClick={_ => { setSelectedInvoiceId(id); setSelectedInvoiceType(r.type + 'Order') } }>{id}</a>
                 } />
-                <Column title='金额' dataIndex='orderAmount' align='center' width={80} render={amount => amount.toLocaleString()} />
-                <Column title='已付' align='center' width={80} render={(_, r) => (r.orderPrepayment + r.orderPayment).toLocaleString()} />
+                <Column title='金额' dataIndex='orderAmount' align='center' width={80} 
+                    render={amount => amountSign + amount.toLocaleString()} 
+                />
+                <Column title='已付' align='center' width={80} 
+                    render={(_, r) => amountSign + (r.orderPrepayment + r.orderPayment).toLocaleString()} 
+                />
                 <Column title='未付' align='center' width={80} render={(_, r) => {
                     const unpaid = r.orderAmount - r.orderPrepayment - r.orderPayment
-                    return <font color={unpaid===0 ? 'black' : 'red'}>{unpaid.toLocaleString()}</font>
+                    return <font color={unpaid===0 ? 'black' : 'red'}>{amountSign + unpaid.toLocaleString()}</font>
                 }} />
             </ColumnGroup>
             <ColumnGroup title='关联退货单' align='center'>
                 <Column title='退货单号' dataIndex='refundId' align='center' width={130} render={(id, r) => 
                     <a onClick={_ => { setSelectedInvoiceId(id); setSelectedInvoiceType(r.type + 'Refund') } }>{id}</a>
                 } />
-                <Column title='退款' dataIndex='refundAmount' align='center' width={80} render={amount => amount ? amount.toLocaleString() : null} />
-                <Column title='已付' align='center' width={80} render={(_, r) => r.refundPayment ? (r.refundPrepayment + r.refundPayment).toLocaleString() : null} />
+                <Column title='退款' dataIndex='refundAmount' align='center' width={80} 
+                    render={amount => amount ? (amountSign + amount.toLocaleString()) : null} 
+                />
+                <Column title='已付' align='center' width={80} 
+                    render={(_, r) => r.refundPayment ? (amountSign + (r.refundPrepayment + r.refundPayment).toLocaleString()) : null} />
                 <Column title='未付' align='center' width={80} render={(_, r) => {
                     const unpaid = r.refundAmount - r.refundPrepayment - r.refundPayment
-                    return <font color={unpaid===0 ? 'black' : 'red'}>{r.refundPayment ? unpaid.toLocaleString() : null}</font>
+                    return <font color={unpaid===0 ? 'black' : 'red'}>{r.refundPayment ? (amountSign + unpaid.toLocaleString()) : null}</font>
                 }} />
             </ColumnGroup>
             { TYPE_COLUMN }
@@ -197,6 +222,7 @@ function InvoiceItemTable(props) {
 
     const ifShowMaterial = invoiceSettings.get('ifShowMaterial') === 'true'
     const ifShowDiscount = invoiceSettings.get('ifShowDiscount') === 'true'
+    const amountSign = invoiceSettings.get('ifShowAmountSign') === 'true' ? invoiceSettings.get('amountSign') : ''
 
     const getSummary = (items) => {
         const orderOriginalAmount = items.reduce((total, cur) => total.plus(cur.orderOriginalAmount || 0), Decimal(0))
@@ -212,12 +238,20 @@ function InvoiceItemTable(props) {
                 <Table.Summary.Row>
                     <Table.Summary.Cell index={0} align='center'>总计</Table.Summary.Cell>
                     <Table.Summary.Cell index={1} colSpan={ifShowMaterial ? 7 : 6}/>
-                    <Table.Summary.Cell index={ifShowMaterial ? 8 : 7} align='center'>{orderOriginalAmount.toNumber().toLocaleString()}</Table.Summary.Cell>
+                    <Table.Summary.Cell index={ifShowMaterial ? 8 : 7} align='center'>
+                        {amountSign + orderOriginalAmount.toNumber().toLocaleString()}
+                    </Table.Summary.Cell>
                     <Table.Summary.Cell index={ifShowMaterial ? 9 : 8} />
-                    <Table.Summary.Cell index={ifShowMaterial ? 10 : 9} align='center'>{orderAmount.toNumber().toLocaleString()}</Table.Summary.Cell>
+                    <Table.Summary.Cell index={ifShowMaterial ? 10 : 9} align='center'>
+                        {amountSign + orderAmount.toNumber().toLocaleString()}
+                    </Table.Summary.Cell>
                     <Table.Summary.Cell index={ifShowMaterial ? 11 : 10} colSpan={3} />
-                    <Table.Summary.Cell index={ifShowMaterial ? 14 : 13} align='center'>{refundOriginalAmount.toNumber().toLocaleString()}</Table.Summary.Cell>
-                    <Table.Summary.Cell index={ifShowMaterial ? 15 : 14} align='center'>{refundAmount.toNumber().toLocaleString()}</Table.Summary.Cell>
+                    <Table.Summary.Cell index={ifShowMaterial ? 14 : 13} align='center'>
+                        {amountSign + refundOriginalAmount.toNumber().toLocaleString()}
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={ifShowMaterial ? 15 : 14} align='center'>
+                        {amountSign + refundAmount.toNumber().toLocaleString()}
+                    </Table.Summary.Cell>
                     <Table.Summary.Cell index={ifShowMaterial ? 16 : 15} />
                     <Table.Summary.Cell index={ifShowMaterial ? 17 : 16} align='center'>
                         <Button type='primary' ghost onClick={_ => exportExcel([[items, INVOICE_ITEM_TABLE_HEADERS, summaryRow]], '清单条目')}>导出</Button>
@@ -229,9 +263,13 @@ function InvoiceItemTable(props) {
             <Table.Summary.Row>
                 <Table.Summary.Cell index={0} align='center'>总计</Table.Summary.Cell>
                 <Table.Summary.Cell index={1} colSpan={ifShowMaterial ? 7 : 6}/>
-                <Table.Summary.Cell index={ifShowMaterial ? 8 : 7} align='center'>{orderAmount.toNumber().toLocaleString()}</Table.Summary.Cell>
+                <Table.Summary.Cell index={ifShowMaterial ? 8 : 7} align='center'>
+                    {amountSign + orderAmount.toNumber().toLocaleString()}
+                </Table.Summary.Cell>
                 <Table.Summary.Cell index={ifShowMaterial ? 9 : 8} colSpan={3} />
-                <Table.Summary.Cell index={ifShowMaterial ? 12 : 11} align='center'>{refundAmount.toNumber().toLocaleString()}</Table.Summary.Cell>
+                <Table.Summary.Cell index={ifShowMaterial ? 12 : 11} align='center'>
+                    {amountSign + refundAmount.toNumber().toLocaleString()}
+                </Table.Summary.Cell>
                 <Table.Summary.Cell index={ifShowMaterial ? 13 : 12} />
                 <Table.Summary.Cell index={ifShowMaterial ? 14 : 13} align='center'>
                     <Button onClick={_ => exportExcel([[items, INVOICE_ITEM_TABLE_HEADERS, summaryRow]], '清单条目')}>导出</Button>
@@ -264,10 +302,13 @@ function InvoiceItemTable(props) {
                 <Column title='单位' dataIndex='unit' align='center' width={50} />
                 <Column title='单价' dataIndex='price' align='center' width={80} render={p => p.toLocaleString()} />
                 { ifShowDiscount ? 
-                    <Column title='金额' dataIndex='orderOriginalAmount' align='center' width={80} render={amount => amount.toLocaleString()} />
+                    <Column title='金额' dataIndex='orderOriginalAmount' align='center' width={80} 
+                        render={amount => amountSign + amount.toLocaleString()} />
                     : null }
                 { ifShowDiscount ? <Column title='折扣' dataIndex='discount' align='center' width={60} render={d => `${d}%`} /> : null }
-                <Column title={ifShowDiscount ? '折后价' : '金额'} dataIndex='orderAmount' align='center' width={80} render={amount => amount.toLocaleString()} />
+                <Column title={ifShowDiscount ? '折后价' : '金额'} dataIndex='orderAmount' align='center' width={80} 
+                    render={amount => amountSign + amount.toLocaleString()} 
+                />
                 <Column title='备注' dataIndex='orderRemark' align='center' width={100} />
             </ColumnGroup>
             <ColumnGroup title='关联退货单' align='center'>
@@ -279,9 +320,11 @@ function InvoiceItemTable(props) {
                 }} /> 
                 <Column title='数量' dataIndex='refundQuantity' align='center' width={80} render={q => q ? q.toLocaleString() : null} />
                 { ifShowDiscount ? 
-                    <Column title='金额' dataIndex='refundOriginalAmount' align='center' width={80} render={amount => amount ? amount.toLocaleString() : null} />
+                    <Column title='金额' dataIndex='refundOriginalAmount' align='center' width={80} 
+                        render={amount => amount ? amountSign + amount.toLocaleString() : null} />
                     : null }
-                <Column title={ifShowDiscount ? '折后价' : '金额'} dataIndex='refundAmount' align='center' width={80} render={amount => amount ? amount.toLocaleString() : null} />
+                <Column title={ifShowDiscount ? '折后价' : '金额'} dataIndex='refundAmount' align='center' width={80} 
+                    render={amount => amount ? amountSign + amount.toLocaleString() : null} />
                 <Column title='备注' dataIndex='refundRemark' align='center' width={100} />
             </ColumnGroup>
             { TYPE_COLUMN }
@@ -296,6 +339,8 @@ function ProductTable(props) {
             <Button type='primary' ghost onClick={_ => exportExcel([[props.products, PRODUCT_TABLE_HEADERS]], '产品')}>导出</Button>
         </Row>
     }
+    const amountSign = invoiceSettings.get('ifShowAmountSign') === 'true' ? invoiceSettings.get('amountSign') : ''
+
     return <Table dataSource={props.products} {...DEFAULT_TABLE_SETTINGS} rowKey={r => r.id} footer={getFooter}>
         { NUMBER_COLUMN }
         <ColumnGroup title='产品信息' align='center'>
@@ -307,12 +352,13 @@ function ProductTable(props) {
         </ColumnGroup>
         <ColumnGroup title='销售信息' align='center'>
             <Column title='数量' dataIndex='salesQuantity' align='center' width={70} render={p => p ? p.toLocaleString() : null} />
-            <Column title='均价' dataIndex='salesPrice' align='center' width={70} render={p => p ? p.toLocaleString() : null} />
+            <Column title='均价' dataIndex='salesPrice' align='center' width={70} 
+                render={p => p ? amountSign + p.toLocaleString() : null} />
             <Column title='退货数量' dataIndex='salesRefundQuantity' align='center' width={80} render={p => p ? p.toLocaleString() : null} />
         </ColumnGroup>
         <ColumnGroup title='采购信息' align='center'>
             <Column title='数量' dataIndex='purchaseQuantity' align='center' width={70} render={p => p ? p.toLocaleString() : null} />
-            <Column title='均价' dataIndex='purchasePrice' align='center' width={70} render={p => p ? p.toLocaleString() : null} />
+            <Column title='均价' dataIndex='purchasePrice' align='center' width={70} render={p => p ? amountSign + p.toLocaleString() : null} />
             <Column title='退货数量' dataIndex='purchaseRefundQuantity' align='center' width={80} render={p => p ? p.toLocaleString() : null} />
         </ColumnGroup>
     </Table>

@@ -51,15 +51,16 @@ function SalesOrderPage(props) {
 
     const getTableColumns = () => {
         const ifShowInvoiceDelivered = invoiceSettings.get('ifShowInvoiceDelivered') == 'true'
+        const amountSign = invoiceSettings.get('ifShowAmountSign') === 'true' ? invoiceSettings.get('amountSign') : ''
         return [
             { title: '序号', align: 'center', render: (_, __, idx) => idx + 1, fixed: 'left' },
             { title: '单号', dataIndex: 'id', align: 'center', render: id => <a onClick={_ => setSelectedOrderId(id)}>{id}</a> },
             { title: '客户', dataIndex: 'partner', align: 'center' },
             { title: '日期', dataIndex: 'date', align: 'center' },
-            { title: '金额', dataIndex: 'amount', align: 'center', render: amount => amount.toLocaleString() },
-            { title: '已付', dataIndex: 'paid', align: 'center', render: paid => paid.toLocaleString() },
+            { title: '金额', dataIndex: 'amount', align: 'center', render: amount => amountSign + amount.toLocaleString() },
+            { title: '已付', dataIndex: 'paid', align: 'center', render: paid => amountSign + paid.toLocaleString() },
             { title: '未付', dataIndex: 'unpaid', align: 'center', render: unpaid => 
-                <span style={{ color: unpaid === 0 ? 'black' : 'red' }}>{unpaid.toLocaleString()}</span>
+                <span style={{ color: unpaid === 0 ? 'black' : 'red' }}>{amountSign + unpaid.toLocaleString()}</span>
             },
             ifShowInvoiceDelivered ? { 
                 title: '配送情况', dataIndex: 'delivered', align: 'center', render: d => <Tag color={DELIVER_COLORS[d]}>{d}</Tag>

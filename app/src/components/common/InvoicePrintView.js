@@ -8,17 +8,22 @@ import { digitUppercase } from '../../utils/invoiceUtils'
 
 /* type */
 function PreviewTable(props) {
+    const ifShowMaterial = invoiceSettings.get('ifShowMaterial') === 'true'
+    const amountSign = printSettings.get('ifShowPrintAmountSign') === 'true' ? printSettings.get('printAmountSign') : ''
+
     const getTableColumns = () => {
-        const ifShowMaterial = invoiceSettings.get('ifShowMaterial') === 'true'
-        // const ifShowDiscount = invoiceSettings.get('ifShowDiscount') === 'true'
         return [
             ifShowMaterial ? { title: '材质', dataIndex: 'material', width: '5%' } : null,
             { title: '名称', dataIndex: 'name', width: '10%' },
             { title: '规格', dataIndex: 'spec', width: '10%' },
             { title: '数量', dataIndex: 'quantity', width: '8%', render: q => q.toLocaleString() },
             { title: '单位', dataIndex: 'unit', width: '6%' },
-            { title: '单价', dataIndex: 'price', width: '8%', render: p => p.toLocaleString() },
-            { title: '金额', dataIndex: 'amount', width: '11%', render: a => a.toLocaleString() },
+            { title: '单价', dataIndex: 'price', width: '8%', render: p => 
+                amountSign + p.toLocaleString()
+            },
+            { title: '金额', dataIndex: 'amount', width: '11%', render: a => 
+                amountSign + a.toLocaleString() 
+            },
             { title: '备注', dataIndex: 'remark', width: '15%' }
         ].filter(i => i != null)
     }
@@ -48,7 +53,10 @@ function PreviewTable(props) {
                             <span style={{ marginLeft: '3px' }}>{digitUppercase(props.invoice.amount)}</span>
                         </td>
                         <td style={{ textAlign: 'left' }} colSpan={2}>
-                            <span style={{ marginLeft: '3px' }}>¥ {props.invoice.amount.toLocaleString()}</span>
+                            <span style={{ marginLeft: '3px' }}>
+                                {amountSign}
+                                {props.invoice.amount.toLocaleString()}
+                            </span>
                         </td>
                     </tr>
                 </tbody>
@@ -147,7 +155,7 @@ function PreviewHeader(props) {
 }
 
 
-export default function InvoiceView(props) {
+export default function InvoicePrintView(props) {
     return <div className='invoiceWrapper' style={{ width: printSettings.get('width') + 'px', height: printSettings.get('height')+'px' }}>
         <div className='invoiceContent' style={{
             paddingTop: printSettings.get('vPadding')+'px', paddingBottom: printSettings.get('vPadding')+'px',
