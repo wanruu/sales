@@ -61,7 +61,7 @@ router.get('/unit', (req, res) => {
     const material = req.query.material
     const name = req.query.name
     const spec = req.query.spec
-    const query = `SELECT unit FROM product 
+    const query = `SELECT id AS productId, unit FROM product 
         WHERE material="${material}" AND name="${name}" AND spec="${spec}"`
     db.all(query, (err, rows) => {
         if (err) {
@@ -69,8 +69,7 @@ router.get('/unit', (req, res) => {
             res.status(500).send(err)
             return
         }
-        const unit = rows.length === 0 ? undefined : rows[0].unit
-        res.send({ unit: unit })
+        res.send(rows?.[0] || {})
     })
 })
 

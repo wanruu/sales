@@ -52,6 +52,10 @@
     display: none 
 }
 
+.editTable .ant-form-item {
+    margin: 0;
+}
+
 
 
 .invoiceWrapper {

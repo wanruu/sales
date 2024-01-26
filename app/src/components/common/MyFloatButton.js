@@ -67,7 +67,9 @@ export default function MyFloatButton(props) {
             <FloatButton icon={<InboxOutlined />} style={{ right: 80 }} badge={{ count: props.drafts.length, color: 'blue' }} />
         </Popover>
         
-        <FloatButton icon={<PlusOutlined />} type='primary' onClick={_ => setEditInvoice(emptyInvoice(0))} style={{ right: 24 }} />
+        <FloatButton icon={<PlusOutlined />} type='primary' style={{ right: 24 }} onClick={_ => 
+            setEditInvoice(emptyInvoice(props.type === 'salesOrder' || props.type === 'purchaseOrder' ? 1 : 0))
+        } />
         
         <Modal title={getTitle(props.type)} open={editInvoice} width={1000} centered onCancel={_ => setEditInvoice(undefined)} footer={null}>
             { props.type === 'salesOrder' ? <SalesOrderEditView order={editInvoice} messageApi={messageApi} dismiss={_ => setEditInvoice(undefined)} 
