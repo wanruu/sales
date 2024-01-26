@@ -82,15 +82,16 @@ export default function PurchaseOrderEditView(props) {
         const ifShowDelivered = invoiceSettings.get('ifShowDelivered') === 'true'
         return [
             { title: '', align: 'center', width: 30, fixed: 'left', render: (_, __, idx) => idx + 1 },
-            ifShowMaterial ? { title: '材质', dataIndex: 'material', align: 'center', width: 50, render: (_, record, idx) =>
+            ifShowMaterial ? 
+            { title: '材质', dataIndex: 'material', align: 'center', width: 50, render: (_, record, idx) =>
                 <ProductInput field='material' size='small' style={{ width: '100%' }} 
                     value={record.material} onChange={value => updateRow(idx, 'material', value)} />
             } : null,
-            { title: '名称', dataIndex: 'name', align: 'center', width: 150, render: (_, record, idx) =>
+            { title: '名称', dataIndex: 'name', align: 'center', width: 100, render: (_, record, idx) =>
                 <ProductInput field='name' size='small' style={{ width: '100%' }} 
                     value={record.name} onChange={value => updateRow(idx, 'name', value)} />
             },
-            { title: '规格', dataIndex: 'spec', align: 'center', width: 70, render: (_, record, idx) =>
+            { title: '规格', dataIndex: 'spec', align: 'center', width: 60, render: (_, record, idx) =>
                 <ProductInput field='spec' size='small' style={{ width: '100%' }} 
                     value={record.spec} onChange={value => updateRow(idx, 'spec', value)} /> 
             },

@@ -48,8 +48,8 @@ export default function PurchaseRefundEditView(props) {
         return [
             { title: '', align: 'center', width: 30, fixed: 'left', render: (_, __, idx) => idx + 1 },
             ifShowMaterial ? { title: '材质', dataIndex: 'material', align: 'center', width: 50 } : null,
-            { title: '名称', dataIndex: 'name', align: 'center', width: 150 },
-            { title: '规格', dataIndex: 'spec', align: 'center', width: 70 },
+            { title: '名称', dataIndex: 'name', align: 'center', width: 100 },
+            { title: '规格', dataIndex: 'spec', align: 'center', width: 60 },
             { title: <span>数量 <Popover content={<>黄色：数量超过采购单上限。<br/>红色：产品已从采购单中移除。</>}><a style={{color: 'gray'}}><ExclamationCircleOutlined/></a></Popover></span>, 
                 dataIndex: 'quantity', align: 'center', width: 70, render: (_, record, idx) => 
                 <InputNumber min={0} stringMode keyboard={false} size='small' controls={false} style={{width: '100%'}} 

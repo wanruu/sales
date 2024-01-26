@@ -86,11 +86,11 @@ export default function SalesOrderEditView(props) {
                 <ProductInput field='material' size='small' style={{ width: '100%' }} 
                     value={record.material} onChange={value => updateRow(idx, 'material', value)} />
             } : null,
-            { title: '名称', dataIndex: 'name', align: 'center', width: 150, render: (_, record, idx) =>
+            { title: '名称', dataIndex: 'name', align: 'center', width: 100, render: (_, record, idx) =>
                 <ProductInput field='name' size='small' style={{ width: '100%' }} 
                     value={record.name} onChange={value => updateRow(idx, 'name', value)} />
             },
-            { title: '规格', dataIndex: 'spec', align: 'center', width: 70, render: (_, record, idx) =>
+            { title: '规格', dataIndex: 'spec', align: 'center', width: 60, render: (_, record, idx) =>
                 <ProductInput field='spec' size='small' style={{ width: '100%' }} 
                     value={record.spec} onChange={value => updateRow(idx, 'spec', value)} /> 
             },
@@ -108,7 +108,10 @@ export default function SalesOrderEditView(props) {
                     min={0} stringMode keyboard={false} size='small' controls={false} style={{width: '100%'}} value={record.price} 
                     onChange={value => updateRow(idx, 'price', value)} />
             },
-            ifShowDiscount ? { title: '金额', dataIndex: 'originalAmount', align: 'center', width: 80, render: a => parseFloat(a).toLocaleString() } : null,
+            ifShowDiscount ? { 
+                title: '金额', dataIndex: 'originalAmount', align: 'center', width: 80, 
+                render: a => parseFloat(a).toLocaleString()
+            } : null,
             ifShowDiscount ? { title: '折扣', dataIndex: 'discount', align: 'center', width: 60, render: (_, record, idx) => 
                 <InputNumber keyboard={false} size='small' min={0} max={100} controls={false} style={{width: '100%'}} 
                     value={record.discount} onChange={value => updateRow(idx, 'discount', value)}
@@ -175,7 +178,8 @@ export default function SalesOrderEditView(props) {
         </Space>
 
         <Table className='editTable' dataSource={order.items} size='small' bordered style={{ height: 400 }} 
-            scroll={{x: 'max-content', y: 400 }} pagination={false} rowKey={record => record.id} columns={getTableColumns()} />
+            scroll={{x: 'max-content', y: 400 }} pagination={false} rowKey={record => record.id} 
+            columns={getTableColumns()} />
         <Divider />
 
         <Col align='end'>

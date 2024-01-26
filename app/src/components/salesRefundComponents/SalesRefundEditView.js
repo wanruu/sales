@@ -45,8 +45,8 @@ export default function SalesRefundEditView(props) {
         return [
             { title: '', align: 'center', width: 30, fixed: 'left', render: (_, __, idx) => idx + 1 },
             ifShowMaterial ? { title: '材质', dataIndex: 'material', align: 'center', width: 50 } : null,
-            { title: '名称', dataIndex: 'name', align: 'center', width: 150 },
-            { title: '规格', dataIndex: 'spec', align: 'center', width: 70 },
+            { title: '名称', dataIndex: 'name', align: 'center', width: 100 },
+            { title: '规格', dataIndex: 'spec', align: 'center', width: 60 },
             { title: '数量', dataIndex: 'quantity', align: 'center', width: 70, render: (_, record, idx) => 
                 <InputNumber min={0} stringMode keyboard={false} size='small' controls={false} style={{width: '100%'}} 
                     value={record.quantity} onChange={value => updateRow(idx, 'quantity', value)} 
