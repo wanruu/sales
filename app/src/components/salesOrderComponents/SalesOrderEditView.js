@@ -69,7 +69,7 @@ export default function SalesOrderEditView(props) {
             <Space>
                 <Button icon={<SaveOutlined/>} type='primary' htmlType='submit'>保存</Button>
                 { 
-                    props.order.id ? null : 
+                    props.order && props.order.id ? null : 
                     <Button icon={<InboxOutlined/>} onClick={_ => props.saveDraft(form.getFieldsValue(true))}>
                         保存草稿
                     </Button> 
