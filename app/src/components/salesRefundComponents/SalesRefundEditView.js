@@ -1,81 +1,25 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import Axios from 'axios'
-import Decimal from 'decimal.js'
-import { Table, Button, DatePicker, Col, Row, InputNumber, Input, Divider, Space, Modal } from 'antd'
-import { EditOutlined, SaveOutlined, DeleteOutlined, CloseOutlined, InboxOutlined } from '@ant-design/icons'
+import {  Button, Col, Divider, Space, Form } from 'antd'
+import { SaveOutlined, CloseOutlined, InboxOutlined } from '@ant-design/icons'
 
 
-import { calItemAmount, calTotalAmount, dcInvoice, emptyInvoice } from '../../utils/invoiceUtils'
-import { baseURL, DATE_FORMAT, invoiceSettings } from '../../utils/config'
-import { DeliveredInput } from '../common/PromptInput'
-import SalesRefundItemSelectView from './SalesRefundItemSelectView'
+import { dcInvoice, emptyInvoice } from '../../utils/invoiceUtils'
+import { baseURL, DATE_FORMAT } from '../../utils/config'
+import InvoiceEditView from '../common/InvoiceEditView'
 import '../common/Invoice.css'
+
 
 /*
     Required: dismiss, refresh, messageApi
     Optional: refund, saveDraft, removeDraft
 */
 export default function SalesRefundEditView(props) {
-    const [refund, setRefund] = useState(emptyInvoice(0))
-    const [isSelectionModalOpen, setSelectionModalOpen] = useState(false)
-    
-    const initRefund = () => {
-        setRefund(props.refund ? dcInvoice(props.refund) : emptyInvoice(0))
-    }
-    const updateRow = (idx, field, value) => {
-        const newRefund = dcInvoice(refund)
-        newRefund.items[idx][field] = value
-        if ('quantity' === field) {
-            const { originalAmount, amount } = calItemAmount(newRefund.items[idx])
-            newRefund.items[idx].originalAmount = originalAmount
-            newRefund.items[idx].amount = amount
-            newRefund.amount = calTotalAmount(newRefund.items)
-        }
-        setRefund(newRefund)
-    }
-    const updateRefund= (field, value) => {
-        const newRefund = dcInvoice(refund)
-        newRefund[field] = value
-        setRefund(newRefund)
-    }
-    const getTableColumns = () => {
-        const ifShowMaterial = invoiceSettings.get('ifShowMaterial') === 'true'
-        const ifShowDiscount = invoiceSettings.get('ifShowDiscount') === 'true'
-        const ifShowDelivered = invoiceSettings.get('ifShowDelivered') === 'true'
-        return [
-            { title: '', align: 'center', width: 30, fixed: 'left', render: (_, __, idx) => idx + 1 },
-            ifShowMaterial ? { title: '材质', dataIndex: 'material', align: 'center', width: 50 } : null,
-            { title: '名称', dataIndex: 'name', align: 'center', width: 100 },
-            { title: '规格', dataIndex: 'spec', align: 'center', width: 60 },
-            { title: '数量', dataIndex: 'quantity', align: 'center', width: 70, render: (_, record, idx) => 
-                <InputNumber min={0} stringMode keyboard={false} size='small' controls={false} style={{width: '100%'}} 
-                    value={record.quantity} onChange={value => updateRow(idx, 'quantity', value)} 
-                    placeholder={record.maxQuantity} />
-            },
-            { title: '单位', dataIndex: 'unit', align: 'center', width: 50 },
-            { title: '单价', dataIndex: 'price', align: 'center', width: 70, render: p => p.toLocaleString() },
-            ifShowDiscount ? { title: '金额', dataIndex: 'originalAmount', align: 'center', width: 80, render: a => parseFloat(a).toLocaleString() } : null,
-            ifShowDiscount ? { title: '折扣', dataIndex: 'discount', align: 'center', width: 50, render: d => `${d}%`} : null,
-            { title: ifShowDiscount ? '折后价' : '金额', dataIndex: 'amount', align: 'center', width: 80, render: a => parseFloat(a).toLocaleString() },
-            { title: '备注', dataIndex: 'remark', align: 'center', width: 100, render: (_, record, idx) => 
-                <Input size='small' style={{ width: '100%' }} value={record.remark} onChange={e => updateRow(idx, 'remark', e.target.value)} />
-            },
-            ifShowDelivered ? { title: '配送', dataIndex: 'delivered', align: 'center', width: 60, fixed: 'right', render: (_, record, idx) => 
-                <DeliveredInput size='small' align='center' style={{ width: '100%' }} value={record.delivered} 
-                    onChange={value => updateRow(idx, 'delivered', value)} />
-            } : null,
-            { title: '', align: 'center', width: 30, fixed: 'right', render: (_, __, idx) => 
-                <Button type='link' size='small' danger onClick={_ => {
-                    const newRefund = dcInvoice(refund)
-                    newRefund.items.splice(idx, 1)
-                    newRefund.amount = calTotalAmount(newRefund.items)
-                    if (newRefund.items.length === 0) newRefund.partner = ''
-                    setRefund(newRefund)
-                }}><DeleteOutlined /></Button>
-            }
-        ].filter(i => i != null)
-    }
+    const [form] = Form.useForm()
+
     const upload = () => {
+        const refund = form.getFieldsValue(true)
+
         if (refund.date == null) {
             return props.messageApi.open({ type: 'error', content: '请选择日期' })
         }
@@ -102,46 +46,32 @@ export default function SalesRefundEditView(props) {
         })
     }
 
-    useEffect(initRefund, [props.refund])
+    useEffect(() => {
+        if (props.refund) {
+            form.setFieldsValue(dcInvoice(props.refund))
+        }
+    }, [props.refund])
 
-    return <>
-        <Space direction='vertical' style={{ width: '100%', marginTop: '10px', marginBottom: '15px' }}>
-            <Row style={{ justifyContent: 'space-between' }} align='middle'>
-                <Col style={{ width: '30%' }}>客户：
-                    { refund.partner ? refund.partner : <span style={{color: 'gray'}}>(选择产品后自动显示)</span> }
-                </Col>
-                <Col style={{ width: '30%' }} align={'center'}>日期：
-                    <DatePicker size='small' style={{ width: 150 }} value={refund.date} onChange={value => updateRefund('date', value)} />
-                </Col>
-                <Col style={{ width: '30%' }} align='right'>
-                    <Button type='primary' onClick={_ => setSelectionModalOpen(true)}>选择销售单及产品</Button>
-                </Col>
-            </Row>
-            <Row style={{ justifyContent: 'space-between' }} align='middle'>
-                <Col style={{ width: '30%' }}>总金额：{parseFloat(refund.amount).toLocaleString()}</Col>
-                <Col style={{ width: '30%' }} align='right'>付款：
-                    <InputNumber size='small' keyboard={false} stringMode controls={false} style={{ width: 120 }}
-                        placeholder={`应付 ${Decimal(refund.amount).minus(refund.prepayment || 0)}`}
-                        value={refund.payment} onChange={value => updateRefund('payment', value)} />
-                    <Button size='small' style={{ marginLeft: '5px' }} icon={<EditOutlined />}
-                        onClick={_ => updateRefund('payment', Decimal(refund.amount).minus(refund.prepayment || 0).toString())} />
-                </Col>
-            </Row>
-        </Space>
-        <Table className='editTable' dataSource={refund.items} size='small' bordered pagination={false}
-            rowKey={r => r.productId} style={{height: 400}} scroll={{x: 'max-content', y: 400 }} columns={getTableColumns()} />
+    return <Form form={form} onFinish={upload}>
+        <InvoiceEditView type='salesRefund' />
     
         <Divider />
         <Col align='end'>
             <Space>
-                <Button icon={<SaveOutlined/>} type='primary' onClick={upload} disabled={refund.partner === ''}>保存</Button>
-                { refund.id ? null : <Button icon={<InboxOutlined/>} onClick={_ => props.saveDraft(refund)}>保存草稿</Button> }
-                <Button icon={<CloseOutlined/>} onClick={_ => { initRefund(); props.dismiss() }}>取消</Button>
+                <Button icon={<SaveOutlined/>} type='primary' htmlType='submit' disabled={form.getFieldValue('partner') === ''}>
+                    保存
+                </Button>
+                { props.refund && props.refund.id ? null : 
+                    <Button icon={<InboxOutlined/>} onClick={_ => props.saveDraft(form.getFieldsValue(true))}>
+                        保存草稿
+                    </Button>
+                }
+                <Button icon={<CloseOutlined/>} 
+                onClick={_ => {
+                    form.setFieldsValue(props.refund ? dcInvoice(props.refund) : emptyInvoice(0))
+                    props.dismiss()
+                }}>取消</Button>
             </Space>
         </Col>
-
-        <Modal title='选择销售单及产品' open={isSelectionModalOpen} width={1000} center onCancel={_ => setSelectionModalOpen(false)} footer={null} destroyOnClose>
-            <SalesRefundItemSelectView editRefund={refund} setEditRefund={setRefund} dismiss={_ => setSelectionModalOpen(false)} />
-        </Modal>
-    </>
+    </Form>
 }
