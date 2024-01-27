@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Space, Card, Form, Table, Button, Radio, Tooltip } from 'antd'
+import { Space, Form, Table, Button, Radio, Tooltip, Divider } from 'antd'
 import { QuestionCircleOutlined } from '@ant-design/icons'
 
 
@@ -141,18 +141,21 @@ export default function InvoiceSettingView() {
     const [invoiceAmountDigitNum, setInvoiceAmountDigitNum] = useState(invoiceSettings.get('invoiceAmountDigitNum'))
     const [itemAmountDigitNum, setItemAmountDigitNum] = useState(invoiceSettings.get('itemAmountDigitNum'))
 
-    return <Card size='small'>
+    return (
         <Space direction='vertical' size={0} style={{ width: '100%' }}>
             <div className='itemTitle'>产品材质</div>
             <SettingSwitchItem keyy='ifShowMaterial' value={ifShowMaterial} setValue={setIfShowMaterial} 
                 label='显示材质' help='该开关不会影响原有数据，只是显示或隐藏材质项。' />
-            
+            <Divider />
+
             <UnitSettingView />
+            <Divider />
 
             <div className='itemTitle'>折扣功能</div>
             <SettingSwitchItem keyy='ifShowDiscount' value={ifShowDiscount} setValue={setIfShowDiscount} 
                 label='折扣功能' help='该开关不会影响原有数据，只是显示或隐藏折扣及折前金额。' />
-            
+            <Divider />
+
             <div className='itemTitle'>配送功能</div>
             <SettingSwitchItem keyy='ifShowDelivered' value={ifShowDelivered} setValue={setIfShowDelivered} 
                 label='允许编辑配送情况' help='若开关打开，则可以在开单页面显示并更改配送情况。' />
@@ -162,7 +165,8 @@ export default function InvoiceSettingView() {
             
             <SettingSwitchItem keyy='ifShowItemDelivered' value={ifShowItemDelivered} setValue={setIfShowItemDelivered} 
                 label='显示单个产品配送情况' help='若开关打开，产品配送情况将会显示为”未配送“或”已配送“；否则，将隐藏配送情况一栏。' />
-            
+            <Divider />
+
             <div className='itemTitle'>金额</div>
             <SettingSwitchItem keyy='ifShowAmountSign' value={ifShowAmountSign} setValue={setIfShowAmountSign} 
                 label='显示金额符号' help='若开关打开，金额将会显示￥符号前缀，例如￥88；否则，只显示数字。不影响打印显示。' />
@@ -189,6 +193,7 @@ export default function InvoiceSettingView() {
                     <Radio.Button value='3'>3位小数</Radio.Button>
                 </Radio.Group>
             </Item>
+
         </Space>
-    </Card>
+    )
 }

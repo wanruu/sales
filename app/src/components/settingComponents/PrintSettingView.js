@@ -1,7 +1,8 @@
-import { Input, InputNumber, Space, Select, Checkbox, Card, Form, Radio, Row } from 'antd'
+import { Input, InputNumber, Space, Select, Checkbox, Form, Radio, Row, Divider, Tooltip } from 'antd'
 import React, { useState } from 'react'
 import dayjs from 'dayjs'
 import uuid from 'react-uuid'
+import { QuestionCircleOutlined } from '@ant-design/icons'
 
 
 import { DATE_FORMAT, DEFAULT_PRINT_SETTINGS, printSettings } from '../../utils/config'
@@ -11,6 +12,14 @@ import SettingSwitchItem from './SettingSwitchItem'
 
 const { Item } = Form
 
+
+function TipsView(props) {
+    return (
+        <Tooltip title={props.help} >
+            <QuestionCircleOutlined style={{ marginLeft: '3px', color: 'gray' }} />
+        </Tooltip>
+    )
+}
 
 export default function PrintSettingView() {
     // Overall
@@ -47,7 +56,7 @@ export default function PrintSettingView() {
         if (val < 0) return ''
         return val === 0 ? '0' : val || ''
     }
-    return <Card size='small'>
+    return (
         <Space direction='vertical' size={0} style={{ width: '100%' }}>
             <div className='itemTitle'>清单整体</div>
             <Form layout='inline'>
@@ -68,6 +77,7 @@ export default function PrintSettingView() {
                         value={vPadding} onChange={val => { setVPadding(inputNum2Str(val)); printSettings.set('vPadding', inputNum2Str(val)) }} />
                 </Item>
             </Form>
+            <Divider />
 
             <div className='itemTitle'>标题</div>
             <Form layout='inline'>
@@ -81,6 +91,7 @@ export default function PrintSettingView() {
                             printSettings.set('titleFontSize', inputNum2Str(val)); setTitleFontSize(inputNum2Str(val)) }}/>
                 </Item>
             </Form>
+            <Divider />
 
             <div className='itemTitle'>副标题</div>
             <Form layout='inline'>
@@ -105,7 +116,7 @@ export default function PrintSettingView() {
                 <Item label='副标题样式'>
                     <Select options={subtitleStyleOptions} value={subtitleStyle} onChange={val => { printSettings.set('subtitleStyle', val); setSubtitleStyle(val) }} />
                 </Item>
-                <Item label='副标题字号' extra={subtitleStyle === 'inline' ? '当样式为“另起一行“时才可指定字号。' : ''}>
+                <Item label={<>副标题字号<TipsView help='当样式为“另起一行“时才可指定字号。' /></>}>
                     { subtitleStyle === 'inline' ?
                         <InputNumber disabled={true} value={titleFontSize || DEFAULT_PRINT_SETTINGS.titleFontSize} /> :
                         <InputNumber keyboard={false} placeholder={DEFAULT_PRINT_SETTINGS.subtitleFontSize} value={subtitleFontSize} 
@@ -113,6 +124,7 @@ export default function PrintSettingView() {
                     }
                 </Item>
             </Form>
+            <Divider />
 
             <div className='itemTitle'>清单基本信息</div>
             <Item label='客户/供应商'>
@@ -131,6 +143,7 @@ export default function PrintSettingView() {
                 <InputNumber keyboard={false} placeholder={DEFAULT_PRINT_SETTINGS.headerFontSize} disabled={subtitleStyle === 'inline'}
                     value={headerFontSize} onChange={val => { printSettings.set('headerFontSize', inputNum2Str(val)); setHeaderFontSize(inputNum2Str(val)) }} />
             </Item>
+            <Divider />
             
 
             <div className='itemTitle'>表格</div>
@@ -140,9 +153,10 @@ export default function PrintSettingView() {
             </Item>
             <SettingSwitchItem keyy='ifShowPrintAmountSign' value={ifShowPrintAmountSign} setValue={setIfShowPrintAmountSign} 
                 label='显示金额符号' help='若开关打开，金额将会显示￥符号前缀，例如￥88；否则，只显示数字。' />
+            <Divider />
 
             <div className='itemTitle'>脚注</div>
-            <Item label='脚注' extra='以回车键分行，每行脚注将依次列在单据脚注位置，单据脚注为两列。'>
+            <Item label={<>脚注<TipsView help='以回车键分行，每行脚注将依次列在单据脚注位置，单据脚注为两列。'/></>}>
                 <Input.TextArea style={{ maxWidth: '600px' }} placeholder={DEFAULT_PRINT_SETTINGS.footer} autoSize
                     value={footer} onChange={e => { setFooter(e.target.value); printSettings.set('footer', e.target.value) }} />
             </Item>
@@ -150,12 +164,12 @@ export default function PrintSettingView() {
                 <InputNumber keyboard={false} placeholder={DEFAULT_PRINT_SETTINGS.footerFontSize}
                     value={footerFontSize} onChange={val => { printSettings.set('footerFontSize', inputNum2Str(val)); setFooterFontSize(inputNum2Str(val)) }} />
             </Item>
-
+            <Divider />
 
             <div className='itemTitle'>预览</div>
             <PrintPreview/>
         </Space>
-    </Card>
+    )
 }
 
 

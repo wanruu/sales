@@ -1,5 +1,5 @@
 import { Input, Upload, InputNumber, Space, Select, Checkbox, Card, Form, Radio, Row,
-    Switch, Typography, Table, Button, 
+    Switch, Typography, Table, Button, Collapse
 } from 'antd'
 import React, { useEffect, useState, } from 'react'
 import * as XLSX from 'xlsx'
@@ -107,11 +107,16 @@ export default function SettingPage() {
     }
 
     return <div className='setting'>
+        <h1>设置</h1>
         {/* <PhoneAccessView /> */}
-        <Title level={2}>清单设置</Title>
-        <InvoiceSettingView />
-        <Title level={2}>打印设置</Title>
-        <PrintSettingView />
+        <Collapse>
+            <Collapse.Panel header='清单设置' key='清单设置'>
+                <InvoiceSettingView />
+            </Collapse.Panel>
+            <Collapse.Panel header='打印设置' key='打印设置'>
+                <PrintSettingView />
+            </Collapse.Panel>
+        </Collapse>
 
         {/* <h2>导入</h2>
         <Upload directory accept='.xlsx' customRequest={handleUpload}>

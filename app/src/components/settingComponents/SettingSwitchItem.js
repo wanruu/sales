@@ -2,7 +2,6 @@ import { Form, Switch, Tooltip } from 'antd'
 import React from 'react'
 import { QuestionCircleOutlined } from '@ant-design/icons'
 
-import { invoiceSettings } from '../../utils/config'
 
 const { Item } = Form
 
