@@ -1,5 +1,6 @@
-import { Space, Card, Form, Table, Button } from 'antd'
 import React, { useEffect, useState } from 'react'
+import { Space, Card, Form, Table, Button, Radio, Tooltip } from 'antd'
+import { QuestionCircleOutlined } from '@ant-design/icons'
 
 
 import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
@@ -121,7 +122,13 @@ function UnitSettingView() {
     </Space>
 }
 
-
+function TipsView(props) {
+    return (
+        <Tooltip title={props.help} >
+            <QuestionCircleOutlined style={{ marginLeft: '3px', color: 'gray' }} />
+        </Tooltip>
+    )
+}
 
 export default function InvoiceSettingView() {
     const [ifShowDiscount, setIfShowDiscount] = useState(invoiceSettings.get('ifShowDiscount'))
@@ -131,7 +138,8 @@ export default function InvoiceSettingView() {
     const [ifShowItemDelivered, setIfShowItemDelivered] = useState(invoiceSettings.get('ifShowItemDelivered'))
     const [ifShowAmountSign, setIfShowAmountSign] = useState(invoiceSettings.get('ifShowAmountSign'))
     const [allowEditAmount, setAllowEditAmount] = useState(invoiceSettings.get('allowEditAmount'))
-
+    const [invoiceAmountDigitNum, setInvoiceAmountDigitNum] = useState(invoiceSettings.get('invoiceAmountDigitNum'))
+    const [itemAmountDigitNum, setItemAmountDigitNum] = useState(invoiceSettings.get('itemAmountDigitNum'))
 
     return <Card size='small'>
         <Space direction='vertical' size={0} style={{ width: '100%' }}>
@@ -147,19 +155,40 @@ export default function InvoiceSettingView() {
             
             <div className='itemTitle'>配送功能</div>
             <SettingSwitchItem keyy='ifShowDelivered' value={ifShowDelivered} setValue={setIfShowDelivered} 
-                label='配送功能' help='若开关打开，则可以在开单页面显示并更改配送情况。' />
+                label='允许编辑配送情况' help='若开关打开，则可以在开单页面显示并更改配送情况。' />
 
             <SettingSwitchItem keyy='ifShowInvoiceDelivered' value={ifShowInvoiceDelivered} setValue={setIfShowInvoiceDelivered} 
-                label='显示整体配送情况' help='若开关打开，清单列表中配送情况将会显示为”未配送“、”部分配送“或”全部配送“；否则，将隐藏配送情况一栏。' />
+                label='显示清单配送情况' help='若开关打开，清单列表中配送情况将会显示为”未配送“、”部分配送“或”全部配送“；否则，将隐藏配送情况一栏。' />
             
             <SettingSwitchItem keyy='ifShowItemDelivered' value={ifShowItemDelivered} setValue={setIfShowItemDelivered} 
                 label='显示单个产品配送情况' help='若开关打开，产品配送情况将会显示为”未配送“或”已配送“；否则，将隐藏配送情况一栏。' />
             
             <div className='itemTitle'>金额</div>
             <SettingSwitchItem keyy='ifShowAmountSign' value={ifShowAmountSign} setValue={setIfShowAmountSign} 
-                label='显示金额符号' help='若开关打开，金额将会显示￥符号前缀，例如￥88；否则，只显示数字。' />
+                label='显示金额符号' help='若开关打开，金额将会显示￥符号前缀，例如￥88；否则，只显示数字。不影响打印显示。' />
             <SettingSwitchItem keyy='allowEditAmount' value={allowEditAmount} setValue={setAllowEditAmount}
                 label='允许修改金额' help='若开关打开，则允许在自动计算金额的基础上输入自定义金额。' />
+            
+            <Item label={<>清单金额保留小数的位数<TipsView help='不影响已创建的清单。'/></>}>
+                <Radio.Group style={{ float: 'right' }} value={invoiceAmountDigitNum} onChange={e => {
+                    setInvoiceAmountDigitNum(e.target.value)
+                    invoiceSettings.set('invoiceAmountDigitNum', e.target.value)
+                }}>
+                    <Radio.Button value='0'>不保留</Radio.Button>
+                    <Radio.Button value='2'>2位小数</Radio.Button>
+                    <Radio.Button value='3'>3位小数</Radio.Button>
+                </Radio.Group>
+            </Item>
+            <Item label={<>单个产品金额保留小数的位数<TipsView help='不影响已创建的清单。'/></>}>
+                <Radio.Group style={{ float: 'right' }} value={itemAmountDigitNum} onChange={e => {
+                    setItemAmountDigitNum(e.target.value)
+                    invoiceSettings.set('itemAmountDigitNum', e.target.value)
+                }}>
+                    <Radio.Button value='0'>不保留</Radio.Button>
+                    <Radio.Button value='2'>2位小数</Radio.Button>
+                    <Radio.Button value='3'>3位小数</Radio.Button>
+                </Radio.Group>
+            </Item>
         </Space>
     </Card>
 }

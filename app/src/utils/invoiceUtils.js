@@ -51,12 +51,19 @@ export const calItemAmount = (itemDict) => {
 
     const originalAmount = quantity.times(price)
     const amount = originalAmount.times(discount).dividedBy(100)
+    const itemAmountDigitNum = parseInt(invoiceSettings.get('itemAmountDigitNum'))
 
-    return { originalAmount: originalAmount.toString(), amount: amount.toString()}
+    return { 
+        originalAmount: originalAmount.toFixed(itemAmountDigitNum, Decimal.ROUND_HALF_UP), 
+        amount: amount.toFixed(itemAmountDigitNum, Decimal.ROUND_HALF_UP)
+    }
 }
 
 export const calTotalAmount = (items) => {
-    return items.reduce((previous, current) => previous.plus(current.amount || 0), Decimal(0)).toFixed(2, Decimal.ROUND_HALF_UP)
+    const invoiceAmountDigitNum = parseInt(invoiceSettings.get('invoiceAmountDigitNum'))
+    return items.reduce((previous, current) => 
+        previous.plus(current.amount || 0), Decimal(0)
+    ).toFixed(invoiceAmountDigitNum, Decimal.ROUND_HALF_UP)
 }
 
 
