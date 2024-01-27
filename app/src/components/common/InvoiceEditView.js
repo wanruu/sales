@@ -111,9 +111,11 @@ export default function InvoiceEditView(props) {
                                 value={record.quantity} 
                                 placeholder={record.maxQuantity}
                                 status={
-                                    record.maxQuantity == null ? 'error' : (
-                                        record.maxQuantity != undefined && Decimal(record.quantity||0).gt(record.maxQuantity) ? 'warning' : ''
-                                    )
+                                    isRefund ? (
+                                        record.maxQuantity == null ? 'error' : (
+                                            Decimal(record.quantity || 0).gt(record.maxQuantity) ? 'warning' : ''
+                                        )
+                                    ) : ''
                                 }
                                 onChange={value => {
                                     setFieldValue(['items', idx, 'quantity'], value)
