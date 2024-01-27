@@ -38,7 +38,7 @@ export const DEFAULT_PAGINATION = {
 export const DEFAULT_INVOICE_SETTINGS = {
     ifShowDiscount: 'true', ifShowMaterial: 'true',
     ifShowDelivered: 'true', ifShowInvoiceDelivered: 'true', ifShowItemDelivered: 'true',
-    ifShowAmountSign: 'true', amountSign: '￥',
+    ifShowAmountSign: 'true', amountSign: '￥', allowEditAmount: 'false',
     unitOptions: JSON.stringify(UNIT_OPTIONS)
 }
 

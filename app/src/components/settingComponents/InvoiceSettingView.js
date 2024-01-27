@@ -130,6 +130,7 @@ export default function InvoiceSettingView() {
     const [ifShowInvoiceDelivered, setIfShowInvoiceDelivered] = useState(invoiceSettings.get('ifShowInvoiceDelivered'))
     const [ifShowItemDelivered, setIfShowItemDelivered] = useState(invoiceSettings.get('ifShowItemDelivered'))
     const [ifShowAmountSign, setIfShowAmountSign] = useState(invoiceSettings.get('ifShowAmountSign'))
+    const [allowEditAmount, setAllowEditAmount] = useState(invoiceSettings.get('allowEditAmount'))
 
 
     return <Card size='small'>
@@ -157,6 +158,8 @@ export default function InvoiceSettingView() {
             <div className='itemTitle'>金额</div>
             <SettingSwitchItem keyy='ifShowAmountSign' value={ifShowAmountSign} setValue={setIfShowAmountSign} 
                 label='显示金额符号' help='若开关打开，金额将会显示￥符号前缀，例如￥88；否则，只显示数字。' />
+            <SettingSwitchItem keyy='allowEditAmount' value={allowEditAmount} setValue={setAllowEditAmount}
+                label='允许修改金额' help='若开关打开，则允许在自动计算金额的基础上输入自定义金额。' />
         </Space>
     </Card>
 }

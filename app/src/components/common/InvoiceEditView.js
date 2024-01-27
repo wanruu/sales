@@ -30,6 +30,7 @@ export default function InvoiceEditView(props) {
         const ifShowDiscount = invoiceSettings.get('ifShowDiscount') === 'true'
         const ifShowMaterial = invoiceSettings.get('ifShowMaterial') === 'true'
         const ifShowDelivered = invoiceSettings.get('ifShowDelivered') === 'true'
+        const allowEditAmount = invoiceSettings.get('allowEditAmount') === 'true'
         return [
             { 
                 title: '', align: 'center', width: 30, fixed: 'left', 
@@ -175,6 +176,18 @@ export default function InvoiceEditView(props) {
                     <Item shouldUpdate>
                         {({ getFieldValue, setFieldValue }) => {
                             const record = (getFieldValue('items') || [])?.[idx] || {}
+                            if (allowEditAmount) {
+                                return (
+                                    <InputNumber keyboard={false} size='small' controls={false} style={{ width: '100%' }} 
+                                    value={record.originalAmount}
+                                    onChange={value => {
+                                        setFieldValue(['items', idx, 'originalAmount'], value)
+                                        setFieldValue(['items', idx, 'amount'], Decimal(value || 0).times(record.discount).dividedBy(100).toString())
+                                        updateTableRows()
+                                        updateTotalAmount()
+                                    }} />
+                                )
+                            }
                             return parseFloat(record.originalAmount).toLocaleString()
                         }}
                     </Item>
@@ -208,6 +221,17 @@ export default function InvoiceEditView(props) {
                     <Item shouldUpdate>
                         {({ getFieldValue, setFieldValue }) => {
                             const record = (getFieldValue('items') || [])?.[idx] || {}
+                            if (allowEditAmount) {
+                                return (
+                                    <InputNumber keyboard={false} size='small' controls={false} style={{ width: '100%' }} 
+                                    value={record.amount}
+                                    onChange={value => {
+                                        setFieldValue(['items', idx, 'amount'], value)
+                                        updateTableRows()
+                                        updateTotalAmount()
+                                    }} />
+                                )
+                            }
                             return parseFloat(record.amount).toLocaleString()
                         }}
                     </Item>
