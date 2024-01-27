@@ -3,7 +3,7 @@ import { Button, Form, Col, Space, Divider } from 'antd'
 import { InboxOutlined, CloseOutlined, SaveOutlined } from '@ant-design/icons'
 import Axios from 'axios'
 
-import { dcInvoice, emptyInvoice, isOrderItemComplete, isOrderItemEmpty, isProductRepeat } from '../../utils/invoiceUtils'
+import { dcInvoice, emptyInvoice, emptyInvoiceItem, isOrderItemComplete, isOrderItemEmpty, isProductRepeat } from '../../utils/invoiceUtils'
 import { baseURL, DATE_FORMAT } from '../../utils/config'
 import InvoiceEditView from '../common/InvoiceEditView'
 import '../common/Invoice.css'
@@ -53,10 +53,14 @@ export default function PurchaseOrderEditView(props) {
         })
     }
 
-    // Effect
     useEffect(() => {
         if (props.order) {
-            form.setFieldsValue(dcInvoice(props.order))
+            const order = dcInvoice(props.order)
+            if (order.id) {
+                order.items = order.items.map(item => Object.assign(item, { productExisting: true }))
+                order.items.push(emptyInvoiceItem())
+            }
+            form.setFieldsValue(order)
         }
     }, [props.order])
 

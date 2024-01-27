@@ -4,7 +4,7 @@ import { InboxOutlined, CloseOutlined, SaveOutlined } from '@ant-design/icons'
 import Axios from 'axios'
 
 
-import { dcInvoice, emptyInvoice, isOrderItemComplete, isOrderItemEmpty, isProductRepeat } from '../../utils/invoiceUtils'
+import { dcInvoice, emptyInvoice, emptyInvoiceItem, isOrderItemComplete, isOrderItemEmpty, isProductRepeat } from '../../utils/invoiceUtils'
 import { baseURL, DATE_FORMAT } from '../../utils/config'
 import '../common/Invoice.css'
 import InvoiceEditView from '../common/InvoiceEditView'
@@ -56,7 +56,12 @@ export default function SalesOrderEditView(props) {
 
     useEffect(() => {
         if (props.order) {
-            form.setFieldsValue(dcInvoice(props.order))
+            const order = dcInvoice(props.order)
+            if (order.id) {
+                order.items = order.items.map(item => Object.assign(item, { productExisting: true }))
+                order.items.push(emptyInvoiceItem())
+            }
+            form.setFieldsValue(order)
         }
     }, [props.order])
 
