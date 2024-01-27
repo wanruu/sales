@@ -4,7 +4,7 @@ import { InboxOutlined, CloseOutlined, SaveOutlined } from '@ant-design/icons'
 import Axios from 'axios'
 
 
-import { dcInvoice, isOrderItemComplete, isOrderItemEmpty, isProductRepeat
+import { dcInvoice, emptyInvoice, isOrderItemComplete, isOrderItemEmpty, isProductRepeat
 } from '../../utils/invoiceUtils'
 import { baseURL, DATE_FORMAT } from '../../utils/config'
 import '../common/Invoice.css'
@@ -75,7 +75,7 @@ export default function SalesOrderEditView(props) {
                     </Button> 
                 }
                 <Button icon={<CloseOutlined/>} onClick={_ => { 
-                    form.resetFields()
+                    form.setFieldsValue(props.order ? dcInvoice(props.order) : emptyInvoice(1))
                     props.dismiss() 
                 }}>
                     取消

@@ -3,7 +3,7 @@ import { Button, Form, Col, Space, Divider } from 'antd'
 import { InboxOutlined, CloseOutlined, SaveOutlined } from '@ant-design/icons'
 import Axios from 'axios'
 
-import { dcInvoice, isOrderItemComplete, isOrderItemEmpty, isProductRepeat } from '../../utils/invoiceUtils'
+import { dcInvoice, emptyInvoice, isOrderItemComplete, isOrderItemEmpty, isProductRepeat } from '../../utils/invoiceUtils'
 import { baseURL, DATE_FORMAT } from '../../utils/config'
 import OrderEditView from '../common/OrderEditView'
 import '../common/Invoice.css'
@@ -70,7 +70,7 @@ export default function PurchaseOrderEditView(props) {
                 { props.order && props.order.id ? null : <Button icon={<InboxOutlined/>} onClick={_ => props.saveDraft(form.getFieldsValue(true))}>保存草稿</Button> }
                 <Button icon={<CloseOutlined/>} 
                 onClick={_ => { 
-                    form.resetFields()
+                    form.setFieldsValue(props.order ? dcInvoice(props.order) : emptyInvoice(1))
                     props.dismiss() 
                 }}>取消</Button>
             </Space>
