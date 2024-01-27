@@ -4,11 +4,10 @@ import { InboxOutlined, CloseOutlined, SaveOutlined } from '@ant-design/icons'
 import Axios from 'axios'
 
 
-import { dcInvoice, emptyInvoice, isOrderItemComplete, isOrderItemEmpty, isProductRepeat
-} from '../../utils/invoiceUtils'
+import { dcInvoice, emptyInvoice, isOrderItemComplete, isOrderItemEmpty, isProductRepeat } from '../../utils/invoiceUtils'
 import { baseURL, DATE_FORMAT } from '../../utils/config'
 import '../common/Invoice.css'
-import OrderEditView from '../common/OrderEditView'
+import InvoiceEditView from '../common/InvoiceEditView'
 
 
 /*
@@ -62,7 +61,7 @@ export default function SalesOrderEditView(props) {
     }, [props.order])
 
     return <Form form={form} onFinish={upload} requiredMark={false}>
-        <OrderEditView />
+        <InvoiceEditView type='salesOrder' />
         <Divider />
 
         <Col align='end'>

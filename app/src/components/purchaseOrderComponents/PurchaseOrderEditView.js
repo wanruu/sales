@@ -5,7 +5,7 @@ import Axios from 'axios'
 
 import { dcInvoice, emptyInvoice, isOrderItemComplete, isOrderItemEmpty, isProductRepeat } from '../../utils/invoiceUtils'
 import { baseURL, DATE_FORMAT } from '../../utils/config'
-import OrderEditView from '../common/OrderEditView'
+import InvoiceEditView from '../common/InvoiceEditView'
 import '../common/Invoice.css'
 
 
@@ -61,7 +61,7 @@ export default function PurchaseOrderEditView(props) {
     }, [props.order])
 
     return <Form form={form} onFinish={upload}>
-        <OrderEditView />
+        <InvoiceEditView type='purchaseOrder' />
         <Divider />
 
         <Col align='end'>

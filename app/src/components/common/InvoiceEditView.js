@@ -13,6 +13,7 @@ import { invoiceSettings, baseURL } from '../../utils/config'
 import { isOrderItemEmpty, emptyInvoiceItem, calItemAmount, calTotalAmount, dcInvoice } from '../../utils/invoiceUtils'
 import './Invoice.css'
 import SalesRefundItemSelectView from '../salesRefundComponents/SalesRefundItemSelectView'
+import PurchaseRefundItemSelectView from '../purchaseRefundComponents/PurchaseRefundItemSelectView'
 
 
 /*
@@ -373,10 +374,20 @@ export default function InvoiceEditView(props) {
                 )}
             </Form.List>
             <Modal title='选择退货产品' open={isSelectionModalOpen} width={1000} center onCancel={_ => setSelectionModalOpen(false)} footer={null} destroyOnClose>
-                <SalesRefundItemSelectView
-                editRefund={form.getFieldsValue(true)} 
-                setEditRefund={r => form.setFieldsValue(dcInvoice(r))}
-                dismiss={_ => setSelectionModalOpen(false)} />
+                {
+                    props.type === 'salesRefund' ? 
+                    <SalesRefundItemSelectView
+                    editRefund={form.getFieldsValue(true)} 
+                    setEditRefund={r => form.setFieldsValue(dcInvoice(r))}
+                    dismiss={_ => setSelectionModalOpen(false)} /> : null
+                }
+                {
+                    props.type === 'purchaseRefund' ?
+                    <PurchaseRefundItemSelectView
+                    editRefund={form.getFieldsValue(true)} 
+                    setEditRefund={r => form.setFieldsValue(dcInvoice(r))}
+                    dismiss={_ => setSelectionModalOpen(false)} /> : null
+                }
             </Modal>
         </>
     )
