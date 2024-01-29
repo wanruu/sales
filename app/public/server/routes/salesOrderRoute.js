@@ -235,42 +235,6 @@ router.get('/', (req, res) => {
     })
 })
 
-router.get('/detailed', (req, res) => {
-    const refundId = req.query.refundId || null  // include
-    const selectOrder = `SELECT i.*, refundId 
-        FROM invoice AS i LEFT JOIN invoiceRelation AS r ON i.id=r.orderId
-        WHERE type=${typeInt} AND (refundId IS NULL OR refundId="${refundId}")`
-    db.all(selectOrder, (err, orders) => {
-        if (err) {
-            console.error(err)
-            res.status(500).send(err)
-            return
-        }
-        const query = `SELECT i.id AS orderId, ii.quantity AS maxQuantity,
-            p.id AS productId, p.material, p.name, p.spec, p.unit, 
-            ii.id AS orderItemId, ii.price, ii.quantity, ii.amount, ii.discount, ii.originalAmount, ii.remark, ii.delivered 
-            FROM invoice AS i, invoiceItem AS ii, product AS p 
-            WHERE i.id=ii.invoiceId AND p.id=ii.productId AND i.type=${typeInt}`
-        db.all(query, (err, items) => {
-            if (err) {
-                console.error(err)
-                res.status(500).send(err)
-                return
-            }
-            for (const item of items) {
-                const order = orders.find(order => order.id === item.orderId)
-                if (order) {
-                    if (order.items === undefined) {
-                        order.items = [item]
-                    } else {
-                        order.items.push(item)
-                    }
-                }
-            }
-            res.send(orders)
-        })
-    })
-})
 
 router.get('/id/:id', (req, res) => {
     const orderId = req.params.id  // str

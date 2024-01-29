@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Table, Divider, Space, Radio, Tag, Modal, message, Button, Row, Col, DatePicker } from 'antd'
+import { Table, Divider, Space, Radio, Tag, Modal, message, Button, Row, Col, DatePicker, Card, Form } from 'antd'
 import Axios from 'axios'
 import Decimal from 'decimal.js'
 import { TableOutlined, CloseOutlined, SearchOutlined } from '@ant-design/icons'
@@ -88,14 +88,14 @@ const PRODUCT_TABLE_HEADERS = [
         { title: '单位', dataIndex: 'unit' }
     ] },
     { title: '销售信息	', children: [
-        { title: '数量', dataIndex: 'salesQuantity' },
-        { title: '均价', dataIndex: 'salesPrice' },
+        { title: '实际销售数量', dataIndex: 'salesQuantity' },
         { title: '退货数量', dataIndex: 'salesRefundQuantity' },
+        { title: '均价', dataIndex: 'salesPrice' },
     ] },
     { title: '采购信息', children: [
-        { title: '数量', dataIndex: 'purchaseQuantity' },
-        { title: '均价', dataIndex: 'purchasePrice' },
+        { title: '实际采购数量', dataIndex: 'purchaseQuantity' },
         { title: '退货数量', dataIndex: 'purchaseRefundQuantity' },
+        { title: '均价', dataIndex: 'purchasePrice' },
     ] }
 ]
 const exportExcel = (sheets, filename) => {
@@ -141,9 +141,7 @@ function InvoiceTable(props) {
                     {amountSign + orderPaid.toNumber().toLocaleString()}
                 </Table.Summary.Cell>
                 <Table.Summary.Cell index={4} align='center'>
-                    <font color={orderUnpaid.equals(0) ? 'black' : 'red'}>
-                        {amountSign + orderUnpaid.toNumber().toLocaleString()}
-                    </font>
+                    {amountSign + orderUnpaid.toNumber().toLocaleString()}
                 </Table.Summary.Cell>
                 <Table.Summary.Cell index={5} />
                 <Table.Summary.Cell index={6} align='center'>
@@ -153,18 +151,13 @@ function InvoiceTable(props) {
                     {amountSign + refundPaid.toNumber().toLocaleString()}
                 </Table.Summary.Cell>
                 <Table.Summary.Cell index={8} align='center'>
-                    <font color={refundUnpaid.equals(0) ? 'black' : 'red'}>
-                        {amountSign + refundUnpaid.toNumber().toLocaleString()}
-                    </font>
+                    {amountSign + refundUnpaid.toNumber().toLocaleString()}
                 </Table.Summary.Cell>
                 <Table.Summary.Cell index={9} align='center'>
                     <Button type='primary' ghost onClick={_ => exportExcel([[items, INVOICE_TABLE_HEADERS, summaryRow]], '清单总览')}>导出</Button>
                 </Table.Summary.Cell>
             </Table.Summary.Row>
         </Table.Summary>
-    }
-    const getFooter = () => {
-        return '注意：当“销售单”与“采购单”混合显示时，总计金额不能代表实际应付、已付、未付的金额，请筛选后再查看。'
     }
 
     const amountSign = invoiceSettings.get('ifShowAmountSign') === 'true' ? invoiceSettings.get('amountSign') : ''
@@ -174,7 +167,7 @@ function InvoiceTable(props) {
             open={selectedInvoiceId !== undefined} onCancel={_ => setSelectedInvoiceId(undefined)} width={900} footer={null} destroyOnClose>
             { selectedInvoiceType ? INVOICE_TYPE_2_DICT[selectedInvoiceType].view() : null }
         </Modal>
-        <Table dataSource={props.invoices} rowKey={r => r.orderId} {...DEFAULT_TABLE_SETTINGS} summary={getSummary} footer={getFooter}>
+        <Table dataSource={props.invoices} rowKey={r => r.orderId} {...DEFAULT_TABLE_SETTINGS} summary={getSummary}>
             { NUMBER_COLUMN }
             <ColumnGroup title='销售/采购单' align='center'>
                 <Column title='单号' dataIndex='orderId' align='center' width={130} render={(id, r) => 
@@ -254,7 +247,7 @@ function InvoiceItemTable(props) {
                     </Table.Summary.Cell>
                     <Table.Summary.Cell index={ifShowMaterial ? 16 : 15} />
                     <Table.Summary.Cell index={ifShowMaterial ? 17 : 16} align='center'>
-                        <Button type='primary' ghost onClick={_ => exportExcel([[items, INVOICE_ITEM_TABLE_HEADERS, summaryRow]], '清单条目')}>导出</Button>
+                        <Button type='primary' ghost onClick={_ => exportExcel([[items, INVOICE_ITEM_TABLE_HEADERS, summaryRow]], '清单明细')}>导出</Button>
                     </Table.Summary.Cell>
                 </Table.Summary.Row>
             </Table.Summary>
@@ -272,13 +265,10 @@ function InvoiceItemTable(props) {
                 </Table.Summary.Cell>
                 <Table.Summary.Cell index={ifShowMaterial ? 13 : 12} />
                 <Table.Summary.Cell index={ifShowMaterial ? 14 : 13} align='center'>
-                    <Button onClick={_ => exportExcel([[items, INVOICE_ITEM_TABLE_HEADERS, summaryRow]], '清单条目')}>导出</Button>
+                    <Button onClick={_ => exportExcel([[items, INVOICE_ITEM_TABLE_HEADERS, summaryRow]], '清单明细')}>导出</Button>
                 </Table.Summary.Cell>
             </Table.Summary.Row>
         </Table.Summary>
-    }
-    const getFooter = () => {
-        return '注意：当“销售单”与“采购单”混合显示时，总计金额不能代表实际金额，请筛选后再查看。'
     }
 
     return <>
@@ -286,7 +276,7 @@ function InvoiceItemTable(props) {
             open={selectedInvoiceId !== undefined} onCancel={_ => setSelectedInvoiceId(undefined)} width={900} footer={null} destroyOnClose>
             { selectedInvoiceType ? INVOICE_TYPE_2_DICT[selectedInvoiceType].view() : null }
         </Modal>
-        <Table dataSource={props.invoiceItems} {...DEFAULT_TABLE_SETTINGS} rowKey={r => r.orderId + r.productId} footer={getFooter} summary={getSummary}>
+        <Table dataSource={props.invoiceItems} {...DEFAULT_TABLE_SETTINGS} rowKey={r => r.orderId + r.productId} summary={getSummary}>
             { NUMBER_COLUMN }
             <ColumnGroup title='销售/采购单' align='center'>
                 <Column title='单号' dataIndex='orderId' align='center' width={130} render={(id, r) => {
@@ -335,7 +325,7 @@ function InvoiceItemTable(props) {
 function ProductTable(props) {
     const getFooter = () => {
         return <Row style={{ justifyContent: 'space-between' }}>
-            <span>注意：表格中显示的“数量”是减去“退货数量”之后的值。</span>
+            <span>注意：表格中显示的“数量”是退货后的数量。</span>
             <Button type='primary' ghost onClick={_ => exportExcel([[props.products, PRODUCT_TABLE_HEADERS]], '产品')}>导出</Button>
         </Row>
     }
@@ -351,15 +341,15 @@ function ProductTable(props) {
             <Column title='单位' dataIndex='unit' align='center' width={50} />
         </ColumnGroup>
         <ColumnGroup title='销售信息' align='center'>
-            <Column title='数量' dataIndex='salesQuantity' align='center' width={70} render={p => p ? p.toLocaleString() : null} />
+            <Column title='实际销售数量' dataIndex='salesQuantity' align='center' width={110} render={p => p ? p.toLocaleString() : null} />
+            <Column title='退货数量' dataIndex='salesRefundQuantity' align='center' width={80} render={p => p ? p.toLocaleString() : null} />
             <Column title='均价' dataIndex='salesPrice' align='center' width={70} 
                 render={p => p ? amountSign + p.toLocaleString() : null} />
-            <Column title='退货数量' dataIndex='salesRefundQuantity' align='center' width={80} render={p => p ? p.toLocaleString() : null} />
         </ColumnGroup>
         <ColumnGroup title='采购信息' align='center'>
-            <Column title='数量' dataIndex='purchaseQuantity' align='center' width={70} render={p => p ? p.toLocaleString() : null} />
-            <Column title='均价' dataIndex='purchasePrice' align='center' width={70} render={p => p ? amountSign + p.toLocaleString() : null} />
+            <Column title='实际采购数量' dataIndex='purchaseQuantity' align='center' width={110} render={p => p ? p.toLocaleString() : null} />
             <Column title='退货数量' dataIndex='purchaseRefundQuantity' align='center' width={80} render={p => p ? p.toLocaleString() : null} />
+            <Column title='均价' dataIndex='purchasePrice' align='center' width={70} render={p => p ? amountSign + p.toLocaleString() : null} />
         </ColumnGroup>
     </Table>
 }
@@ -370,11 +360,12 @@ function ProductTable(props) {
 */
 export default function PartnerView(props) {
     const [partner, setPartner] = useState(undefined)
-    const [dataRange, setDataRange] = useState(null)
     const [tableType, setTableType] = useState('byInvoice')
     const [messageApi, contextHolder] = message.useMessage()
+    const [form] = Form.useForm()
 
     const load = () => {
+        const dataRange = form.getFieldValue('date')
         Axios({
             method: 'get',
             baseURL: baseURL(),
@@ -401,7 +392,7 @@ export default function PartnerView(props) {
     }
     const tableOptions = [
         { label: '清单总览', value: 'byInvoice' },
-        { label: '清单条目', value: 'byInvoiceItem' },
+        { label: '清单明细', value: 'byInvoiceItem' },
         { label: '产品', value: 'byProduct' }
     ]
     const processInvoiceItems = (invoiceItems) => {
@@ -444,7 +435,7 @@ export default function PartnerView(props) {
         ])(partner.invoiceItems)
         exportExcel([
             [partner.invoices, INVOICE_TABLE_HEADERS, invoiceSR, '清单总览'],
-            [partner.invoiceItems, INVOICE_ITEM_TABLE_HEADERS, invoiceItemsSR, '清单条目'],
+            [partner.invoiceItems, INVOICE_ITEM_TABLE_HEADERS, invoiceItemsSR, '清单明细'],
             [partner.products, PRODUCT_TABLE_HEADERS, null, '产品']
         ], partner.name)
     }
@@ -462,18 +453,17 @@ export default function PartnerView(props) {
             </Row>
         </Space>
         
-        <Row style={{ marginBottom: '10px' }} align='middle'>
-            <Col span={12} align='left'>
-                销售/采购单：
-                <Space.Compact>
-                    <RangePicker allowEmpty={[true, true]} onChange={val => setDataRange(val)} />
-                    <Button icon={<SearchOutlined />} onClick={load} />
-                </Space.Compact>
-            </Col>
-            <Col span={12} align='right'>
-                <Radio.Group value={tableType} onChange={e => setTableType(e.target.value)} options={tableOptions} />
-            </Col>
-        </Row>
+        <Card size='small' style={{ marginBottom: '10px' }}>
+            <Form form={form} onFinish={load} layout='inline'>
+                <Form.Item label='销售/采购单日期' name='date'>
+                    <RangePicker allowEmpty={[true, true]} />
+                </Form.Item>
+                <Button htmlType='submit'>筛选</Button>
+            </Form>
+            <br />
+            <Radio.Group value={tableType} onChange={e => setTableType(e.target.value)} options={tableOptions} />
+        </Card>
+
         { tableDict[tableType]() }
         
         <Divider />

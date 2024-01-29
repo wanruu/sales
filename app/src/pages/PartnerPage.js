@@ -88,8 +88,8 @@ function PartnerPage() {
         { title: '电话', align: 'center', dataIndex: 'phone' },
         { title: '地址', align: 'center', dataIndex: 'address' },
         { title: '身份', align: 'center', render: (_, record) => {
-            const customer = record.orderId == null ? null : <Tag color='orange'>客户</Tag>
-            const provider = record.purchaseId == null ? null : <Tag color='blue'>供应商</Tag>
+            const customer = record.orderId == null ? null : <Tag color='blue'>客户</Tag>
+            const provider = record.purchaseId == null ? null : <Tag color='gold'>供应商</Tag>
             return <>{ customer } { provider }</>
         }},
         { title: '操作', align: 'center', fixed: 'right', render: (_, record) => 
