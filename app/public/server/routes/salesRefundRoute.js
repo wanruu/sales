@@ -47,18 +47,34 @@ router.get('/id/:id', (req, res) => {
             res.status(500).send(err)
             return
         }
-        const orderItems = `SELECT p.material, p.name, p.spec, p.unit, p.quantity AS remainingQuantity,
-        oi.price, oi.discount, oi.quantity AS maxQuantity, oi.productId
-        FROM invoiceItem AS oi, product AS p
-        WHERE oi.invoiceId="${refund.orderId}" AND oi.productId=p.id`
-        const refundItems = `SELECT productId, id AS refundItemId, quantity, originalAmount, amount, remark, delivered
+        const orderItems = `SELECT price, discount, productId,
+        quantity AS maxQuantity
+        FROM invoiceItem 
+        WHERE invoiceId="${refund.orderId}"`
+
+        const refundItems = `SELECT price, discount, productId,
+        NULL AS maxQuantity,
+        id AS refundItemId, quantity, originalAmount, amount, remark, delivered
         FROM invoiceItem
         WHERE invoiceId="${refundId}"`
-        const selectAllItems = `SELECT oi.*, ri.*
-        FROM (${orderItems}) AS oi LEFT JOIN (${refundItems}) AS ri
-        ON ri.productId=oi.productId`
+
+        const combineItems = `SELECT ii.*,
+        p.material, p.name, p.spec, p.unit
+        FROM (
+            SELECT oi.*, 
+            ri.refundItemId, ri.quantity, ri.originalAmount, ri.amount, ri.remark, ri.delivered
+            FROM (${orderItems}) AS oi
+            LEFT JOIN (${refundItems}) AS ri
+            ON ri.productId=oi.productId
+            UNION
+            SELECT ri.*
+            FROM (${refundItems}) AS ri
+            LEFT JOIN (${orderItems}) AS oi
+            ON ri.productId=oi.productId
+        ) AS ii, product AS p
+        WHERE ii.productId=p.id`
         
-        db.all(selectAllItems, (err, items) => {
+        db.all(combineItems, (err, items) => {
             if (err) {
                 console.error(err)
                 res.status(500).send(err)

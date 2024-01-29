@@ -381,9 +381,11 @@ export default function InvoiceEditView(props) {
     const addToUnrefundedItems = (index) => {
         if (isRefund) {
             const item = (form.getFieldValue('items') || [])?.[index] || {}
-            item.quantity = item.maxQuantity
-            const unrefundedItems = [...(form.getFieldValue('unrefundedItems') || []), item]
-            form.setFieldValue('unrefundedItems', unrefundedItems)
+            if (item.maxQuantity != null) {
+                item.quantity = item.maxQuantity
+                const unrefundedItems = [...(form.getFieldValue('unrefundedItems') || []), item]
+                form.setFieldValue('unrefundedItems', unrefundedItems)
+            }
         }
     }
 

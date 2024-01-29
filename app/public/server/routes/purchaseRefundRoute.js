@@ -46,18 +46,34 @@ router.get('/id/:id', (req, res) => {
             res.status(500).send(err)
             return
         }
-        const refundItems = `SELECT ii.id AS refundItemId, productId, material, name, spec, unit, p.quantity AS remainingQuantity, 
-            price, discount, ii.quantity, originalAmount, amount, remark, delivered 
-            FROM invoiceItem ii, product p
-            WHERE ii.invoiceId="${refundId}" AND ii.productId=p.id`
-        const orderItems = `SELECT oi.*
-            FROM invoiceRelation AS r, invoiceItem AS oi
-            WHERE r.refundId="${refundId}" AND oi.invoiceId=r.orderId`
-        const selectRefundItemsWithOrderInfo = `SELECT ri.*,
-            IFNULL(IFNULL(oi.weight,0)/oi.quantity,0) AS unitWeight, oi.quantity AS maxQuantity
-            FROM (${refundItems}) AS ri LEFT JOIN (${orderItems}) AS oi
-            ON oi.productId=ri.productId`
-        db.all(selectRefundItemsWithOrderInfo, (err, items) => {
+        const orderItems = `SELECT price, discount, productId,
+        quantity AS maxQuantity
+        FROM invoiceItem 
+        WHERE invoiceId="${refund.orderId}"`
+
+        const refundItems = `SELECT price, discount, productId,
+        NULL AS maxQuantity,
+        id AS refundItemId, quantity, originalAmount, amount, remark, delivered
+        FROM invoiceItem
+        WHERE invoiceId="${refundId}"`
+
+        const combineItems = `SELECT ii.*,
+        p.material, p.name, p.spec, p.unit
+        FROM (
+            SELECT oi.*, 
+            ri.refundItemId, ri.quantity, ri.originalAmount, ri.amount, ri.remark, ri.delivered
+            FROM (${orderItems}) AS oi
+            LEFT JOIN (${refundItems}) AS ri
+            ON ri.productId=oi.productId
+            UNION
+            SELECT ri.*
+            FROM (${refundItems}) AS ri
+            LEFT JOIN (${orderItems}) AS oi
+            ON ri.productId=oi.productId
+        ) AS ii, product AS p
+        WHERE ii.productId=p.id`
+
+        db.all(combineItems, (err, items) => {
             if (err) {
                 console.error(err)
                 res.status(500).send(err)

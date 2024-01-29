@@ -75,10 +75,6 @@ export const isOrderItemEmpty = (item) => {
 }
 
 export const isOrderItemComplete = (item) => {
-    const ifShowMaterial = invoiceSettings.get('ifShowMaterial') === 'true'
-    if (ifShowMaterial) 
-        return item.material !== '' && item.name !== '' && item.spec !== '' && item.quantity !== null && 
-            item.unit !== '' && item.price !== null && item.discount !== null
     return item.name !== '' && item.spec !== '' && item.quantity !== null && 
         item.unit !== '' && item.price !== null && item.discount !== null
 }
