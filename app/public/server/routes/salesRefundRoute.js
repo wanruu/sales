@@ -47,40 +47,60 @@ router.get('/id/:id', (req, res) => {
             res.status(500).send(err)
             return
         }
-        const orderItems = `SELECT price, discount, productId,
-        quantity AS maxQuantity
-        FROM invoiceItem 
-        WHERE invoiceId="${refund.orderId}"`
-
-        const refundItems = `SELECT price, discount, productId,
-        NULL AS maxQuantity,
-        id AS refundItemId, quantity, originalAmount, amount, remark, delivered
-        FROM invoiceItem
-        WHERE invoiceId="${refundId}"`
-
-        const combineItems = `SELECT ii.*,
+        const selectOrderItems = `SELECT ii.price, ii.discount, ii.productId,
+        ii.quantity AS maxQuantity,
         p.material, p.name, p.spec, p.unit
-        FROM (
-            SELECT oi.*, 
-            ri.refundItemId, ri.quantity, ri.originalAmount, ri.amount, ri.remark, ri.delivered
-            FROM (${orderItems}) AS oi
-            LEFT JOIN (${refundItems}) AS ri
-            ON ri.productId=oi.productId
-            UNION
-            SELECT ri.*
-            FROM (${refundItems}) AS ri
-            LEFT JOIN (${orderItems}) AS oi
-            ON ri.productId=oi.productId
-        ) AS ii, product AS p
-        WHERE ii.productId=p.id`
+        FROM invoiceItem AS ii, product AS p
+        WHERE ii.invoiceId="${refund.orderId}" AND p.id=ii.productId`
+
+        const selectRefundItems = `SELECT ii.price, ii.discount, ii.productId,
+        NULL AS maxQuantity,
+        ii.id AS refundItemId, ii.quantity, ii.originalAmount, ii.amount, ii.remark, ii.delivered,
+        p.material, p.name, p.spec, p.unit
+        FROM invoiceItem AS ii, product AS p
+        WHERE ii.invoiceId="${refundId}" AND p.id=ii.productId`
+
+        // const combineItems = `SELECT ii.*,
+        // p.material, p.name, p.spec, p.unit
+        // FROM (
+        //     SELECT oi.*, 
+        //     ri.refundItemId, ri.quantity, ri.originalAmount, ri.amount, ri.remark, ri.delivered
+        //     FROM (${orderItems}) AS oi
+        //     LEFT JOIN (${refundItems}) AS ri
+        //     ON ri.productId=oi.productId
+        //     UNION
+        //     SELECT ri.*
+        //     FROM (${refundItems}) AS ri
+        //     LEFT JOIN (${orderItems}) AS oi
+        //     ON ri.productId=oi.productId
+        // ) AS ii, product AS p
+        // WHERE ii.productId=p.id`
         
-        db.all(combineItems, (err, items) => {
+        db.all(selectOrderItems, (err, orderItems) => {
             if (err) {
                 console.error(err)
                 res.status(500).send(err)
                 return
             }
-            res.send(Object.assign(refund, { items: items }))
+            db.all(selectRefundItems, (err, refundItems) => {
+                if (err) {
+                    console.error(err)
+                    res.status(500).send(err)
+                    return
+                }
+                const productsDict = {}
+                for (const refundItem of refundItems) {
+                    productsDict[refundItem.productId] = refundItem
+                }
+                for (const orderItem of orderItems) {
+                    if (productsDict[orderItem.productId] === undefined) {
+                        productsDict[orderItem.productId] = orderItem
+                    } else {
+                        productsDict[orderItem.productId].maxQuantity = orderItem.maxQuantity
+                    }
+                }
+                res.send(Object.assign(refund, { items: Object.values(productsDict) }))
+            })
         })
     })
 })
