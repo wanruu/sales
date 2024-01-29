@@ -65,7 +65,7 @@ export default function SalesOrderEditView(props) {
         }
     }, [props.order])
 
-    return <Form form={form} onFinish={upload} requiredMark={false}>
+    return <Form form={form} onFinish={upload}>
         <InvoiceEditView type='salesOrder' />
         <Divider />
 

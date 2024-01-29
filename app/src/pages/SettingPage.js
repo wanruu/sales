@@ -110,7 +110,7 @@ export default function SettingPage() {
         <h1>设置</h1>
         {/* <PhoneAccessView /> */}
         <Collapse>
-            <Collapse.Panel header='清单设置' key='清单设置'>
+            <Collapse.Panel header='开单设置' key='开单设置'>
                 <InvoiceSettingView />
             </Collapse.Panel>
             <Collapse.Panel header='打印设置' key='打印设置'>

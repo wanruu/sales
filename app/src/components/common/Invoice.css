@@ -56,6 +56,10 @@
     margin: 0;
 }
 
+.editTable .ant-input-number-group-addon {
+    padding: 0px 3px;
+}
+
 
 
 .invoiceWrapper {

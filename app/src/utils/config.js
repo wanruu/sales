@@ -40,7 +40,8 @@ export const DEFAULT_INVOICE_SETTINGS = {
     ifShowDelivered: 'true', ifShowInvoiceDelivered: 'true', ifShowItemDelivered: 'true',
     ifShowAmountSign: 'true', amountSign: '￥', allowEditAmount: 'false',
     itemAmountDigitNum: '3', invoiceAmountDigitNum: '2',
-    unitOptions: JSON.stringify(UNIT_OPTIONS)
+    unitOptions: JSON.stringify(UNIT_OPTIONS),
+    ifShowRemarkCalculator: 'true'
 }
 
 

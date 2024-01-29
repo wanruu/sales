@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 import Axios from 'axios'
 import Decimal from 'decimal.js'
-import { Form, Input, Table, Button, InputNumber, Select, Row, DatePicker, Popover, Modal, Collapse } from 'antd'
+import { Form, Input, Table, Button, InputNumber, Select, Row, DatePicker, Popover, Modal, Collapse, Space } from 'antd'
 import { DeleteOutlined, EditOutlined, ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons'
-
+import { evaluate } from 'mathjs'
 
 const { Item } = Form
 
@@ -29,13 +29,14 @@ export default function InvoiceEditView(props) {
         const ifShowMaterial = invoiceSettings.get('ifShowMaterial') === 'true'
         const ifShowDelivered = invoiceSettings.get('ifShowDelivered') === 'true'
         const allowEditAmount = invoiceSettings.get('allowEditAmount') === 'true'
+        const ifShowRemarkCalculator = invoiceSettings.get('ifShowRemarkCalculator') === 'true'
         return [
             { 
                 title: '', align: 'center', width: 30, fixed: 'left', 
                 render: (_, __, idx) => idx + 1 
             },
             ifShowMaterial ? { 
-                title: '材质', dataIndex: 'material', align: 'center', width: 50,
+                title: '材质', dataIndex: 'material', align: 'center', width: 60,
                 render: (_, field, idx) => (
                     <Item shouldUpdate>
                         {({ getFieldValue, setFieldValue }) => {
@@ -54,7 +55,7 @@ export default function InvoiceEditView(props) {
                 )
             } : null,
             { 
-                title: '名称', dataIndex: 'name', align: 'center', width: 100, 
+                title: '名称', dataIndex: 'name', align: 'center', width: 140, 
                 render: (_, field, idx) => (
                     <Item shouldUpdate>
                         {({ getFieldValue, setFieldValue }) => {
@@ -73,7 +74,7 @@ export default function InvoiceEditView(props) {
                 )
             },
             { 
-                title: '规格', dataIndex: 'spec', align: 'center', width: 60, 
+                title: '规格', dataIndex: 'spec', align: 'center', width: 120, 
                 render: (_, field, idx) => (
                     <Item shouldUpdate>
                         {({ getFieldValue, setFieldValue }) => {
@@ -100,7 +101,7 @@ export default function InvoiceEditView(props) {
                         </Popover>
                     </span> : '数量'
                 ), 
-                dataIndex: 'quantity', align: 'center', width: 70, 
+                dataIndex: 'quantity', align: 'center', width: 80, 
                 render: (_, field, idx) => (
                     <Item shouldUpdate>
                         {({ getFieldValue, setFieldValue }) => {
@@ -147,7 +148,7 @@ export default function InvoiceEditView(props) {
                 )
             },
             { 
-                title: '单价', dataIndex: 'price', align: 'center', width: 70, 
+                title: '单价', dataIndex: 'price', align: 'center', width: 90, 
                 render: (_, field, idx) => (
                     <Item shouldUpdate>
                         {({ getFieldValue, setFieldValue }) => {
@@ -193,7 +194,7 @@ export default function InvoiceEditView(props) {
             } : null,
             ifShowDiscount ? 
             { 
-                title: '折扣', dataIndex: 'discount', align: 'center', width: 60, 
+                title: '折扣', dataIndex: 'discount', align: 'center', width: 65, 
                 render: (_, field, idx) => (
                     <Item shouldUpdate>
                         {({ getFieldValue, setFieldValue }) => {
@@ -201,13 +202,14 @@ export default function InvoiceEditView(props) {
                             return isRefund ? `${record.discount}%` : (
                                 <InputNumber keyboard={false} size='small' 
                                 min={0} max={100} controls={false} style={{ width: '100%' }} 
-                                formatter={(value) => `${value}%`} parser={(value) => value.replace('%', '')}
+                                // formatter={(value) => `${value}%`} parser={(value) => value.replace('%', '')}
                                 value={record.discount} 
                                 onChange={value => {
                                     setFieldValue(['items', idx, 'discount'], value)
                                     updateTableRows()
                                     updateItemAmount(idx)
-                                }} />
+                                }}
+                                addonAfter='%' />
                             )
                         }}
                     </Item>
@@ -236,24 +238,35 @@ export default function InvoiceEditView(props) {
                 )
             },
             { 
-                title: '备注', dataIndex: 'remark', align: 'center', width: 100, 
+                title: '备注', dataIndex: 'remark', align: 'center', width: 180, 
                 render: (_, field, idx) => (
                     <Item shouldUpdate>
                         {({ getFieldValue, setFieldValue }) => {
                             const record = (getFieldValue('items') || [])?.[idx] || {}
-                            return <Input size='small' style={{ width: '100%' }} 
-                                value={record.remark} 
-                                onChange={e => {
-                                    setFieldValue(['items', idx, 'remark'], e.target.value)
-                                    updateTableRows()
-                                }} />
+                            return (<Space size={3}>
+                                <Input size='small' 
+                                    value={record.remark} 
+                                    onChange={e => {
+                                        setFieldValue(['items', idx, 'remark'], e.target.value)
+                                        updateTableRows()
+                                    }} />
+                                { ifShowRemarkCalculator ?
+                                    <Button size='small' style={{ paddingLeft: '4px', paddingRight: '4px' }}
+                                    onClick={_ => {
+                                        const quantity = calRemark(record.remark)
+                                        if (quantity) {
+                                            setFieldValue(['items', idx, 'quantity'], quantity)
+                                        }
+                                    }}> = </Button> :null
+                                }
+                            </Space>)
                         }}
                     </Item>
                 )
             },
             ifShowDelivered ? 
             { 
-                title: '配送', dataIndex: 'delivered', align: 'center', width: 60, fixed: 'right', 
+                title: '配送', dataIndex: 'delivered', align: 'center', width: 60, 
                 render: (_, field, idx) => (
                     <Item shouldUpdate>
                         {({ getFieldValue, setFieldValue }) => {
@@ -325,6 +338,15 @@ export default function InvoiceEditView(props) {
                 }}><PlusOutlined /></Button>
             }}
         ].filter(c => c != null)
+    }
+
+    const calRemark = (remark) => {
+        try {
+            const newRemark = remark.replace(/）/g, ')').replace(/（/g, '(')
+            const equation = newRemark.match(/[0-9\+\-\*\/()\.]+/)[0]
+            const quantity = parseFloat(evaluate(equation).toFixed(5))
+            return quantity
+        } catch (err) { }
     }
 
     const updateUnit = (index) => {
