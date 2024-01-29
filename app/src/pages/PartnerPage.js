@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Table, Button, Space, message, Modal, Form, Input, Card } from 'antd'
+import { Table, Button, Space, message, Modal, Form, Input, Card, Tag } from 'antd'
 import Axios from 'axios'
 import { ExclamationCircleFilled, PlusOutlined, TableOutlined, ClearOutlined, SearchOutlined } from '@ant-design/icons'
 
@@ -87,10 +87,16 @@ function PartnerPage() {
         { title: '文件位置', align: 'center', dataIndex: 'folder' },
         { title: '电话', align: 'center', dataIndex: 'phone' },
         { title: '地址', align: 'center', dataIndex: 'address' },
+        { title: '身份', align: 'center', render: (_, record) => {
+            const customer = record.orderId == null ? null : <Tag color='orange'>客户</Tag>
+            const provider = record.purchaseId == null ? null : <Tag color='blue'>供应商</Tag>
+            return <>{ customer } { provider }</>
+        }},
         { title: '操作', align: 'center', fixed: 'right', render: (_, record) => 
             <Space>
                 <Button type='primary' ghost onClick={_ => setEditPartner(record)}>编辑</Button>
-                {record.invoiceNum > 0 ?
+                {
+                    record.purchaseId != null || record.orderId != null ?
                     <Button onClick={_ => setSelectedPartnerName(record.name)}>查看</Button> :
                     <Button danger onClick={_ => showDeleteConfirm([record.name])}>删除</Button>
                 }

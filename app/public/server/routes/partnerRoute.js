@@ -10,13 +10,12 @@ const purchaseRefundType = INVOICE_TYPE_2_INT.purchaseRefund
 
 
 router.get('/', (req, res) => {
-    const t = `SELECT p.name, COUNT(*) AS invoiceNum
-        FROM partner AS p, invoiceItem AS ii, invoice AS i 
-        WHERE p.name=i.partner AND ii.invoiceId=i.id 
-        GROUP BY p.name`
-
-    const query = `SELECT p.*, invoiceNum 
-        FROM partner AS p LEFT JOIN (${t}) AS t ON p.name=t.name`
+    const salesOrder = `SELECT partner, id AS orderId FROM invoice WHERE type=${INVOICE_TYPE_2_INT.salesOrder} GROUP BY partner`
+    const purchaseOrder = `SELECT partner, id AS purchaseId FROM invoice WHERE type=${INVOICE_TYPE_2_INT.purchaseOrder} GROUP BY partner`
+    const query = `SELECT partner.*, orderId, purchaseId
+        FROM partner
+        LEFT JOIN (${salesOrder}) AS o ON partner.name=o.partner
+        LEFT JOIN (${purchaseOrder}) AS p ON partner.name=p.partner`
     db.all(query, (err, rows) => {
         if (err) {
             console.error(err)
