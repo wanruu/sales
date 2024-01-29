@@ -42,7 +42,13 @@ export default function SalesRefundView(props) {
 
     return <>
         <div style={{ display: mode === 'edit' ? 'block' : 'none' }}>
-            <SalesRefundEditView refund={refund} dismiss={_ => setMode('view')} messageApi={props.messageApi} refresh={_ => { load(); props.refresh() }} /> 
+            <SalesRefundEditView refund={refund} 
+            dismiss={_ => setMode('view')} 
+            messageApi={props.messageApi} 
+            refresh={_ => { 
+                load()
+                props.refresh() 
+            }} /> 
         </div>
         <div style={{ display: mode === 'view' ? 'block' : 'none'}}>
             <View refund={refund} setMode={setMode} />
@@ -74,13 +80,17 @@ function View(props) {
                 <Col span={8}>总金额：{props.refund.amount.toLocaleString()}</Col>
                 <Col span={8}>已付：{props.refund.payment.toLocaleString()}</Col>
                 <Col span={8}>未付：
-                    <span style={{ color: props.refund.unpaid === 0 ? 'black' : 'red' }}>{props.refund.unpaid.toLocaleString()}</span>
+                    <span style={{ color: props.refund.unpaid === 0 ? 'black' : 'red' }}>
+                        {props.refund.unpaid.toLocaleString()}
+                    </span>
                 </Col>
             </Row>
         </Space>
 
-        <Table dataSource={props.refund.items} columns={getInvoiceViewTableColumns('salesRefund')} size='small' bordered style={{ height: 400 }} 
-            rowKey={record => record.refundItemId} scroll={{x: 'max-content', y: 400 }} pagination={false} />
+        <Table dataSource={props.refund.items.filter(item => item.quantity != null)} 
+        columns={getInvoiceViewTableColumns('salesRefund')} 
+        size='small' bordered style={{ height: 400 }} 
+        rowKey={record => record.refundItemId} scroll={{x: 'max-content', y: 400 }} pagination={false} />
 
         <Divider />
         <Col align='end'>

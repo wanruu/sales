@@ -3,20 +3,16 @@ import Decimal from 'decimal.js'
 import uuid from 'react-uuid'
 import { Tag, Popover, Space } from 'antd'
 
-import { invoiceSettings, DELIVER_COLORS } from './config'
+import { invoiceSettings, DELIVER_COLORS, DATE_FORMAT } from './config'
 
 
 export const dcInvoice = (invoice) => {
-    return {
-        id: invoice.id,
-        partner: invoice.partner,
-        date: invoice.date == null ? null : dayjs(invoice.date),
-        draftTime: invoice.draftTime,
-        amount: invoice.amount,
-        payment: invoice.payment,
-        prepayment: invoice.prepayment,
-        items: JSON.parse(JSON.stringify(invoice.items))
+    if (invoice.date && typeof(invoice.date) !== 'string') {
+        invoice.date = invoice.date.format(DATE_FORMAT)
     }
+    const newInvoice = JSON.parse(JSON.stringify(invoice))
+    newInvoice.date = newInvoice.date == null ? null : dayjs(newInvoice.date)
+    return newInvoice
 }
 
 export const emptyInvoiceItem = () => {
@@ -40,7 +36,7 @@ export const emptyInvoice = (itemsNum) => {
         amount: '0',
         prepayment: '',
         payment: '',
-        items:  [...Array(itemsNum).keys()].map(_ => emptyInvoiceItem()),
+        items:  [...Array(itemsNum).keys()].map(_ => emptyInvoiceItem())
     }
 }
 

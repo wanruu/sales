@@ -6,6 +6,7 @@ const db = require('../db')
 const { formatInsert, getNextInvoiceId, updateProductByInvoiceItems,
     isDateValid, getQuantitySign, INVOICE_TYPE_2_INT
 } = require('./utils.js')
+const { default: Decimal } = require('decimal.js')
 
 
 const prefix = 'XT'
@@ -46,17 +47,18 @@ router.get('/id/:id', (req, res) => {
             res.status(500).send(err)
             return
         }
-        const refundItems = `SELECT ii.id AS refundItemId, productId, material, name, spec, unit, p.quantity AS remainingQuantity, 
-            price, discount, ii.quantity, originalAmount, amount, remark, delivered 
-            FROM invoiceItem ii, product p
-            WHERE ii.invoiceId="${refundId}" AND ii.productId=p.id`
-        const orderItems = `SELECT oi.*
-            FROM invoiceRelation AS r, invoiceItem AS oi
-            WHERE r.refundId="${refundId}" AND oi.invoiceId=r.orderId`
-        const selectRefundItemsWithOrderInfo = `SELECT ri.*, oi.quantity AS maxQuantity
-            FROM (${refundItems}) AS ri LEFT JOIN (${orderItems}) AS oi
-            ON ri.productId=oi.productId`
-        db.all(selectRefundItemsWithOrderInfo, (err, items) => {
+        const orderItems = `SELECT p.material, p.name, p.spec, p.unit, p.quantity AS remainingQuantity,
+        oi.price, oi.discount, oi.quantity AS maxQuantity, oi.productId
+        FROM invoiceItem AS oi, product AS p
+        WHERE oi.invoiceId="${refund.orderId}" AND oi.productId=p.id`
+        const refundItems = `SELECT productId, id AS refundItemId, quantity, originalAmount, amount, remark, delivered
+        FROM invoiceItem
+        WHERE invoiceId="${refundId}"`
+        const selectAllItems = `SELECT oi.*, ri.*
+        FROM (${orderItems}) AS oi LEFT JOIN (${refundItems}) AS ri
+        ON ri.productId=oi.productId`
+        
+        db.all(selectAllItems, (err, items) => {
             if (err) {
                 console.error(err)
                 res.status(500).send(err)

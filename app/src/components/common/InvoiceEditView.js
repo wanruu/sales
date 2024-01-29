@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import Axios from 'axios'
 import Decimal from 'decimal.js'
-import { Form, Input, Table, Button, InputNumber, Select, Row, DatePicker, Popover, Modal } from 'antd'
+import { Form, Input, Table, Button, InputNumber, Select, Row, DatePicker, Popover, Modal, Collapse } from 'antd'
 import { DeleteOutlined, EditOutlined, ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons'
 
 
@@ -9,12 +9,10 @@ const { Item } = Form
 
 
 import { PartnerInput, PriceInput, ProductInput } from './PromptInput'
-import { invoiceSettings, baseURL } from '../../utils/config'
+import { invoiceSettings, baseURL, DATE_FORMAT } from '../../utils/config'
 import { isOrderItemEmpty, emptyInvoiceItem, calItemAmount, calTotalAmount, dcInvoice } from '../../utils/invoiceUtils'
 import './Invoice.css'
-import SalesRefundItemSelectView from '../salesRefundComponents/SalesRefundItemSelectView'
-import PurchaseRefundItemSelectView from '../purchaseRefundComponents/PurchaseRefundItemSelectView'
-
+import RefundSelectionView from './RefundSelectionView'
 
 /*
     Required: type
@@ -272,17 +270,61 @@ export default function InvoiceEditView(props) {
             } : null,
             { 
                 title: '', align: 'center', width: 30, fixed: 'right', 
-                render: (_, field, idx) => (
-                    <Button type='link' size='small' danger onClick={_ => {
+                render: (_, field, idx) => {
+                    return <Button type='link' size='small' danger onClick={_ => {
+                        addToUnrefundedItems(idx)
                         remove(idx)
                         updateTotalAmount()
                         updateTableRows()
                     }}>
                         <DeleteOutlined />
                     </Button>
-                )
+                }
             }
         ].filter(i => i != null)
+    }
+
+    const getUnrefundedTableColumns = (add, remove) => {
+        const ifShowDiscount = invoiceSettings.get('ifShowDiscount') === 'true'
+        const ifShowMaterial = invoiceSettings.get('ifShowMaterial') === 'true'
+        return [
+            { title: '', align: 'center', render: (_, __, idx) => idx + 1},
+            ifShowMaterial ? { title: '材质', dataIndex: 'material', align: 'center', render: (_, field, idx) => (
+                form.getFieldValue(['unrefundedItems', idx, 'material'])
+            ) } : null,
+            { title: '名称', dataIndex: 'name', align: 'center', render: (_, field, idx) => (
+                form.getFieldValue(['unrefundedItems', idx, 'name'])
+            )},
+            { title: '规格', dataIndex: 'spec', align: 'center', render: (_, field, idx) => (
+                form.getFieldValue(['unrefundedItems', idx, 'spec'])
+            ) },
+            { title: '数量', dataIndex: 'maxQuantity', align: 'center', render: (_, field, idx) => (
+                form.getFieldValue(['unrefundedItems', idx, 'maxQuantity']).toLocaleString()
+            ) },
+            { title: '单位', dataIndex: 'unit', align: 'center', render: (_, field, idx) => (
+                form.getFieldValue(['unrefundedItems', idx, 'unit'])
+            ) },
+            { title: '单价', dataIndex: 'price', align: 'center', render: (_, field, idx) => {
+                const amountSign = invoiceSettings.get('ifShowAmountSign') === 'true' ? invoiceSettings.get('amountSign') : ''
+                return amountSign + form.getFieldValue(['unrefundedItems', idx, 'price']).toLocaleString()
+            } },
+            ifShowDiscount ? { title: '折扣', dataIndex: 'discount', align: 'center', render: (_, field, idx) => (
+                `${form.getFieldValue(['unrefundedItems', idx, 'discount'])}%`
+            ) } : null,
+            { title: '', width: 30, fixed: 'right', render: (_, field, idx) => {
+                return <Button type='link' size='small' onClick={_ => {
+                    const item = form.getFieldValue(['unrefundedItems', idx])
+                    item.quantity = item.maxQuantity
+                    const { originalAmount, amount } = calItemAmount(item)
+                    item.originalAmount = originalAmount
+                    item.amount = amount
+                    const items = [...(form.getFieldValue('items') || []), item]
+                    form.setFieldValue('items', items)
+                    updateTotalAmount()
+                    remove(idx)
+                }}><PlusOutlined /></Button>
+            }}
+        ].filter(c => c != null)
     }
 
     const updateUnit = (index) => {
@@ -336,6 +378,15 @@ export default function InvoiceEditView(props) {
         form.setFieldValue('amount', calTotalAmount(records))
     }
 
+    const addToUnrefundedItems = (index) => {
+        if (isRefund) {
+            const item = (form.getFieldValue('items') || [])?.[index] || {}
+            item.quantity = item.maxQuantity
+            const unrefundedItems = [...(form.getFieldValue('unrefundedItems') || []), item]
+            form.setFieldValue('unrefundedItems', unrefundedItems)
+        }
+    }
+
     return (
         <>
             <Row style={{ justifyContent: 'space-between', marginTop: '15px', marginBottom: '5px' }}>
@@ -350,8 +401,13 @@ export default function InvoiceEditView(props) {
                         </Item>
                     )
                 }
-                <Item label='日期' name='date' style={{ margin: 0 }}>
-                    <DatePicker style={{ width: 150 }} size='small' />
+                <Item label='日期' shouldUpdate style={{ margin: 0 }}>
+                    { ({ getFieldValue, setFieldValue }) => {
+                        return typeof(getFieldValue('date')) === 'object' ? 
+                        <DatePicker style={{ width: 150 }} size='small' 
+                        value={getFieldValue('date')}
+                        onChange={val => setFieldValue('date', val)} /> : typeof(getFieldValue('date'))
+                    } }
                 </Item>
                 {
                     isRefund ? 
@@ -392,29 +448,55 @@ export default function InvoiceEditView(props) {
             </Row>
             <Form.List name="items">
                 {(fields, { add, remove }) => (
-                    <Table className='editTable' size='small' bordered style={{ height: 400 }}
+                    <Table className='editTable' size='small' bordered 
                         dataSource={fields} columns={getTableColumns(add, remove)}
-                        scroll={{x: 'max-content', y: 400 }} pagination={false}
+                        style={isRefund ? {} : { height: 400 }} scroll={isRefund ? {} : {x: 'max-content', y: 400 }}
+                        pagination={false}
                         rowKey={field => field.key}
                     />
                 )}
             </Form.List>
-            <Modal title='选择退货产品' open={isSelectionModalOpen} width={1000} center onCancel={_ => setSelectionModalOpen(false)} footer={null} destroyOnClose>
-                {
-                    props.type === 'salesRefund' ? 
-                    <SalesRefundItemSelectView
-                    editRefund={form.getFieldsValue(true)} 
-                    setEditRefund={r => form.setFieldsValue(dcInvoice(r))}
-                    dismiss={_ => setSelectionModalOpen(false)} /> : null
-                }
-                {
-                    props.type === 'purchaseRefund' ?
-                    <PurchaseRefundItemSelectView
-                    editRefund={form.getFieldsValue(true)} 
-                    setEditRefund={r => form.setFieldsValue(dcInvoice(r))}
-                    dismiss={_ => setSelectionModalOpen(false)} /> : null
-                }
-            </Modal>
+            {
+                isRefund ? 
+                <>
+                    <br />
+                    <Form.List name="unrefundedItems">
+                        {(fields, { add, remove }) => (
+                            <Collapse defaultActiveKey={'1'}>
+                                <Collapse.Panel header={`待退货产品 (${fields.length})`} key='1'>
+                                    { fields.length > 0 ? 
+                                        <Table size='small' bordered dataSource={fields} rowKey={r => r.key}
+                                        pagination={false}
+                                        columns={getUnrefundedTableColumns(add, remove)} /> : null
+                                    }
+                                </Collapse.Panel>
+                            </Collapse>
+                        )}
+                    </Form.List>
+
+                    <Modal title='选择退货' open={isSelectionModalOpen} width={1000} center 
+                    onCancel={_ => setSelectionModalOpen(false)} footer={null} destroyOnClose>
+                        {
+                            props.type === 'salesRefund' ? 
+                            <RefundSelectionView 
+                            type='salesOrder'
+                            refund={form.getFieldsValue(true)} 
+                            setRefund={r => form.setFieldsValue(r)}
+                            dismiss={_ => setSelectionModalOpen(false)} />
+                            : null
+                        }
+                        {
+                            props.type === 'purchaseRefund' ?
+                            <RefundSelectionView 
+                            type='purchaseOrder'
+                            refund={form.getFieldsValue(true)} 
+                            setRefund={r => form.setFieldsValue(r)}
+                            dismiss={_ => setSelectionModalOpen(false)} /> 
+                            : null
+                        }
+                    </Modal>
+                </> : null
+            }
         </>
     )
 }

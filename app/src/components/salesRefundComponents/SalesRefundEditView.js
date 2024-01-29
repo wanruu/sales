@@ -19,22 +19,23 @@ export default function SalesRefundEditView(props) {
 
     const upload = () => {
         const refund = form.getFieldsValue(true)
-
+        if (refund.orderId == null || refund.orderId === undefined || refund.items.length === 0) {
+            return props.messageApi.open({ type: 'error', content: '请选择退货的项目' })
+        }
         if (refund.date == null) {
             return props.messageApi.open({ type: 'error', content: '请选择日期' })
         }
-        const newRefund = dcInvoice(refund)
-        newRefund.date = newRefund.date.format(DATE_FORMAT)
-        newRefund.items = newRefund.items.map(item => {
+        refund.date = refund.date.format(DATE_FORMAT)
+        refund.items = refund.items.map(item => {
             item.quantity = item.quantity || '0'
             return item
         })
-        newRefund.orderId = newRefund.items[0].orderId
+
         Axios({
-            method: newRefund.id ? 'put' : 'post',
+            method: refund.id ? 'put' : 'post',
             baseURL: baseURL(),
-            url: newRefund.id ? `salesRefund/id/${newRefund.id}` : 'salesRefund',
-            data: newRefund,
+            url: refund.id ? `salesRefund/id/${refund.id}` : 'salesRefund',
+            data: refund, 
             'Content-Type': 'application/json',
         }).then(_ => {
             props.messageApi.open({ type: 'success', content: '保存成功' })
@@ -46,11 +47,18 @@ export default function SalesRefundEditView(props) {
         })
     }
 
-    useEffect(() => {
+    const resetForm = () => {
         if (props.refund) {
-            form.setFieldsValue(dcInvoice(props.refund))
+            const refund = dcInvoice(props.refund)
+            refund.unrefundedItems = refund.items.filter(item => item.quantity == null)
+            refund.items = refund.items.filter(item => item.quantity != null)
+            form.setFieldsValue(refund)
+        } else {
+            form.setFieldsValue(emptyInvoice(0))
         }
-    }, [props.refund])
+    }
+
+    useEffect(resetForm, [props.refund])
 
     return <Form form={form} onFinish={upload}>
         <InvoiceEditView type='salesRefund' />
@@ -58,7 +66,7 @@ export default function SalesRefundEditView(props) {
         <Divider />
         <Col align='end'>
             <Space>
-                <Button icon={<SaveOutlined/>} type='primary' htmlType='submit' disabled={form.getFieldValue('partner') === ''}>
+                <Button icon={<SaveOutlined/>} type='primary' htmlType='submit'>
                     保存
                 </Button>
                 { props.refund && props.refund.id ? null : 
@@ -68,7 +76,7 @@ export default function SalesRefundEditView(props) {
                 }
                 <Button icon={<CloseOutlined/>} 
                 onClick={_ => {
-                    form.setFieldsValue(props.refund ? dcInvoice(props.refund) : emptyInvoice(0))
+                    resetForm()
                     props.dismiss()
                 }}>取消</Button>
             </Space>

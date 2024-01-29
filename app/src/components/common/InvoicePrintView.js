@@ -37,7 +37,7 @@ function PreviewTable(props) {
                     </tr>
                 </thead>
                 <tbody>
-                    { props.invoice.items.map((item, itemIdx) =>
+                    { props.invoice.items.filter(item => item.quantity != null).map((item, itemIdx) =>
                         <tr key={item.productId}>
                             <td>{itemIdx+1}</td>
                             { getTableColumns().map(col => 
