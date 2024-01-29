@@ -117,17 +117,6 @@ export function UnitInput(props) {
 }
 
 
-export function DeliveredInput(props) {
-    const options = [
-        { label: '未配送', value: false }, 
-        { label: '已配送', value: true }
-    ]
-    return <Select size={props.size || 'small'} options={options} 
-        align={props.align || 'center'} value={props.value} onChange={props.onChange} style={props.style || {}}
-    />
-}
-
-
 function PriceHistory(props) {
     const [prices, setPrices] = useState([])
     const [displayType, setDisplayType] = useState('table')
