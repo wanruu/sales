@@ -104,7 +104,7 @@ export default function InvoiceView(props) {
 
         <Table dataSource={props.invoice.items.filter(item => item.quantity != null)} columns={getColumns()} 
         size='small' bordered style={{ height: 400 }} scroll={{x: 'max-content', y: 400 }} pagination={false}
-        rowKey={record => record.refundItemId} />
+        rowKey={record => record.id || record.refundItemId} />
         <Divider />
     </>)
 }
