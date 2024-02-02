@@ -1,4 +1,4 @@
-import { Typography, Collapse } from 'antd'
+import { Typography, Collapse, Space } from 'antd'
 import React from 'react'
 import * as XLSX from 'xlsx'
 import Axios from 'axios'
@@ -11,6 +11,8 @@ import { baseURL } from '../utils/config'
 import PhoneAccessView from '../components/common/PhoneAccessView'
 import PrintSettingView from '../components/setting/PrintSettingView'
 import InvoiceSettingView from '../components/setting/InvoiceSettingView'
+import ProductSettingView from '../components/setting/ProductSettingView'
+import DisplaySettingView from '../components/setting/DisplaySettingView'
 import './settingPage.css'
 
 
@@ -103,17 +105,27 @@ export default function SettingPage() {
         readFile(file)
     }
 
+    const collapseItems = [
+        { header: '产品设置', content: <ProductSettingView /> },
+        { header: '功能设置', content: <InvoiceSettingView /> },
+        { header: '显示设置', content: <DisplaySettingView /> },
+        { header: '打印设置', content: <PrintSettingView /> }
+    ]
+
     return <div className='setting'>
-        <h1>设置</h1>
+        <br />
         {/* <PhoneAccessView /> */}
-        <Collapse>
-            <Collapse.Panel header='开单设置' key='开单设置'>
-                <InvoiceSettingView />
-            </Collapse.Panel>
-            <Collapse.Panel header='打印设置' key='打印设置'>
-                <PrintSettingView />
-            </Collapse.Panel>
-        </Collapse>
+        <Space direction='vertical' style={{ width: '100%' }}>
+            <Collapse>
+                { 
+                    collapseItems.map(item => (
+                        <Collapse.Panel header={item.header} key={item.header}>
+                            { item.content }
+                        </Collapse.Panel>
+                    ))
+                }
+            </Collapse>
+        </Space>
 
         {/* <h2>导入</h2>
         <Upload directory accept='.xlsx' customRequest={handleUpload}>

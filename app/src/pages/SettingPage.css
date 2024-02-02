@@ -1,15 +1,12 @@
 .setting .ant-form-item {
-    padding-top: 5px;
-    padding-bottom: 5px;
-    margin-bottom: 0;
+    margin: 10px 0px 0px 50px
 }
 
 
 .setting .itemTitle {
-    font-size: 14pt;
+    font-size: 12pt;
     font-weight: bold;
-    padding-bottom: 5px;
-    padding-top: 5px;
+    margin-top: 5px;
 }
 
 .setting .ant-divider {
@@ -17,7 +14,8 @@
 }
 
 .setting .ant-collapse-header-text {
-    font-size: large;
+    font-size: 13pt;
+    font-weight: bold;
 }
 
 .setting .ant-switch {
