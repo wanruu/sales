@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from 'react'
 import Axios from 'axios'
-import { Table, Modal, Button, Space, message, Input, Form, Row, Card, Tag } from 'antd'
+import dayjs from 'dayjs'
+import { Table, Modal, Button, Space, message, Form, Tag, Tabs } from 'antd'
 import { Decimal } from 'decimal.js'
-import { ExclamationCircleFilled, TableOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons'
+import { ExclamationCircleFilled } from '@ant-design/icons'
 
 
 const { confirm } = Modal
-const { Item } = Form
 
 
 import { baseURL, DATE_FORMAT, DEFAULT_PAGINATION, DELIVER_COLORS, invoiceSettings } from '../utils/config'
 import { exportExcel, getExportData } from '../utils/export'
-import { DateRangeItem, DeliverItem } from '../components/common/SearchBoxItem'
-import SalesOrderView from '../components/salesOrderComponents/SalesOrderView'
-import SalesRefundView from '../components/salesRefundComponents/SalesRefundView'
+import InvoiceSearchBox from '../components/invoice/SearchBox'
+import SalesOrderView from '../components/invoice/salesOrder/SalesOrderView'
+import SalesRefundView from '../components/invoice/salesRefund/SalesRefundView'
 import MyFloatButton from '../components/common/MyFloatButton'
 
 
@@ -128,6 +128,7 @@ function SalesOrderPage(props) {
         exportExcel('销售单', getExportData(orderTableColumns, filteredSalesOrders))
     }
 
+
     useEffect(load, [])
 
     return <>
@@ -145,25 +146,10 @@ function SalesOrderPage(props) {
         </Modal>
 
         <br />
-        <Space direction='vertical' style={{ width: '100%' }}>
-            {/* Function Box */}
-            <Card size='small'><Form className='search-box' form={form} onFinish={_ => filterSalesOrders(salesOrders)}><Row>
-                <Item label='单号' name='orderId'><Input allowClear placeholder='单号' /></Item>
-                <Item label='客户' name='partner'><Input allowClear placeholder='客户' /></Item>
-                <DateRangeItem />
-                <DeliverItem />
-                <Item label='退货单号' name='refundId'><Input allowClear placeholder='退货单号' /></Item>
-                <Space wrap>
-                    <Button icon={<SearchOutlined />} type='primary' htmlType='submit'>搜索</Button>
-                    <Button icon={<TableOutlined />} onClick={exportSalesOrders} disabled={filteredSalesOrders.length === 0}>批量导出</Button>
-                    <Button icon={<DeleteOutlined />} onClick={_ => showDeleteConfirm(filteredSalesOrders.map(o => o.id) || [])} danger disabled={filteredSalesOrders.length === 0}>批量删除</Button>
-                </Space>
-            </Row></Form></Card>
-
-            {/* Sales Order Table */}
-            <Table dataSource={filteredSalesOrders} bordered rowKey={record => record.id} size='middle'
-                columns={getTableColumns()} pagination={DEFAULT_PAGINATION} scroll={{ x: 'max-content' }} />
-        </Space>
+        <InvoiceSearchBox data={salesOrders} setFilteredData={setFilteredSalesOrders} type='salesOrder' />
+        <br />
+        <Table dataSource={filteredSalesOrders} bordered rowKey={record => record.id} size='middle'
+        columns={getTableColumns()} pagination={DEFAULT_PAGINATION} scroll={{ x: 'max-content' }} />
     </>
 }
 

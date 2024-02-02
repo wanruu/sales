@@ -7,10 +7,10 @@ import { TableOutlined, CloseOutlined, SearchOutlined } from '@ant-design/icons'
 
 import { baseURL, invoiceSettings, DATE_FORMAT } from '../../utils/config'
 import { MyWorkBook, MyWorkSheet } from '../../utils/export'
-import SalesOrderView from '../salesOrderComponents/SalesOrderView'
-import SalesRefundView from '../salesRefundComponents/SalesRefundView'
-import PurchaseOrderView from '../purchaseOrderComponents/PurchaseOrderView'
-import PurchaseRefundView from '../purchaseRefundComponents/PurchaseRefundView'
+import SalesOrderView from '../invoice/salesOrder/SalesOrderView'
+import SalesRefundView from '../invoice/salesRefund/SalesRefundView'
+import PurchaseOrderView from '../invoice/purchaseOrder/PurchaseOrderView'
+import PurchaseRefundView from '../invoice/purchaseRefund/PurchaseRefundView'
 
 
 const { Column, ColumnGroup } = Table

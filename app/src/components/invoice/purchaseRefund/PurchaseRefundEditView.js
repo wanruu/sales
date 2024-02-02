@@ -1,20 +1,19 @@
 import React, { useEffect } from 'react'
 import Axios from 'axios'
-import {  Button, Col, Divider, Space, Form } from 'antd'
+import { Button, Col, Divider, Space, Form } from 'antd'
 import { SaveOutlined, CloseOutlined, InboxOutlined } from '@ant-design/icons'
 
 
-import { dcInvoice, emptyInvoice } from '../../utils/invoiceUtils'
-import { baseURL, DATE_FORMAT } from '../../utils/config'
-import InvoiceEditView from '../common/InvoiceEditView'
-import '../common/Invoice.css'
+import { dcInvoice, emptyInvoice } from '../../../utils/invoiceUtils'
+import { baseURL, DATE_FORMAT } from '../../../utils/config'
+import InvoiceEditView from '../InvoiceEditView'
 
 
 /*
     Required: dismiss, refresh, messageApi
     Optional: refund, saveDraft, removeDraft
 */
-export default function SalesRefundEditView(props) {
+export default function PurchaseRefundEditView(props) {
     const [form] = Form.useForm()
 
     const upload = () => {
@@ -34,8 +33,8 @@ export default function SalesRefundEditView(props) {
         Axios({
             method: refund.id ? 'put' : 'post',
             baseURL: baseURL(),
-            url: refund.id ? `salesRefund/id/${refund.id}` : 'salesRefund',
-            data: refund, 
+            url: refund.id ? `purchaseRefund/id/${refund.id}` : 'purchaseRefund',
+            data: refund,
             'Content-Type': 'application/json',
         }).then(_ => {
             props.messageApi.open({ type: 'success', content: '保存成功' })
@@ -61,23 +60,23 @@ export default function SalesRefundEditView(props) {
     useEffect(resetForm, [props.refund])
 
     return <Form form={form} onFinish={upload}>
-        <InvoiceEditView type='salesRefund' />
-    
+        <InvoiceEditView type='purchaseRefund' />
+
         <Divider />
         <Col align='end'>
             <Space>
                 <Button icon={<SaveOutlined/>} type='primary' htmlType='submit'>
                     保存
                 </Button>
-                { props.refund && props.refund.id ? null : 
-                    <Button icon={<InboxOutlined/>} onClick={_ => props.saveDraft(form.getFieldsValue(true))}>
+                { 
+                    props.refund && props.refund.id ? null : 
+                    <Button icon={<InboxOutlined/>} onClick={_ => props.saveDraft(refund)}>
                         保存草稿
-                    </Button>
+                    </Button> 
                 }
-                <Button icon={<CloseOutlined/>} 
-                onClick={_ => {
+                <Button icon={<CloseOutlined/>} onClick={_ => { 
                     resetForm()
-                    props.dismiss()
+                    props.dismiss() 
                 }}>取消</Button>
             </Space>
         </Col>

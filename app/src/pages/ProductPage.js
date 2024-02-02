@@ -9,8 +9,8 @@ const { Item } = Form
 
 import { baseURL, DEFAULT_PAGINATION, invoiceSettings } from '../utils/config'
 import { exportExcel, getExportData } from '../utils/export'
-import ProductEditView from '../components/productComponents/ProductEditView'
-import ProductView from '../components/productComponents/ProductView'
+import ProductEditView from '../components/product/ProductEditView'
+import ProductView from '../components/product/ProductView'
 
 
 function ProductPage() {

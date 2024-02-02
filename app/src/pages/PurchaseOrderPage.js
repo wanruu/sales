@@ -1,19 +1,18 @@
 import React, { useEffect, useState } from 'react'
 import Axios from 'axios'
-import { Table, Modal, Button, Space, message, Input, Form, Row, Card, Tag } from 'antd'
+import { Table, Modal, Button, Space, message, Form, Tag } from 'antd'
 import { Decimal } from 'decimal.js'
-import { ExclamationCircleFilled, TableOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons'
+import { ExclamationCircleFilled } from '@ant-design/icons'
 
 
 const { confirm } = Modal
-const { Item } = Form
 
 
 import { baseURL, DATE_FORMAT, DEFAULT_PAGINATION, DELIVER_COLORS, invoiceSettings } from '../utils/config'
 import { exportExcel, getExportData } from '../utils/export'
-import { DateRangeItem, DeliverItem } from '../components/common/SearchBoxItem'
-import PurchaseOrderView from '../components/purchaseOrderComponents/PurchaseOrderView'
-import PurchaseRefundView from '../components/purchaseRefundComponents/PurchaseRefundView'
+import InvoiceSearchBox from '../components/invoice/SearchBox'
+import PurchaseOrderView from '../components/invoice/purchaseOrder/PurchaseOrderView'
+import PurchaseRefundView from '../components/invoice/purchaseRefund/PurchaseRefundView'
 import MyFloatButton from '../components/common/MyFloatButton'
 
 
@@ -146,25 +145,10 @@ function PurchaseOrderPage(props) {
         </Modal>
 
         <br />
-        <Space direction='vertical' style={{ width: '100%' }}>
-            {/* Function Box */}
-            <Card size='small'><Form className='search-box' form={form} onFinish={_ => filterPurchaseOrders(purchaseOrders)}><Row>
-                <Item label='单号' name='orderId'><Input allowClear placeholder='单号' /></Item>
-                <Item label='供应商' name='partner'><Input allowClear placeholder='供应商' /></Item>
-                <DateRangeItem />
-                <DeliverItem />
-                <Item label='退货单号' name='refundId'><Input allowClear placeholder='退货单号' /></Item>
-                <Space wrap>
-                    <Button icon={<SearchOutlined />} type='primary' htmlType='submit'>搜索</Button>
-                    <Button icon={<TableOutlined />} onClick={exportPurchaseOrders} disabled={filteredPurchaseOrders.length === 0}>批量导出</Button>
-                    <Button icon={<DeleteOutlined />} onClick={_ => showDeleteConfirm(filteredPurchaseOrders.map(o => o.id) || [])} danger disabled={filteredPurchaseOrders.length === 0}>批量删除</Button>
-                </Space>
-            </Row></Form></Card>
-
-            {/* Purchase Order Table */}
-            <Table dataSource={filteredPurchaseOrders} bordered size='middle' rowKey={record => record.id} 
-                columns={getTableColumns()} pagination={DEFAULT_PAGINATION} scroll={{ x: 'max-content' }} />
-        </Space>
+        <InvoiceSearchBox data={purchaseOrders} setFilteredData={setFilteredPurchaseOrders} type='purchaseOrder' />
+        <br />
+        <Table dataSource={filteredPurchaseOrders} bordered size='middle' rowKey={record => record.id} 
+        columns={getTableColumns()} pagination={DEFAULT_PAGINATION} scroll={{ x: 'max-content' }} />
     </>
 }
 

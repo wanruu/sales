@@ -2,9 +2,11 @@ import React from 'react'
 import { Row, Col, Space } from 'antd'
 import { FieldNumberOutlined } from '@ant-design/icons'
 
-import './Invoice.css'
+
 import { printSettings, invoiceSettings } from '../../utils/config'
 import { digitUppercase } from '../../utils/invoiceUtils'
+import './invoicePrintView.css'
+
 
 /* type */
 function PreviewTable(props) {

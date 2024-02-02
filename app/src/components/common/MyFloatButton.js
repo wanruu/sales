@@ -5,10 +5,11 @@ import dayjs from 'dayjs'
 
 
 import { emptyInvoice } from '../../utils/invoiceUtils'
-import SalesOrderEditView from '../salesOrderComponents/SalesOrderEditView'
-import SalesRefundEditView from '../salesRefundComponents/SalesRefundEditView'
-import PurchaseOrderEditView from '../purchaseOrderComponents/PurchaseOrderEditView'
-import PurchaseRefundEditView from '../purchaseRefundComponents/PurchaseRefundEditView'
+import SalesOrderEditView from '../invoice/salesOrder/SalesOrderEditView'
+import SalesRefundEditView from '../invoice/salesRefund/SalesRefundEditView'
+import PurchaseOrderEditView from '../invoice/purchaseOrder/PurchaseOrderEditView'
+import PurchaseRefundEditView from '../invoice/purchaseRefund/PurchaseRefundEditView'
+import './myFloatButton.css'
 
 /*
     Required: type, refresh, drafts, setDrafts

@@ -6,7 +6,7 @@ import { QuestionCircleOutlined } from '@ant-design/icons'
 
 
 import { DATE_FORMAT, DEFAULT_PRINT_SETTINGS, printSettings } from '../../utils/config'
-import InvoicePrintView from '../common/InvoicePrintView'
+import InvoicePrintView from '../invoice/InvoicePrintView'
 import SettingSwitchItem from './SettingSwitchItem'
 
 

@@ -12,9 +12,9 @@ import { baseURL } from '../utils/config'
 
 
 import PhoneAccessView from '../components/common/PhoneAccessView'
-import PrintSettingView from '../components/settingComponents/PrintSettingView'
-import InvoiceSettingView from '../components/settingComponents/InvoiceSettingView'
-import './SettingPage.css'
+import PrintSettingView from '../components/setting/PrintSettingView'
+import InvoiceSettingView from '../components/setting/InvoiceSettingView'
+import './settingPage.css'
 
 
 const { Title } = Typography

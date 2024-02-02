@@ -6,18 +6,17 @@ import { EditOutlined, PrinterOutlined, TableOutlined, RollbackOutlined } from '
 import { useReactToPrint } from 'react-to-print'
 
 
-import { baseURL } from '../../utils/config'
-import { getExportData, exportExcel } from '../../utils/export'
-import InvoicePrintView from '../common/InvoicePrintView'
-import PurchaseOrderEditView from './PurchaseOrderEditView'
-import PartnerPopoverView from '../partnerComponents/PartnerPopoverView'
-import { getInvoiceExportColumns, getInvoiceViewTableColumns } from '../../utils/invoiceUtils'
+import { baseURL } from '../../../utils/config'
+import { getExportData, exportExcel } from '../../../utils/export'
+import InvoicePrintView from '../InvoicePrintView'
+import SalesOrderEditView from './SalesOrderEditView'
+import PartnerPopoverView from '../../partner/PartnerPopoverView'
+import { getInvoiceExportColumns, getInvoiceViewTableColumns } from '../../../utils/invoiceUtils'
 
 /*
     Required: id, refresh, messageApi
-    Optional: allowEditPartner
 */
-export default function PurchaseOrderView(props) {
+export default function SalesOrderView(props) {
     const [order, setOrder] = useState(undefined)
     const [mode, setMode] = useState('view')
 
@@ -25,7 +24,7 @@ export default function PurchaseOrderView(props) {
         Axios({
             method: 'get',
             baseURL: baseURL(),
-            url: `purchaseOrder/id/${props.id}`,
+            url: `salesOrder/id/${props.id}`,
             'Content-Type': 'application/json',
         }).then(res => {
             const newOrder = res.data
@@ -43,7 +42,7 @@ export default function PurchaseOrderView(props) {
 
     return  <>
         <div style={{ display: mode === 'edit' ? 'block' : 'none' }}>
-            <PurchaseOrderEditView order={order} dismiss={_ => setMode('view')} messageApi={props.messageApi} refresh={_ => { load(); props.refresh() }} /> 
+            <SalesOrderEditView order={order} dismiss={_ => setMode('view')} messageApi={props.messageApi} refresh={_ => { load(); props.refresh() }} /> 
         </div>
         <div style={{ display: mode === 'view' ? 'block' : 'none'}}>
             <View order={order} setMode={setMode} refresh={load} allowEditPartner={props.allowEditPartner} />
@@ -56,17 +55,19 @@ export default function PurchaseOrderView(props) {
 
 /*
     Required: order, setMode
+    Optional: allowEditPartner
 */
 function View(props) {
     const exportFile = () => {
-        const itemColumns = getInvoiceExportColumns('purchaseOrder')
-        exportExcel(`采购单${props.order.id}`, getExportData(itemColumns, props.order.items))
+        const itemColumns = getInvoiceExportColumns('salesOrder')
+        exportExcel(`销售单${props.order.id}`, getExportData(itemColumns, props.order.items))
     }
     return !props.order ? null : <>
         <Space direction='vertical' style={{ width: '100%', marginTop: '10px', marginBottom: '15px' }}>
             <Row>
-                <Col span={8}>供应商：{
-                    props.allowEditPartner ? <PartnerPopoverView refresh={props.refresh} partner={_.fromPairs(['name', 'folder', 'phone', 'address'].map(key => [key, props.order[key]]))} />
+                <Col span={8}>客户：{
+                    props.allowEditPartner ?
+                    <PartnerPopoverView refresh={props.refresh} partner={_.fromPairs(['name', 'folder', 'phone', 'address'].map(key => [key, props.order[key]]))} />
                     : props.order.name
                 }</Col>
                 <Col span={8}>日期：{props.order.date}</Col>
@@ -83,7 +84,7 @@ function View(props) {
             </Row>
         </Space>
 
-        <Table dataSource={props.order.items} columns={getInvoiceViewTableColumns('purchaseOrder')} 
+        <Table dataSource={props.order.items} columns={getInvoiceViewTableColumns('salesOrder')} 
             size='small' bordered style={{ height: 400 }} 
             rowKey={record => record.id} scroll={{x: 'max-content', y: 400 }} pagination={false} />
 
@@ -108,7 +109,7 @@ function PrintView(props) {
         <Space direction='vertical' size='middle' style={{ width: '100%', marginTop: '10px', marginBottom: '10px' }}>
             <Col align='middle' style={{ overflowX: 'auto', overflowY: 'clip' }}>
                 <div ref={componentRef} >
-                    {!props.order ? null : <InvoicePrintView invoice={props.order} type='purchaseOrder' />}
+                    {!props.order ? null : <InvoicePrintView invoice={props.order} type='salesOrder' />}
                 </div>
             </Col>
         </Space>

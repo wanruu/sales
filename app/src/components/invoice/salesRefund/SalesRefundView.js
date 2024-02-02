@@ -6,17 +6,17 @@ import { EditOutlined, PrinterOutlined, TableOutlined, RollbackOutlined } from '
 import { useReactToPrint } from 'react-to-print'
 
 
-import { baseURL } from '../../utils/config'
-import { getExportData, exportExcel } from '../../utils/export'
-import InvoicePrintView from '../common/InvoicePrintView'
-import PurchaseRefundEditView from '../purchaseRefundComponents/PurchaseRefundEditView'
-import { getInvoiceViewTableColumns } from '../../utils/invoiceUtils'
+import { baseURL } from '../../../utils/config'
+import { getExportData, exportExcel } from '../../../utils/export'
+import InvoicePrintView from '../InvoicePrintView'
+import SalesRefundEditView from './SalesRefundEditView'
+import { getInvoiceExportColumns, getInvoiceViewTableColumns } from '../../../utils/invoiceUtils'
 
 
 /*
     Required: id, refresh, messageApi
 */
-export default function PurchaseRefundView(props) {
+export default function SalesRefundView(props) {
     const [refund, setRefund] = useState(undefined)
     const [mode, setMode] = useState('view')
 
@@ -24,7 +24,7 @@ export default function PurchaseRefundView(props) {
         Axios({
             method: 'get',
             baseURL: baseURL(),
-            url: `purchaseRefund/id/${props.id}`,
+            url: `salesRefund/id/${props.id}`,
             'Content-Type': 'application/json',
         }).then(res => {
             const newRefund = res.data
@@ -42,7 +42,7 @@ export default function PurchaseRefundView(props) {
 
     return <>
         <div style={{ display: mode === 'edit' ? 'block' : 'none' }}>
-            <PurchaseRefundEditView refund={refund} 
+            <SalesRefundEditView refund={refund} 
             dismiss={_ => setMode('view')} 
             messageApi={props.messageApi} 
             refresh={_ => { 
@@ -65,16 +65,16 @@ export default function PurchaseRefundView(props) {
 */
 function View(props) {
     const exportFile = () => {
-        const itemColumns = getInvoiceViewTableColumns('purchaseRefund')
-        exportExcel(`采购退货单${props.refund.id}`, getExportData(itemColumns, props.refund.items))
+        const itemColumns = getInvoiceExportColumns('salesRefund')
+        exportExcel(`销售退货单${props.refund.id}`, getExportData(itemColumns, props.refund.items))
     }
 
     return !props.refund ? null : <>
         <Space direction='vertical' style={{ width: '100%', marginTop: '10px', marginBottom: '15px' }}>
             <Row>
-                <Col span={8}>供应商：{props.refund.partner}</Col>
+                <Col span={8}>客户：{props.refund.partner}</Col>
                 <Col span={8}>日期：{props.refund.date}</Col>
-                <Col span={8}>关联采购单：{props.refund.orderId || '无'}</Col>
+                <Col span={8}>关联销售单：{props.refund.orderId || '无'}</Col>
             </Row>
             <Row>
                 <Col span={8}>总金额：{props.refund.amount.toLocaleString()}</Col>
@@ -88,7 +88,7 @@ function View(props) {
         </Space>
 
         <Table dataSource={props.refund.items.filter(item => item.quantity != null)} 
-        columns={getInvoiceViewTableColumns('purchaseRefund')} 
+        columns={getInvoiceViewTableColumns('salesRefund')} 
         size='small' bordered style={{ height: 400 }} 
         rowKey={record => record.refundItemId} scroll={{x: 'max-content', y: 400 }} pagination={false} />
 
@@ -115,7 +115,7 @@ function PrintView(props) {
         <Space direction='vertical' size='middle' style={{ width: '100%', marginTop: '10px', marginBottom: '10px' }}>
             <Col align='middle' style={{ overflowX: 'auto', overflowY: 'clip' }}>
                 <div ref={componentRef} > 
-                    {!props.refund ? null : <InvoicePrintView invoice={props.refund} type='purchaseRefund' />}
+                    {!props.refund ? null : <InvoicePrintView invoice={props.refund} type='salesRefund' />}
                 </div>
             </Col>
         </Space>

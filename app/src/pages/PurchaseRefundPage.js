@@ -1,19 +1,18 @@
 import React, { useState, useEffect } from 'react'
 import Axios from 'axios'
-import { Table, Space, Button, message, Modal, Form, Row, Input, Card, Tag } from 'antd'
+import { Table, Space, Button, message, Modal, Form, Tag } from 'antd'
 import Decimal from 'decimal.js'
-import { ExclamationCircleFilled, DeleteOutlined, TableOutlined, SearchOutlined } from '@ant-design/icons'
+import { ExclamationCircleFilled } from '@ant-design/icons'
 
 
 const { confirm } = Modal
-const { Item } = Form
 
 
 import { baseURL, DATE_FORMAT, DEFAULT_PAGINATION, DELIVER_COLORS, invoiceSettings } from '../utils/config'
 import { exportExcel, getExportData } from '../utils/export'
-import { DateRangeItem, DeliverItem } from '../components/common/SearchBoxItem'
-import PurchaseRefundView from '../components/purchaseRefundComponents/PurchaseRefundView'
-import PurchaseOrderView from '../components/purchaseOrderComponents/PurchaseOrderView'
+import InvoiceSearchBox from '../components/invoice/SearchBox'
+import PurchaseRefundView from '../components/invoice/purchaseRefund/PurchaseRefundView'
+import PurchaseOrderView from '../components/invoice/purchaseOrder/PurchaseOrderView'
 import MyFloatButton from '../components/common/MyFloatButton'
 
 
@@ -144,25 +143,10 @@ function PurchaseRefundPage(props) {
         </Modal>
 
         <br />
-        <Space direction='vertical' style={{ width: '100%' }}>
-            {/* Function Box */}
-            <Card size='small'><Form className='search-box' form={form} onFinish={_ => filterPurchaseRefunds(purchaseRefunds)}><Row>
-                <Item label='单号' name='refundId'><Input allowClear placeholder='单号' /></Item>
-                <Item label='供应商' name='partner'><Input allowClear placeholder='供应商' /></Item>
-                <DateRangeItem />
-                <DeliverItem />
-                <Item label='采购单号' name='orderId'><Input allowClear placeholder='采购单号' /></Item>
-                <Space wrap>
-                    <Button icon={<SearchOutlined />} type='primary' htmlType='submit'>搜索</Button>
-                    <Button icon={<TableOutlined />} onClick={exportPurchaseRefunds} disabled={filteredPurchaseRefunds.length === 0}>批量导出</Button>
-                    <Button danger icon={<DeleteOutlined />} onClick={_ => showDeleteConfirm(filteredPurchaseRefunds.map(f => f.id) || [])} disabled={filteredPurchaseRefunds.length === 0}>批量删除</Button>
-                </Space>
-            </Row></Form></Card>
-
-            {/* Purchase Refund Table */}
-            <Table dataSource={filteredPurchaseRefunds} size='middle' rowKey={record => record.id} 
-                bordered columns={getTableColumns()} pagination={DEFAULT_PAGINATION} scroll={{ x: 'max-content' }} />
-        </Space>
+        <InvoiceSearchBox data={purchaseRefunds} setFilteredData={setFilteredPurchaseRefunds} type='purchaseRefund' />
+        <br />
+        <Table dataSource={filteredPurchaseRefunds} size='middle' rowKey={record => record.id} 
+        bordered columns={getTableColumns()} pagination={DEFAULT_PAGINATION} scroll={{ x: 'max-content' }} />
     </>
 }
 

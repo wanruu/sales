@@ -1,0 +1,32 @@
+.editTable tbody tr:not(.ant-table-measure-row) td {
+    padding: 2px !important;
+}
+
+
+.rc-virtual-list .ant-select-item {
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+    text-align: center;
+}
+
+.editTable .ant-select-selector {
+    /* font-size: 12px; */
+    border-radius: 4px;
+}
+
+.editTable .ant-select-selection-item {
+    padding: 0px !important;
+    /* font-size: 12px; */
+}
+
+.editTable .ant-select-arrow {
+    display: none 
+}
+
+.editTable .ant-form-item {
+    margin: 0;
+}
+
+.editTable .ant-input-number-group-addon {
+    padding: 0px 3px;
+}

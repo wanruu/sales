@@ -8,11 +8,11 @@ import { evaluate } from 'mathjs'
 const { Item } = Form
 
 
-import { PartnerInput, PriceInput, ProductInput } from './PromptInput'
+import { PartnerInput, PriceInput, ProductInput } from '../common/PromptInput'
 import { invoiceSettings, baseURL, DATE_FORMAT } from '../../utils/config'
 import { isOrderItemEmpty, emptyInvoiceItem, calItemAmount, calTotalAmount, dcInvoice } from '../../utils/invoiceUtils'
-import './Invoice.css'
 import RefundSelectionView from './RefundSelectionView'
+import './invoiceEditView.css'
 
 /*
     Required: type

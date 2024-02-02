@@ -7,8 +7,8 @@ const { confirm } = Modal
 const { Item } = Form
 
 
-import PartnerEditView from '../components/partnerComponents/PartnerEditView'
-import PartnerView from '../components/partnerComponents/PartnerView'
+import PartnerEditView from '../components/partner/PartnerEditView'
+import PartnerView from '../components/partner/PartnerView'
 import { baseURL, DEFAULT_PAGINATION } from '../utils/config'
 import { exportExcel } from '../utils/export'
 
