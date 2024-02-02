@@ -7,10 +7,7 @@ import { TableOutlined, CloseOutlined, SearchOutlined } from '@ant-design/icons'
 
 import { baseURL, invoiceSettings, DATE_FORMAT } from '../../utils/config'
 import { MyWorkBook, MyWorkSheet } from '../../utils/export'
-import SalesOrderView from '../invoice/salesOrder/SalesOrderView'
-import SalesRefundView from '../invoice/salesRefund/SalesRefundView'
-import PurchaseOrderView from '../invoice/purchaseOrder/PurchaseOrderView'
-import PurchaseRefundView from '../invoice/purchaseRefund/PurchaseRefundView'
+import InvoiceFullView from '../invoice/InvoiceFullView'
 
 
 const { Column, ColumnGroup } = Table
@@ -114,10 +111,10 @@ function InvoiceTable(props) {
     const [selectedInvoiceId, setSelectedInvoiceId] = useState(undefined)
     const [selectedInvoiceType, setSelectedInvoiceType] = useState(undefined)
     const INVOICE_TYPE_2_DICT = {
-        salesOrder: { str: '销售单', view: _ => <SalesOrderView id={selectedInvoiceId} messageApi={props.messageApi} refresh={props.refresh} allowEditPartner={false} /> },
-        salesRefund: { str: '销售退款单', view: _ => <SalesRefundView id={selectedInvoiceId} messageApi={props.messageApi} refresh={props.refresh} allowEditPartner={false} /> },
-        purchaseOrder: { str: '采购单', view: _ => <PurchaseOrderView id={selectedInvoiceId} messageApi={props.messageApi} refresh={props.refresh} allowEditPartner={false} /> },
-        purchaseRefund: { str: '采购退款单', view: _ => <PurchaseRefundView id={selectedInvoiceId} messageApi={props.messageApi} refresh={props.refresh} allowEditPartner={false} /> }
+        salesOrder: { str: '销售单', view: _ => <InvoiceFullView id={selectedInvoiceId} messageApi={props.messageApi} refresh={props.refresh} allowEditPartner={false} /> },
+        salesRefund: { str: '销售退款单', view: _ => <InvoiceFullView id={selectedInvoiceId} messageApi={props.messageApi} refresh={props.refresh} allowEditPartner={false} /> },
+        purchaseOrder: { str: '采购单', view: _ => <InvoiceFullView id={selectedInvoiceId} messageApi={props.messageApi} refresh={props.refresh} allowEditPartner={false} /> },
+        purchaseRefund: { str: '采购退款单', view: _ => <InvoiceFullView id={selectedInvoiceId} messageApi={props.messageApi} refresh={props.refresh} allowEditPartner={false} /> }
     }
     const getSummary = (items) => {
         const orderAmount = items.reduce((total, cur) => total.plus(cur.orderAmount || 0), Decimal(0))
@@ -207,10 +204,10 @@ function InvoiceItemTable(props) {
     const [selectedInvoiceId, setSelectedInvoiceId] = useState(undefined)
     const [selectedInvoiceType, setSelectedInvoiceType] = useState(undefined)
     const INVOICE_TYPE_2_DICT = {
-        salesOrder: { str: '销售单', view: _ => <SalesOrderView id={selectedInvoiceId} messageApi={props.messageApi} refresh={props.refresh} allowEditPartner={false} /> },
-        salesRefund: { str: '销售退款单', view: _ => <SalesRefundView id={selectedInvoiceId} messageApi={props.messageApi} refresh={props.refresh} allowEditPartner={false} /> },
-        purchaseOrder: { str: '采购单', view: _ => <PurchaseOrderView id={selectedInvoiceId} messageApi={props.messageApi} refresh={props.refresh} allowEditPartner={false} /> },
-        purchaseRefund: { str: '采购退款单', view: _ => <PurchaseRefundView id={selectedInvoiceId} messageApi={props.messageApi} refresh={props.refresh} allowEditPartner={false} /> }
+        salesOrder: { str: '销售单', view: _ => <InvoiceFullView id={selectedInvoiceId} messageApi={props.messageApi} refresh={props.refresh} allowEditPartner={false} /> },
+        salesRefund: { str: '销售退款单', view: _ => <InvoiceFullView id={selectedInvoiceId} messageApi={props.messageApi} refresh={props.refresh} allowEditPartner={false} /> },
+        purchaseOrder: { str: '采购单', view: _ => <InvoiceFullView id={selectedInvoiceId} messageApi={props.messageApi} refresh={props.refresh} allowEditPartner={false} /> },
+        purchaseRefund: { str: '采购退款单', view: _ => <InvoiceFullView id={selectedInvoiceId} messageApi={props.messageApi} refresh={props.refresh} allowEditPartner={false} /> }
     }
 
     const ifShowMaterial = invoiceSettings.get('ifShowMaterial') === 'true'

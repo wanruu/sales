@@ -1,8 +1,12 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Axios from 'axios'
 import Decimal from 'decimal.js'
-import { Form, Input, Table, Button, InputNumber, Select, Row, DatePicker, Popover, Modal, Collapse, Space } from 'antd'
-import { DeleteOutlined, EditOutlined, ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons'
+import { Form, Input, Table, Button, InputNumber, Select, Row, DatePicker, Popover, 
+    Modal, Collapse, Space, Col, Divider 
+} from 'antd'
+import { DeleteOutlined, EditOutlined, ExclamationCircleOutlined, PlusOutlined, 
+    SaveOutlined, InboxOutlined, CloseOutlined
+} from '@ant-design/icons'
 import { evaluate } from 'mathjs'
 
 const { Item } = Form
@@ -10,14 +14,122 @@ const { Item } = Form
 
 import { PartnerInput, PriceInput, ProductInput } from '../common/PromptInput'
 import { invoiceSettings, baseURL, DATE_FORMAT } from '../../utils/config'
-import { isOrderItemEmpty, emptyInvoiceItem, calItemAmount, calTotalAmount, dcInvoice } from '../../utils/invoiceUtils'
+import { isOrderItemEmpty, emptyInvoiceItem, calItemAmount, calTotalAmount, dcInvoice, emptyInvoice, isOrderItemComplete, isProductRepeat } from '../../utils/invoiceUtils'
 import RefundSelectionView from './RefundSelectionView'
 import './invoiceEditView.css'
+
+
+/*
+    Required: dismiss, refresh, messageApi, type
+    Optional: invoice, saveDraft, removeDraft
+*/
+export default function InvoiceEditView(props) {
+    const [form] = Form.useForm()
+
+    const isOrder = ['salesOrder', 'purchaseOrder'].includes(props.type)
+    const isSales = ['salesOrder', 'salesRefund'].includes(props.type)
+    
+    const upload = () => {
+        const invoice = form.getFieldsValue(true)
+
+        // 1. Check data
+        if (isOrder) {
+            if (invoice.partner === '') {
+                const p = isSales ? '客户' : '供应商'
+                return props.messageApi.open({ type: 'error', content: `请填写${p}名称` })
+            }
+            const nIncomplete = invoice.items.filter(item => !isOrderItemComplete(item) && !isOrderItemEmpty(item)).length
+            if (nIncomplete > 0) {
+                return props.messageApi.open({ type: 'error', content: '表格填写不完整' })
+            }
+            if (isProductRepeat(invoice.items)) {
+                return props.messageApi.open({ type: 'error', content: '产品种类重复' })
+            }
+        } else {
+            if (invoice.orderId == null || invoice.orderId === undefined || invoice.items.length === 0) {
+                return props.messageApi.open({ type: 'error', content: '请选择退货的项目' })
+            }
+        }
+        if (invoice.date == null) {
+            return props.messageApi.open({ type: 'error', content: '请选择日期' })
+        }
+
+        // 2. Clean data & Upload
+        const newInvoice = dcInvoice(invoice)
+        newInvoice.date = newInvoice.date.format(DATE_FORMAT)
+        newInvoice.items = newInvoice.items.filter(item => !isOrderItemEmpty(item)).map(item => {
+            item.quantity = item.quantity || '0'
+            return item
+        })
+        Axios({
+            method: newInvoice.id ? 'put' : 'post',
+            baseURL: baseURL(),
+            url: newInvoice.id ? `${props.type}/id/${newInvoice.id}` : props.type,
+            data: newInvoice,
+            'Content-Type': 'application/json',
+        }).then(_ => {
+            props.messageApi.open({ type: 'success', content: '保存成功' })
+            props.refresh()
+            if (props.removeDraft) props.removeDraft(invoice)
+            props.dismiss()
+        }).catch(_ => {
+            props.messageApi.open({ type: 'error', content: '保存失败' })
+        })
+    }
+
+    const resetForm = () => {        
+        if (props.invoice) {
+            const invoice = dcInvoice(props.invoice)
+            if (isOrder) {
+                if (invoice.id) {
+                    invoice.items = invoice.items.map(item => Object.assign(item, { productExisting: true }))
+                    invoice.items.push(emptyInvoiceItem())
+                }
+            } else {
+                invoice.unrefundedItems = invoice.items.filter(item => item.quantity == null)
+                invoice.items = invoice.items.filter(item => item.quantity != null)
+            }
+            form.setFieldsValue(invoice)
+        } else {
+            form.setFieldsValue(emptyInvoice(isOrder ? 1 : 0))
+        }
+    }
+
+    useEffect(resetForm, [props.invoice])
+
+    return (
+        <Form form={form} onFinish={upload}>
+            <SubEditView type={props.type} />
+            <Divider />
+
+            <Col align='end'>
+                <Space>
+                    <Button icon={<SaveOutlined/>} type='primary' htmlType='submit'>
+                        保存
+                    </Button>
+                    { 
+                        props.invoice && props.invoice.id ? null : 
+                        <Button icon={<InboxOutlined/>} onClick={_ => props.saveDraft(form.getFieldsValue(true))}>
+                            保存草稿
+                        </Button> 
+                    }
+                    <Button icon={<CloseOutlined/>} onClick={_ => { 
+                        resetForm()
+                        props.dismiss() 
+                    }}>
+                        取消
+                    </Button>
+                </Space>
+            </Col>
+        </Form>
+    )
+}
+
 
 /*
     Required: type
 */
-export default function InvoiceEditView(props) {
+function SubEditView(props) {
     const form = Form.useFormInstance()
     const [isSelectionModalOpen, setSelectionModalOpen] = useState(false)
 

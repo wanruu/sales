@@ -13,15 +13,11 @@ import {
 const { Header, Content, Footer, Sider } = Layout
 
 
-import SalesOrderPage from './pages/SalesOrderPage.js'
-import SalesRefundPage from './pages/SalesRefundPage.js'
-import PurchaseOrderPage from './pages/PurchaseOrderPage.js'
-import PurchaseRefundPage from './pages/PurchaseRefundPage.js'
 import SettingPage from './pages/SettingPage.js'
 import ProductPage from './pages/ProductPage.js'
 import PartnerPage from './pages/PartnerPage.js'
 import HelpPage from './pages/HelpPage.js'
-
+import InvoicePage from './pages/InvoicePage.js'
 
 const defaultMenuKey = 'salesOrder'
 
@@ -38,10 +34,10 @@ function App() {
 
     // Pages
     const pages = {
-        'salesOrder': <SalesOrderPage drafts={salesOrders} setDrafts={setSalesOrders} />,
-        'salesRefund': <SalesRefundPage drafts={salesRefunds} setDrafts={setSalesRefunds} />,
-        'purchaseOrder': <PurchaseOrderPage drafts={purchaseOrders} setDrafts={setPurchaseOrders} />,
-        'purchaseRefund': <PurchaseRefundPage drafts={purchaseRefunds} setDrafts={setPurchaseRefunds} />,
+        'salesOrder': <InvoicePage type='salesOrder' drafts={salesOrders} setDrafts={setSalesOrders} />,
+        'salesRefund': <InvoicePage type='salesRefund' drafts={salesRefunds} setDrafts={setSalesRefunds} />,
+        'purchaseOrder': <InvoicePage type='purchaseOrder' drafts={purchaseOrders} setDrafts={setPurchaseOrders} />,
+        'purchaseRefund': <InvoicePage type='purchaseRefund' drafts={purchaseRefunds} setDrafts={setPurchaseRefunds} />,
         'product': <ProductPage />,
         'partner': <PartnerPage />,
         'settings': <SettingPage />,

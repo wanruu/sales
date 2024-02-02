@@ -1,9 +1,8 @@
 import dayjs from 'dayjs'
 import Decimal from 'decimal.js'
 import uuid from 'react-uuid'
-import { Tag, Popover, Space } from 'antd'
 
-import { invoiceSettings, DELIVER_COLORS, DATE_FORMAT } from './config'
+import { invoiceSettings, DATE_FORMAT } from './config'
 
 
 export const dcInvoice = (invoice) => {
@@ -95,84 +94,6 @@ export const isProductRepeat = (items) => {
     return false
 }
 
-
-export const getInvoiceViewTableColumns = (type) => {
-    const ifShowMaterial = invoiceSettings.get('ifShowMaterial') === 'true'
-    const ifShowDiscount = invoiceSettings.get('ifShowDiscount') === 'true'
-    const ifShowDelivered = invoiceSettings.get('ifShowDelivered') === 'true'
-    const ifShowAmountSign = invoiceSettings.get('ifShowAmountSign') === 'true'
-    const amountSign = invoiceSettings.get('amountSign')
-    const isRefund = type === 'salesRefund' || type === 'purchaseRefund'
-    const ifShowWeight = type === 'purchaseOrder'
-    return [
-        { title: '', align: 'center', width: 30, fixed: 'left', render: (_, __, idx) => idx + 1 },
-        ifShowMaterial ? { title: '材质', dataIndex: 'material', align: 'center', width: 50 } : null,
-        { title: '名称', dataIndex: 'name', align: 'center', width: 120 },
-        { title: '规格', dataIndex: 'spec', align: 'center', width: 70 },
-        { title: '数量', dataIndex: 'quantity', align: 'center', width: 70, render: q => q.toLocaleString() },
-        { title: '单位', dataIndex: 'unit', align: 'center', width: 50 },
-        { title: '单价', dataIndex: 'price', align: 'center', width: 70, render: p => 
-            (ifShowAmountSign ? amountSign : '') + p.toLocaleString()
-        },
-        ifShowDiscount ? { title: '金额', dataIndex: 'originalAmount', align: 'center', width: 80, render: a => 
-            (ifShowAmountSign ? amountSign : '') + a.toLocaleString()
-        } : null,
-        ifShowDiscount ? { title: '折扣', dataIndex: 'discount', align: 'center', width: 50, render: discount => `${discount}%` } : null,
-        { title: ifShowDiscount ? '折后价' : '金额', dataIndex: 'amount', align: 'center', width: 80, render: d => 
-            (ifShowAmountSign ? amountSign : '') + d.toLocaleString()
-        },
-        ifShowWeight ? { title: '重量', dataIndex: 'weight', align: 'center', width: 80, render: w => w ? w.toLocaleString() : w 
-        } : null,
-        { title: '备注', dataIndex: 'remark', align: 'center', width: 160 },
-        ifShowDelivered ? { title: '配送', dataIndex: 'delivered', align: 'center', width: 60, fixed: 'right', render: delivered => {
-            const text = delivered ? '已配送' : '未配送'
-            return <Tag color={DELIVER_COLORS[text]}>{text}</Tag>
-        }} : null,
-        isRefund ? null : { title: '退货状态', align: 'center', width: 75, fixed: 'right', render: (_, record) => 
-            <Popover trigger='click' content={
-                <Space direction='vertical'>
-                    <span>退货数量：{(record.refundQuantity || 0).toLocaleString()}</span>
-                    { ifShowDiscount ? <span>金额：{(record.refundOriginalAmount || 0).toLocaleString()}</span> : null }
-                    <span>{ifShowDiscount ? '折后价：': '金额：'}{(record.refundAmount || 0).toLocaleString()}</span>
-                </Space>
-            }>
-                <a>{ Decimal(record.refundQuantity || 0).equals(record.quantity) ? '全部退货' :
-                    (Decimal(record.refundQuantity || 0).gt(record.quantity) ? '退货超数' : (
-                        Decimal(record.refundQuantity || 0).equals(0) ? null : '部分退货'
-                    ))
-                }</a>
-            </Popover>
-        }
-    ].filter(i => i != null)
-}
-
-
-export const getInvoiceExportColumns = (type) => {
-    const ifShowMaterial = invoiceSettings.get('ifShowMaterial') === 'true'
-    const ifShowDiscount = invoiceSettings.get('ifShowDiscount') === 'true'
-    const ifShowWeight = type === 'purchaseOrder'
-    const isRefund = type === 'salesRefund' || type === 'purchaseRefund'
-    return [
-        { title: '序号', onExport: (_,__,idx) => idx+1, summary: '总计'},
-        ifShowMaterial ? { title: '材质', dataIndex: 'material' } : null,
-        { title: '名称', dataIndex: 'name' },
-        { title: '规格', dataIndex: 'spec' },
-        { title: '数量', dataIndex: 'quantity' },
-        { title: '单位', dataIndex: 'unit' },
-        { title: '单价', dataIndex: 'price' },
-        ifShowDiscount ? { title: '金额', dataIndex: 'originalAmount', summary: 'sum' } : null,
-        ifShowDiscount ? { title: '折扣', dataIndex: 'discount', onExport: d => `${d}%` } : null,
-        { title: ifShowDiscount ? '折后价' : '金额', dataIndex: 'amount', summary: 'sum' },
-        ifShowWeight ? { title: '重量', dataIndex: 'weight' } : null,
-        { title: '备注', dataIndex: 'remark' },
-        { title: '配送', dataIndex: 'delivered', onExport: d => d ? '已配送' : '未配送' },
-        isRefund ? null : { title: '退货状态', width: 75, onExport: (_, record) => 
-            Decimal(record.refundQuantity || 0).equals(record.quantity) ? '全部退货' :
-            (Decimal(record.refundQuantity || 0).gt(record.quantity) ? '退货超数' : (
-            Decimal(record.refundQuantity || 0).equals(0) ? null : '部分退货'
-        )) }
-    ].filter(i => i != null)
-}
 
 export function digitUppercase(n) {
     var fraction = ['角', '分']

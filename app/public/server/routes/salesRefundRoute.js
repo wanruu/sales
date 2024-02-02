@@ -38,7 +38,7 @@ router.get('/', (req, res) => {
 
 router.get('/id/:id', (req, res) => {
     const refundId = req.params.id
-    const selectRefund = `SELECT i.*, orderId, p.address, p.phone 
+    const selectRefund = `SELECT i.*, orderId, p.* 
         FROM invoice AS i, partner AS p, invoiceRelation AS r 
         WHERE id="${refundId}" AND partner=name AND r.refundId=i.id`
     db.each(selectRefund, (err, refund) => {

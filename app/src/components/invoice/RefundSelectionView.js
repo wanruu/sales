@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import Axios from 'axios'
-import { Table, Space, Button, Row, Col, Divider } from 'antd'
+import { Table, Button } from 'antd'
 import _ from 'lodash'
 
 import { baseURL, invoiceSettings } from '../../utils/config'
-import { dcInvoice, calTotalAmount } from '../../utils/invoiceUtils'
+import { calTotalAmount } from '../../utils/invoiceUtils'
 
 
 /*

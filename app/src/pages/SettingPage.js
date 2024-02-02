@@ -1,10 +1,7 @@
-import { Input, Upload, InputNumber, Space, Select, Checkbox, Card, Form, Radio, Row,
-    Switch, Typography, Table, Button, Collapse
-} from 'antd'
-import React, { useEffect, useState, } from 'react'
+import { Typography, Collapse } from 'antd'
+import React from 'react'
 import * as XLSX from 'xlsx'
 import Axios from 'axios'
-import dayjs from 'dayjs'
 import uuid from 'react-uuid'
 
 

@@ -1,19 +1,51 @@
 import React from 'react'
 import Decimal from 'decimal.js'
-import { Table, Col, Row, Divider, Space, Popover } from 'antd'
+import { Table, Col, Row, Divider, Space, Popover, Tag, Button } from 'antd'
 import _ from 'lodash'
+import { EditOutlined, PrinterOutlined } from '@ant-design/icons'
 
-import { invoiceSettings } from '../../utils/config'
+
+import { invoiceSettings, DELIVER_COLORS } from '../../utils/config'
 import PartnerPopoverView from '../partner/PartnerPopoverView'
 
 
 /*
-    Required: type, invoice (refund的话items需要过滤quantity不为null)
-    Optional: allowEditPartner (false by default), refresh (required if allowEditPartner=true)
+    Required: type, invoice (refund的话items需要过滤quantity不为null), setMode
+    Optional: allowEditPartner (false by default), refresh (required if allowEditPartner=true),
+        allowEdit (true by default), allowPrint (true by default), 
+        setMode (required if allowEdit=true or allowPrint=true)
 */
 export default function InvoiceView(props) {
     const isSales = ['salesOrder', 'salesRefund'].includes(props.type)
     const isRefund = ['salesRefund', 'purchaseRefund'].includes(props.type)
+
+
+    // const getInvoiceExportColumns = (type) => {
+    //     const ifShowMaterial = invoiceSettings.get('ifShowMaterial') === 'true'
+    //     const ifShowDiscount = invoiceSettings.get('ifShowDiscount') === 'true'
+    //     const ifShowWeight = type === 'purchaseOrder'
+    //     const isRefund = type === 'salesRefund' || type === 'purchaseRefund'
+    //     return [
+    //         { title: '序号', onExport: (_,__,idx) => idx+1, summary: '总计'},
+    //         ifShowMaterial ? { title: '材质', dataIndex: 'material' } : null,
+    //         { title: '名称', dataIndex: 'name' },
+    //         { title: '规格', dataIndex: 'spec' },
+    //         { title: '数量', dataIndex: 'quantity' },
+    //         { title: '单位', dataIndex: 'unit' },
+    //         { title: '单价', dataIndex: 'price' },
+    //         ifShowDiscount ? { title: '金额', dataIndex: 'originalAmount', summary: 'sum' } : null,
+    //         ifShowDiscount ? { title: '折扣', dataIndex: 'discount', onExport: d => `${d}%` } : null,
+    //         { title: ifShowDiscount ? '折后价' : '金额', dataIndex: 'amount', summary: 'sum' },
+    //         ifShowWeight ? { title: '重量', dataIndex: 'weight' } : null,
+    //         { title: '备注', dataIndex: 'remark' },
+    //         { title: '配送', dataIndex: 'delivered', onExport: d => d ? '已配送' : '未配送' },
+    //         isRefund ? null : { title: '退货状态', width: 75, onExport: (_, record) => 
+    //             Decimal(record.refundQuantity || 0).equals(record.quantity) ? '全部退货' :
+    //             (Decimal(record.refundQuantity || 0).gt(record.quantity) ? '退货超数' : (
+    //             Decimal(record.refundQuantity || 0).equals(0) ? null : '部分退货'
+    //         )) }
+    //     ].filter(i => i != null)
+    // }
 
     // const exportFile = () => {
     //     const itemColumns = getInvoiceExportColumns('salesOrder')
@@ -67,6 +99,7 @@ export default function InvoiceView(props) {
             }
         ].filter(i => i != null)
     }
+
     return (<>
         <Space direction='vertical' style={{ width: '100%', marginTop: '10px', marginBottom: '15px' }}>
             <Row>
@@ -106,5 +139,19 @@ export default function InvoiceView(props) {
         size='small' bordered style={{ height: 400 }} scroll={{x: 'max-content', y: 400 }} pagination={false}
         rowKey={record => record.id || record.refundItemId} />
         <Divider />
+        
+        <Col align='end'>
+            <Space>
+                {
+                    props.allowEdit === false ? null :
+                    <Button icon={<EditOutlined/>} type='primary' onClick={_ => props.setMode('edit')}>编辑</Button>
+                }
+                {/* <Button icon={<TableOutlined/>} onClick={exportFile}>导出</Button> */}
+                {
+                    props.allowPrint === false ? null :
+                    <Button icon={<PrinterOutlined/>} onClick={_ => props.setMode('print')}>打印预览</Button>
+                }
+            </Space>
+        </Col>
     </>)
 }

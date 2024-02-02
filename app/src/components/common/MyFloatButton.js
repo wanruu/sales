@@ -5,10 +5,7 @@ import dayjs from 'dayjs'
 
 
 import { emptyInvoice } from '../../utils/invoiceUtils'
-import SalesOrderEditView from '../invoice/salesOrder/SalesOrderEditView'
-import SalesRefundEditView from '../invoice/salesRefund/SalesRefundEditView'
-import PurchaseOrderEditView from '../invoice/purchaseOrder/PurchaseOrderEditView'
-import PurchaseRefundEditView from '../invoice/purchaseRefund/PurchaseRefundEditView'
+import InvoiceEditView from '../invoice/InvoiceEditView'
 import './myFloatButton.css'
 
 /*
@@ -73,14 +70,9 @@ export default function MyFloatButton(props) {
         } />
         
         <Modal title={getTitle(props.type)} open={editInvoice} width={1000} centered onCancel={_ => setEditInvoice(undefined)} footer={null}>
-            { props.type === 'salesOrder' ? <SalesOrderEditView order={editInvoice} messageApi={messageApi} dismiss={_ => setEditInvoice(undefined)} 
-                refresh={props.refresh} saveDraft={saveDraft} removeDraft={removeDraft} /> : null }
-            { props.type === 'salesRefund' ? <SalesRefundEditView refund={editInvoice} messageApi={messageApi} dismiss={_ => setEditInvoice(undefined)} 
-                refresh={props.refresh} saveDraft={saveDraft} removeDraft={removeDraft} /> : null }
-            { props.type === 'purchaseOrder' ? <PurchaseOrderEditView order={editInvoice} messageApi={messageApi} dismiss={_ => setEditInvoice(undefined)} 
-                refresh={props.refresh} saveDraft={saveDraft} removeDraft={removeDraft} /> : null }
-            { props.type === 'purchaseRefund' ? <PurchaseRefundEditView refund={editInvoice} messageApi={messageApi} dismiss={_ => setEditInvoice(undefined)} 
-                refresh={props.refresh} saveDraft={saveDraft} removeDraft={removeDraft} /> : null }
+            <InvoiceEditView invoice={editInvoice} messageApi={messageApi} 
+            dismiss={_ => setEditInvoice(undefined)} refresh={props.refresh} 
+            saveDraft={saveDraft} removeDraft={removeDraft} />
         </Modal>
     </>
 }
