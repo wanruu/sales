@@ -209,7 +209,7 @@ function PrintPreview() {
             
             { previewType ?
             <div style={{ overflowX: 'auto', overflowY: 'clip' }}>
-                <InvoicePrintView type={previewType} invoice={initInvoiceForPreview(previews[previewType].prefix, previewItemNum)} />
+                <InvoicePrintView footer={false} type={previewType} invoice={initInvoiceForPreview(previews[previewType].prefix, previewItemNum)} />
             </div> : null }
         </Item>
     </Form>

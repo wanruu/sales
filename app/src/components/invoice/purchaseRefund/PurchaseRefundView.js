@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import Axios from 'axios'
 import Decimal from 'decimal.js'
 import { Table, Button, Col, Row, Divider, Space } from 'antd'
-import { EditOutlined, PrinterOutlined, TableOutlined, RollbackOutlined } from '@ant-design/icons'
-import { useReactToPrint } from 'react-to-print'
+import { EditOutlined, PrinterOutlined, TableOutlined } from '@ant-design/icons'
 
 
 import { baseURL } from '../../../utils/config'
@@ -38,25 +37,20 @@ export default function PurchaseRefundView(props) {
         }).catch(_ => { })
     }
 
+    const refresh = () => {
+        load()
+        props.refresh()
+    }
+
+    const modeDict = {
+        'edit': <PurchaseRefundEditView refund={refund} dismiss={_ => setMode('view')} messageApi={props.messageApi} refresh={refresh} />,
+        'view': <View refund={refund} setMode={setMode}  />,
+        'print': <InvoicePrintView invoice={refund} dismiss={_ => setMode('view')} type='purchaseRefund' />
+    }
+
     useEffect(load, [])
 
-    return <>
-        <div style={{ display: mode === 'edit' ? 'block' : 'none' }}>
-            <PurchaseRefundEditView refund={refund} 
-            dismiss={_ => setMode('view')} 
-            messageApi={props.messageApi} 
-            refresh={_ => { 
-                load()
-                props.refresh() 
-            }} /> 
-        </div>
-        <div style={{ display: mode === 'view' ? 'block' : 'none'}}>
-            <View refund={refund} setMode={setMode} />
-        </div>
-        <div style={{ display: mode === 'print' ? 'block' : 'none'}}>
-            <PrintView refund={refund} setMode={setMode} />
-        </div>
-    </>
+    return modeDict[mode]
 }
 
 
@@ -98,31 +92,6 @@ function View(props) {
                 <Button icon={<EditOutlined/>} type='primary' onClick={_ => props.setMode('edit')}>编辑</Button>
                 <Button icon={<TableOutlined/>} onClick={exportFile}>导出</Button>
                 <Button icon={<PrinterOutlined/>} onClick={_ => props.setMode('print')}>打印预览</Button>
-            </Space>
-        </Col>
-    </>
-}
-
-
-function PrintView(props) {
-    // for print
-    const componentRef = useRef(null)
-    const handlePrint = useReactToPrint({
-        content: () => componentRef.current,
-    })
-
-    return <>
-        <Space direction='vertical' size='middle' style={{ width: '100%', marginTop: '10px', marginBottom: '10px' }}>
-            <Col align='middle' style={{ overflowX: 'auto', overflowY: 'clip' }}>
-                <div ref={componentRef} > 
-                    {!props.refund ? null : <InvoicePrintView invoice={props.refund} type='purchaseRefund' />}
-                </div>
-            </Col>
-        </Space>
-        <Col align='end'>
-            <Space>
-                <Button icon={<RollbackOutlined />} onClick={_ => props.setMode('view')}>返回</Button>
-                <Button icon={<PrinterOutlined/>} onClick={handlePrint} type='primary'>打印</Button>
             </Space>
         </Col>
     </>

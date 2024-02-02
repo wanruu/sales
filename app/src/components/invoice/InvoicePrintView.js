@@ -1,6 +1,8 @@
-import React from 'react'
-import { Row, Col, Space } from 'antd'
+import React, { useRef } from 'react'
+import { Row, Col, Space, Button } from 'antd'
 import { FieldNumberOutlined } from '@ant-design/icons'
+import { useReactToPrint } from 'react-to-print'
+import { PrinterOutlined, RollbackOutlined } from '@ant-design/icons'
 
 
 import { printSettings, invoiceSettings } from '../../utils/config'
@@ -8,7 +10,9 @@ import { digitUppercase } from '../../utils/invoiceUtils'
 import './invoicePrintView.css'
 
 
-/* type */
+/* 
+    Required: invoice
+*/
 function PreviewTable(props) {
     const ifShowMaterial = invoiceSettings.get('ifShowMaterial') === 'true'
     const amountSign = printSettings.get('ifShowPrintAmountSign') === 'true' ? printSettings.get('printAmountSign') : ''
@@ -68,7 +72,9 @@ function PreviewTable(props) {
 }
 
 
-/* type */
+/* 
+    Required: type
+*/
 function PreviewTitle(props) {
     // Content
     const title = printSettings.get('title').replace(/ /g, '\xa0')
@@ -122,7 +128,9 @@ function PreviewFooter() {
 }
 
 
-/* invoice, type */
+/* 
+    Required: invoice, type 
+*/
 function PreviewHeader(props) {
     // Style
     const fontSize = { fontSize: printSettings.get('headerFontSize') + 'px' }
@@ -157,18 +165,43 @@ function PreviewHeader(props) {
 }
 
 
+/*
+    Required: invoice, type
+    Optional: footer (true by default), dismiss (required when footer=true)
+*/
 export default function InvoicePrintView(props) {
-    return <div className='invoiceWrapper' style={{ width: printSettings.get('width') + 'px', height: printSettings.get('height')+'px' }}>
-        <div className='invoiceContent' style={{
-            paddingTop: printSettings.get('vPadding')+'px', paddingBottom: printSettings.get('vPadding')+'px',
-            paddingLeft: printSettings.get('hPadding')+'px', paddingRight: printSettings.get('hPadding')+'px',
-        }}>
-            <Space direction='vertical' style={{ width: '100%' }} size={5}>
-                <PreviewTitle type={props.type} />
-                <PreviewHeader invoice={props.invoice} type={props.type} />
-                <PreviewTable invoice={props.invoice} />
-                <PreviewFooter />
-            </Space>
-        </div>
-    </div>
+    // for print
+    const componentRef = useRef(null)
+    const handlePrint = useReactToPrint({ content: () => componentRef.current })
+
+    return (<>
+        <Space direction='vertical' size='middle' style={{ width: '100%', marginTop: '10px', marginBottom: '10px' }}>
+            <Col align='middle' style={{ overflowX: 'auto', overflowY: 'clip' }}>
+                <div ref={componentRef} >
+                    <div className='invoiceWrapper' style={{ width: printSettings.get('width') + 'px', height: printSettings.get('height')+'px' }}>
+                        <div className='invoiceContent' style={{
+                            paddingTop: printSettings.get('vPadding')+'px', paddingBottom: printSettings.get('vPadding')+'px',
+                            paddingLeft: printSettings.get('hPadding')+'px', paddingRight: printSettings.get('hPadding')+'px',
+                        }}>
+                            <Space direction='vertical' style={{ width: '100%' }} size={5}>
+                                <PreviewTitle {...props} />
+                                <PreviewHeader {...props} />
+                                <PreviewTable {...props} />
+                                <PreviewFooter />
+                            </Space>
+                        </div>
+                    </div>
+                </div>
+            </Col>
+        </Space>
+        {
+            props.footer === false ? null :
+            <Col align='end'>
+                <Space>
+                    <Button onClick={props.dismiss} icon={<RollbackOutlined />}>返回</Button>
+                    <Button onClick={handlePrint} type='primary' icon={<PrinterOutlined />}>打印</Button>
+                </Space>
+            </Col>
+        }
+    </>)
 }
