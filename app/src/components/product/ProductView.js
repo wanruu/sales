@@ -159,8 +159,8 @@ export default function ProductView(props) {
     }
 
     const calUnitWeight = (items) => {
-        const quantity = Decimal(0)
-        const weight = Decimal(0)
+        var quantity = Decimal(0)
+        var weight = Decimal(0)
         
         for (const item of items) {
             if (item.weight != null) {
