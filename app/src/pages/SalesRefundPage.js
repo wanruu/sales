@@ -40,7 +40,8 @@ function SalesRefundPage(props) {
             'Content-Type': 'application/json',
         }).then(res => {
             const refunds = res.data.map(r => {
-                r.unpaid = Decimal(r.amount).minus(r.payment).toNumber()
+                r.paid = Decimal(r.prepayment).plus(r.payment).toNumber()
+                r.unpaid = Decimal(r.amount).minus(r.paid).toNumber()
                 return r
             })
             setSalesRefunds(refunds)
