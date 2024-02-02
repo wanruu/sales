@@ -50,7 +50,7 @@ function SalesOrderPage(props) {
     }
 
     const getTableColumns = () => {
-        const ifShowInvoiceDelivered = invoiceSettings.get('ifShowInvoiceDelivered') == 'true'
+        const ifShowDelivered = invoiceSettings.get('ifShowDelivered') == 'true'
         const amountSign = invoiceSettings.get('ifShowAmountSign') === 'true' ? invoiceSettings.get('amountSign') : ''
         return [
             { title: '序号', align: 'center', render: (_, __, idx) => idx + 1, fixed: 'left' },
@@ -62,7 +62,7 @@ function SalesOrderPage(props) {
             { title: '未付', dataIndex: 'unpaid', align: 'center', render: unpaid => 
                 <span style={{ color: unpaid === 0 ? 'black' : 'red' }}>{amountSign + unpaid.toLocaleString()}</span>
             },
-            ifShowInvoiceDelivered ? { 
+            ifShowDelivered ? { 
                 title: '配送情况', dataIndex: 'delivered', align: 'center', render: d => <Tag color={DELIVER_COLORS[d]}>{d}</Tag>
             } : null,
             { title: '关联退货单', dataIndex: 'refundId', align: 'center', render: id => id ? <a onClick={_ => setSelectedRefundId(id)}>{id}</a> : null },

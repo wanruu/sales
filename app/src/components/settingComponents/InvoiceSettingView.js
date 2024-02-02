@@ -134,8 +134,6 @@ export default function InvoiceSettingView() {
     const [ifShowDiscount, setIfShowDiscount] = useState(invoiceSettings.get('ifShowDiscount'))
     const [ifShowMaterial, setIfShowMaterial] = useState(invoiceSettings.get('ifShowMaterial'))
     const [ifShowDelivered, setIfShowDelivered] = useState(invoiceSettings.get('ifShowDelivered'))
-    const [ifShowInvoiceDelivered, setIfShowInvoiceDelivered] = useState(invoiceSettings.get('ifShowInvoiceDelivered'))
-    const [ifShowItemDelivered, setIfShowItemDelivered] = useState(invoiceSettings.get('ifShowItemDelivered'))
     const [ifShowAmountSign, setIfShowAmountSign] = useState(invoiceSettings.get('ifShowAmountSign'))
     const [allowEditAmount, setAllowEditAmount] = useState(invoiceSettings.get('allowEditAmount'))
     const [invoiceAmountDigitNum, setInvoiceAmountDigitNum] = useState(invoiceSettings.get('invoiceAmountDigitNum'))
@@ -152,20 +150,12 @@ export default function InvoiceSettingView() {
             <UnitSettingView />
             <Divider />
  
-            <div className='itemTitle'>折扣功能</div>
+            <div className='itemTitle'>基本功能</div>
             <SettingSwitchItem keyy='ifShowDiscount' value={ifShowDiscount} setValue={setIfShowDiscount} 
                 label='折扣功能' help='该开关不会影响原有数据，只是显示或隐藏折扣及折前金额。' />
-            <Divider />
-
-            <div className='itemTitle'>配送功能</div>
+           
             <SettingSwitchItem keyy='ifShowDelivered' value={ifShowDelivered} setValue={setIfShowDelivered} 
-                label='允许编辑配送情况' help='若开关打开，则可以在开单页面显示并更改配送情况。' />
-
-            <SettingSwitchItem keyy='ifShowInvoiceDelivered' value={ifShowInvoiceDelivered} setValue={setIfShowInvoiceDelivered} 
-                label='显示清单配送情况' help='若开关打开，清单列表中配送情况将会显示为”未配送“、”部分配送“或”全部配送“；否则，将隐藏配送情况一栏。' />
-            
-            <SettingSwitchItem keyy='ifShowItemDelivered' value={ifShowItemDelivered} setValue={setIfShowItemDelivered} 
-                label='显示单个产品配送情况' help='若开关打开，产品配送情况将会显示为”未配送“或”已配送“；否则，将隐藏配送情况一栏。' />
+                label='配送功能' help={false} />
             <Divider />
 
             <div className='itemTitle'>金额</div>

@@ -99,7 +99,7 @@ export const isProductRepeat = (items) => {
 export const getInvoiceViewTableColumns = (type) => {
     const ifShowMaterial = invoiceSettings.get('ifShowMaterial') === 'true'
     const ifShowDiscount = invoiceSettings.get('ifShowDiscount') === 'true'
-    const ifShowItemDelivered = invoiceSettings.get('ifShowItemDelivered') === 'true'
+    const ifShowDelivered = invoiceSettings.get('ifShowDelivered') === 'true'
     const ifShowAmountSign = invoiceSettings.get('ifShowAmountSign') === 'true'
     const amountSign = invoiceSettings.get('amountSign')
     const isRefund = type === 'salesRefund' || type === 'purchaseRefund'
@@ -124,7 +124,7 @@ export const getInvoiceViewTableColumns = (type) => {
         ifShowWeight ? { title: '重量', dataIndex: 'weight', align: 'center', width: 80, render: w => w ? w.toLocaleString() : w 
         } : null,
         { title: '备注', dataIndex: 'remark', align: 'center', width: 160 },
-        ifShowItemDelivered ? { title: '配送', dataIndex: 'delivered', align: 'center', width: 60, fixed: 'right', render: delivered => {
+        ifShowDelivered ? { title: '配送', dataIndex: 'delivered', align: 'center', width: 60, fixed: 'right', render: delivered => {
             const text = delivered ? '已配送' : '未配送'
             return <Tag color={DELIVER_COLORS[text]}>{text}</Tag>
         }} : null,

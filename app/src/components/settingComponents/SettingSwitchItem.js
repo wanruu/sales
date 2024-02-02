@@ -12,9 +12,11 @@ const { Item } = Form
 export default function SettingSwitchItem(props) {
     return <Item label={<>
         {props.label}
-        <Tooltip title={props.help} >
-            <QuestionCircleOutlined style={{ marginLeft: '3px', color: 'gray' }} />
-        </Tooltip>
+        {props.help === false ? null :
+            <Tooltip title={props.help} >
+                <QuestionCircleOutlined style={{ marginLeft: '3px', color: 'gray' }} />
+            </Tooltip>
+        }
     </>}>
         <Switch checked={props.value === 'true'} onChange={val => {
             props.setValue(`${val}`)

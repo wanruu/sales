@@ -51,7 +51,7 @@ function PurchaseRefundPage(props) {
     }
 
     const getTableColumns = () => {
-        const ifShowInvoiceDelivered = invoiceSettings.get('ifShowInvoiceDelivered') == 'true'
+        const ifShowDelivered = invoiceSettings.get('ifShowDelivered') == 'true'
         const amountSign = invoiceSettings.get('ifShowAmountSign') == 'true' ? invoiceSettings.get('amountSign') : ''
         
         return [
@@ -63,7 +63,7 @@ function PurchaseRefundPage(props) {
             { title: '已付', dataIndex: 'payment', align: 'center', render: payment => amountSign + payment.toLocaleString() },
             { title: '未付', dataIndex: 'unpaid', align: 'center', 
                 render: unpaid => <span style={{ color: unpaid === 0 ? 'black' : 'red' }}>{amountSign + unpaid.toLocaleString()}</span> },
-            ifShowInvoiceDelivered ? { 
+                ifShowDelivered ? { 
                 title: '配送情况', dataIndex: 'delivered', align: 'center', render: d => <Tag color={DELIVER_COLORS[d]}>{d}</Tag>
             } : null,
             { title: '关联采购单', dataIndex: 'orderId', align: 'center', render: id => <a onClick={_ => setSelectedOrderId(id)}>{id}</a> },
