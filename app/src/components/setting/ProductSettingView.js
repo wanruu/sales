@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Space, Form, Table, Button, Divider } from 'antd'
+import { Form, Table, Button, Divider, Card } from 'antd'
 
 
 import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
@@ -15,6 +15,7 @@ import { CSS } from '@dnd-kit/utilities'
 
 import { invoiceSettings } from '../../utils/config'
 import SettingSwitchItem from './SettingSwitchItem'
+import Title from 'antd/es/typography/Title'
 
 const { Item } = Form
 
@@ -90,51 +91,51 @@ function UnitSettingView() {
         invoiceSettings.set('unitOptions', JSON.stringify(unitOptions))
     }, [unitOptions])
 
-
-    return <Space direction='vertical' size={0} style={{ width: '100%' }}>
-        <div className='itemTitle'>产品单位</div>
-        {
-            isEditing ? 
-            <Form layout='vertical'>
-                <Item extra='（1）勾选的单位将会显示在开单页面、产品编辑页面的单位选择列表中，不勾选则不显示。
-                    （2）拖动列表项目可以为单位排序。
-                    （3）无需手动保存。'>
-                    <DndContext sensors={sensors} modifiers={[restrictToVerticalAxis]} onDragEnd={onDragEnd}>
-                        <SortableContext items={unitOptions.map(i => i.key)} strategy={verticalListSortingStrategy}>
-                            <Table size='small' rowKey='key' columns={editTableColumns} dataSource={unitOptions}
-                                pagination={false} components={{ body: { row: TableRow } }} 
-                                rowSelection={rowSelection}
-                                footer={_ =>
-                                    <Button size='small' onClick={_ => setIsEditing(false)}>收起</Button>
-                                }
-                                
-                            />
-                        </SortableContext>
-                    </DndContext>
-                </Item>
-            </Form> :
-            <Item>
-                <Table size='small' rowKey='key' columns={viewTableColumns} pagination={false}
-                    dataSource={unitOptions.filter(o => o.showing)}
-                    footer={_ => <Button size='small' onClick={_ => setIsEditing(true)}>编辑</Button>}
-                />
+    if (isEditing) {
+        return (
+            <Item extra='（1）勾选的单位将会显示在开单页面、产品编辑页面的单位选择列表中，不勾选则不显示。
+                （2）拖动列表项目可以为单位排序。
+                （3）无需手动保存。'>
+                <DndContext sensors={sensors} modifiers={[restrictToVerticalAxis]} onDragEnd={onDragEnd}>
+                    <SortableContext items={unitOptions.map(i => i.key)} strategy={verticalListSortingStrategy}>
+                        <Table size='small' rowKey='key' columns={editTableColumns} dataSource={unitOptions}
+                            pagination={false} components={{ body: { row: TableRow } }} 
+                            rowSelection={rowSelection}
+                            footer={_ =>
+                                <Button size='small' onClick={_ => setIsEditing(false)}>收起</Button>
+                            }
+                            
+                        />
+                    </SortableContext>
+                </DndContext>
             </Item>
-        }
-    </Space>
+        )
+    }
+
+    return (
+        <Table size='small' rowKey='key' columns={viewTableColumns} pagination={false}
+            dataSource={unitOptions.filter(o => o.showing)}
+            footer={_ => <Button size='small' onClick={_ => setIsEditing(true)}>编辑</Button>}
+        />
+    )
 }
 
 
 export default function ProductSettingView() {
     const [ifShowMaterial, setIfShowMaterial] = useState(invoiceSettings.get('ifShowMaterial'))
 
-    return (
-        <Space direction='vertical' size={0} style={{ width: '100%' }}>
-            <div className='itemTitle'>产品材质</div>
+    return (<>
+        <Title id='product' level={2}>产品设置</Title>
+
+        <Card>
+            <Title id='product-material' level={3}>材质</Title>
             <SettingSwitchItem keyy='ifShowMaterial' value={ifShowMaterial} setValue={setIfShowMaterial} 
                 label='开启材质' help='该开关不会影响原有数据，只是显示或隐藏材质项。' />
+        
             <Divider />
 
+            <Title id='product-unit' level={3}>单位</Title>
             <UnitSettingView />
-        </Space>
-    )
+        </Card>
+    </>)
 }
