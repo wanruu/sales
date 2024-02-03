@@ -13,7 +13,7 @@ router.get('/', (req, res) => {
         FROM invoiceItem
         WHERE weight IS NOT NULL
         GROUP BY productId`
-    const query = `SELECT p.id, material, name, spec, unit, quantity, invoiceNum, quantity*unitWeight AS estimatedWeight
+    const query = `SELECT p.id, material, name, spec, unit, invoiceNum
         FROM product AS p 
         LEFT JOIN (${invoiceItemNum}) AS t ON p.id=t.productId
         LEFT JOIN (${unitWeight}) AS u ON p.id=u.productId`
@@ -30,7 +30,14 @@ router.get('/', (req, res) => {
 router.get('/id/:id', (req, res) => {
     const productId = req.params.id
     
-    const selectProduct = `SELECT * FROM product WHERE id="${productId}"`
+    const quantityChange = `SELECT 
+        CASE WHEN i.type IN (${INVOICE_TYPE_2_INT.salesOrder}, ${INVOICE_TYPE_2_INT.purchaseRefund}) THEN -ii.quantity
+        ELSE ii.quantity END AS quantityChange
+    FROM invoiceItem AS ii, invoice AS i
+    WHERE ii.invoiceId=i.id AND ii.productId="${productId}"`
+    const selectProduct = `SELECT p.*, SUM(c.quantityChange) AS quantity
+    FROM product AS p, (${quantityChange}) AS c
+    WHERE p.id="${productId}"`
     db.each(selectProduct, (err, product) => {
         if (err) {
             console.error(err)
@@ -116,7 +123,7 @@ router.delete('/', (req, res) => {
 
 router.put('/id/:id', async (req, res) => {
     const productId = req.params.id
-    const updates = ['material', 'name', 'spec', 'unit', 'quantity'].map(key => `${key}="${req.body[key]}"`).join(', ')
+    const updates = ['material', 'name', 'spec', 'unit'].map(key => `${key}="${req.body[key]}"`).join(', ')
     const query = `UPDATE product SET ${updates} WHERE id="${productId}"`
     
     // update product
@@ -134,8 +141,8 @@ router.put('/id/:id', async (req, res) => {
 
 
 router.post('/', (req, res) => {
-    const query = `INSERT INTO product (id, material, name, spec, quantity, unit) 
-        VALUES ("${crypto.randomUUID()}", "${req.body.material}", "${req.body.name}", "${req.body.spec}", "${req.body.quantity}", "${req.body.unit}")`
+    const query = `INSERT INTO product (id, material, name, spec, unit) 
+        VALUES ("${crypto.randomUUID()}", "${req.body.material}", "${req.body.name}", "${req.body.spec}", "${req.body.unit}")`
     db.run(query, err => {
         if (err && err.errno === 19) { 
             console.error(err)

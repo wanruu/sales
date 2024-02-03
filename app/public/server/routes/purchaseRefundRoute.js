@@ -3,8 +3,8 @@ const router = express.Router()
 
 
 const db = require('../db')
-const { formatInsert, getNextInvoiceId, updateProductByInvoiceItems,
-    isDateValid, getQuantitySign, INVOICE_TYPE_2_INT
+const { formatInsert, getNextInvoiceId, updateProductByInvoiceItems, isDateValid, 
+    INVOICE_TYPE_2_INT
 } = require('./utils.js')
 
 
@@ -110,7 +110,7 @@ router.post('/', async (req, res) => {
     }
 
     // 1. update products
-    var productDictArray = await updateProductByInvoiceItems(items, typeStr).catch(err => {
+    var productDictArray = await updateProductByInvoiceItems(items).catch(err => {
         console.error(err)
         res.status(500).send(err)
     })
@@ -176,27 +176,15 @@ router.post('/', async (req, res) => {
 router.delete('/', async (req, res) => {
     const ids = (req.body.ids || []).map(id => `"${id}"`).join(', ')
 
-    // 1. update product quantity
-    const updateProduct = `UPDATE product
-        SET quantity=product.quantity${getQuantitySign(typeStr, true)}oi.quantity
-        FROM invoice AS i, invoiceItem AS oi
-        WHERE i.id IN (${ids}) AND i.id=oi.invoiceId AND oi.productId=product.id`
-    db.run(updateProduct, err => {
+    // 1. delete purchase refund
+    const deleteInvoice = `DELETE FROM invoice WHERE id IN (${ids})`
+    db.run(deleteInvoice, err => {
         if (err) {
             console.error(err)
             res.status(500).send(err)
             return
         }
-        // 2. delete purchase refund
-        const deleteInvoice = `DELETE FROM invoice WHERE id IN (${ids})`
-        db.run(deleteInvoice, err => {
-            if (err) {
-                console.error(err)
-                res.status(500).send(err)
-                return
-            }
-            res.end()
-        })
+        res.end()
     })
 })
 
@@ -222,19 +210,12 @@ router.put('/id/:id', async (req, res) => {
         return
     }
 
-    // 1. update products & delete old items
-    const updateProducts = `UPDATE product
-        SET quantity=product.quantity${getQuantitySign(typeStr, true)}ri.quantity
-        FROM invoiceItem AS ri
-        WHERE ri.invoiceId="${refundId}" AND product.id=ri.productId`
+    // 1. delete old items
     const deleteOldRefundItems = `DELETE FROM invoiceItem WHERE invoiceId="${refundId}"`
     await new Promise((resolve, reject) => {
-        db.run(updateProducts, err => {
+        db.run(deleteOldRefundItems, err => {
             if (err) { reject(err) }
-            db.run(deleteOldRefundItems, err => {
-                if (err) { reject(err) }
-                resolve()
-            })
+            resolve()
         })
     }).catch(err => {
         console.error(err)
@@ -256,7 +237,7 @@ router.put('/id/:id', async (req, res) => {
 
 
     // 3. update products
-    var productDictArray = await updateProductByInvoiceItems(items, typeStr).catch(err => {
+    var productDictArray = await updateProductByInvoiceItems(items).catch(err => {
         console.error(err)
         res.status(500).send(err)
     })

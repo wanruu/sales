@@ -3,10 +3,9 @@ const router = express.Router()
 
 
 const db = require('../db')
-const { formatInsert, getNextInvoiceId, updateProductByInvoiceItems,
-    isDateValid, getQuantitySign, INVOICE_TYPE_2_INT
+const { formatInsert, getNextInvoiceId, updateProductByInvoiceItems, isDateValid, 
+    INVOICE_TYPE_2_INT
 } = require('./utils.js')
-const { default: Decimal } = require('decimal.js')
 
 
 const prefix = 'XT'
@@ -60,22 +59,6 @@ router.get('/id/:id', (req, res) => {
         FROM invoiceItem AS ii, product AS p
         WHERE ii.invoiceId="${refundId}" AND p.id=ii.productId`
 
-        // const combineItems = `SELECT ii.*,
-        // p.material, p.name, p.spec, p.unit
-        // FROM (
-        //     SELECT oi.*, 
-        //     ri.refundItemId, ri.quantity, ri.originalAmount, ri.amount, ri.remark, ri.delivered
-        //     FROM (${orderItems}) AS oi
-        //     LEFT JOIN (${refundItems}) AS ri
-        //     ON ri.productId=oi.productId
-        //     UNION
-        //     SELECT ri.*
-        //     FROM (${refundItems}) AS ri
-        //     LEFT JOIN (${orderItems}) AS oi
-        //     ON ri.productId=oi.productId
-        // ) AS ii, product AS p
-        // WHERE ii.productId=p.id`
-        
         db.all(selectOrderItems, (err, orderItems) => {
             if (err) {
                 console.error(err)
@@ -127,11 +110,11 @@ router.post('/', async (req, res) => {
     }
 
     // 1. update products
-    var productDictArray = await updateProductByInvoiceItems(items, typeStr).catch(err => {
+    var productDictArray = await updateProductByInvoiceItems(items).catch(err => {
         console.error(err)
         res.status(500).send(err)
     })
-    
+
     // 2. insert salesRefund
     const refundId = await getNextInvoiceId(req.body.date, prefix).catch(err => {
         console.error(err)
@@ -175,7 +158,7 @@ router.post('/', async (req, res) => {
         }
     })
     const { query, flatData } = formatInsert('INSERT', 'invoiceItem', refundItemDictArray, [])
-    await new Promise((resolve, reject) => { 
+    await new Promise((resolve, reject) => {
         db.run(query, flatData, err => {
             if (err) { reject(err) }
             resolve()
@@ -184,7 +167,7 @@ router.post('/', async (req, res) => {
         console.error(err)
         res.status(500).send(err)
     })
-    
+
     // 5. return
     res.end()
 })
@@ -193,27 +176,15 @@ router.post('/', async (req, res) => {
 router.delete('/', async (req, res) => {
     const ids = (req.body.ids || []).map(id => `"${id}"`).join(', ')
 
-    // 1. update product quantity
-    const updateProduct = `UPDATE product
-        SET quantity=product.quantity${getQuantitySign(typeStr, true)}oi.quantity
-        FROM invoice AS i, invoiceItem AS oi
-        WHERE i.id IN (${ids}) AND i.id=oi.invoiceId AND oi.productId=product.id`
-    db.run(updateProduct, err => {
+    // 1. delete sales refund
+    const deleteInvoice = `DELETE FROM invoice WHERE id IN (${ids})`
+    db.run(deleteInvoice, err => {
         if (err) {
             console.error(err)
             res.status(500).send(err)
             return
         }
-        // 2. delete sales refund
-        const deleteInvoice = `DELETE FROM invoice WHERE id IN (${ids})`
-        db.run(deleteInvoice, err => {
-            if (err) {
-                console.error(err)
-                res.status(500).send(err)
-                return
-            }
-            res.end()
-        })
+        res.end()
     })
 })
 
@@ -239,19 +210,12 @@ router.put('/id/:id', async (req, res) => {
         return
     }
 
-    // 1. update products & delete old items
-    const updateProducts = `UPDATE product
-        SET quantity=product.quantity${getQuantitySign(typeStr, true)}ri.quantity
-        FROM invoiceItem AS ri
-        WHERE ri.invoiceId="${refundId}" AND product.id=ri.productId`
+    // 1. delete old items
     const deleteOldRefundItems = `DELETE FROM invoiceItem WHERE invoiceId="${refundId}"`
     await new Promise((resolve, reject) => {
-        db.run(updateProducts, err => {
+        db.run(deleteOldRefundItems, err => {
             if (err) { reject(err) }
-            db.run(deleteOldRefundItems, err => {
-                if (err) { reject(err) }
-                resolve()
-            })
+            resolve()
         })
     }).catch(err => {
         console.error(err)
@@ -273,11 +237,11 @@ router.put('/id/:id', async (req, res) => {
 
 
     // 3. update products
-    var productDictArray = await updateProductByInvoiceItems(items, typeStr).catch(err => {
+    var productDictArray = await updateProductByInvoiceItems(items).catch(err => {
         console.error(err)
         res.status(500).send(err)
     })
-    
+
 
     // 4. update invoice relation
     await new Promise((resolve, reject) => {
@@ -305,7 +269,7 @@ router.put('/id/:id', async (req, res) => {
         }
     })
     const { query, flatData } = formatInsert('INSERT', 'invoiceItem', refundItemDictArray, [])
-    await new Promise((resolve, reject) => { 
+    await new Promise((resolve, reject) => {
         db.run(query, flatData, err => {
             if (err) { reject(err) }
             resolve()

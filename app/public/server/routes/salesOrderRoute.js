@@ -3,8 +3,7 @@ const router = express.Router()
 const _ = require('lodash')
 
 const db = require('../db')
-const { updatePartner, updateProductByInvoiceItems,
-    getQuantitySign, isDateValid, getNextInvoiceId, formatInsert,
+const { updatePartner, updateProductByInvoiceItems, isDateValid, getNextInvoiceId, formatInsert,
     INVOICE_TYPE_2_INT, 
 } = require('./utils.js')
 
@@ -61,7 +60,7 @@ router.post('/', async (req, res) => {
 
     // 2. insert/update products, insert salesOrderItem
     if (items.length > 0) {
-        const productDictArray = await updateProductByInvoiceItems(items, typeStr).catch(err => {
+        const productDictArray = await updateProductByInvoiceItems(items).catch(err => {
             console.error(err)
             res.status(500).send(err)
         })
@@ -131,19 +130,12 @@ router.put('/id/:id', async (req, res) => {
         res.status(500).send(err)
     })
 
-    // 3. update products & delete old items
-    const updateProducts = `UPDATE product
-        SET quantity=product.quantity${getQuantitySign(typeStr, true)}oi.quantity
-        FROM invoiceItem AS oi
-        WHERE oi.invoiceId="${orderId}" AND product.id=oi.productId`
+    // 3. delete old items
     const deleteOldOrderItems = `DELETE FROM invoiceItem WHERE invoiceId="${orderId}"`
     await new Promise((resolve, reject) => {
-        db.run(updateProducts, err => {
+        db.run(deleteOldOrderItems, err => {
             if (err) { reject(err) }
-            db.run(deleteOldOrderItems, err => {
-                if (err) { reject(err) }
-                resolve()
-            })
+            resolve()
         })
     }).catch(err => {
         console.error(err)
@@ -152,7 +144,7 @@ router.put('/id/:id', async (req, res) => {
 
     // 4. insert new product & invoice items
     if (items.length > 0) {
-        const productDictArray = await updateProductByInvoiceItems(items, typeStr).catch(err => {
+        const productDictArray = await updateProductByInvoiceItems(items).catch(err => {
             console.error(err)
             res.status(500).send(err)
         })
@@ -257,13 +249,13 @@ router.get('/id/:id', (req, res) => {
 
         const selectItem = refundId ?
         `SELECT oi.id, oi.productId, oi.price, oi.discount, oi.quantity, oi.originalAmount, oi.amount, oi.remark, oi.delivered,
-            p.material, p.name, p.spec, p.unit, p.quantity AS remainingQuantity,
+            p.material, p.name, p.spec, p.unit,
             ri.quantity AS refundQuantity, ri.originalAmount AS refundOriginalAmount, ri.amount AS refundAmount
             FROM invoiceItem AS oi, product AS p 
             LEFT JOIN invoiceItem AS ri ON oi.productId=ri.productId AND ri.invoiceId="${refundId}"
             WHERE oi.invoiceId="${orderId}" AND p.id=oi.productId` :
         `SELECT oi.id, oi.productId, oi.price, oi.discount, oi.quantity, oi.originalAmount, oi.amount, oi.remark, oi.delivered,
-            p.material, p.name, p.spec, p.unit, p.quantity AS remainingQuantity
+            p.material, p.name, p.spec, p.unit
             FROM invoiceItem AS oi, product AS p
             WHERE oi.invoiceId="${orderId}" AND p.id=oi.productId`
         db.all(selectItem, (err, items) => {
@@ -281,45 +273,16 @@ router.get('/id/:id', (req, res) => {
 router.delete('/', (req, res) => {
     const ids = (req.body.ids || []).map(id => `"${id}"`).join(', ')
 
-    // 1. update product quantity
-    const orderQuan = `SELECT productId, SUM(quantity) AS quantity
-        FROM invoiceItem
-        WHERE invoiceId IN (${ids})
-        GROUP BY productId`
-    const refundQuan = `SELECT productId, SUM(quantity) AS quantity
-        FROM invoiceItem AS ri, invoiceRelation AS r
-        WHERE r.orderId IN (${ids}) AND r.refundId=ri.invoiceId
-        GROUP BY productId`
-    // const overallQuan = `SELECT o.productId, IFNULL(o.quantity,0)-IFNULL(r.quantity,0) AS quantity
-    //     FROM (${orderQuan}) AS o LEFT OUTER JOIN (${refundQuan}) AS r ON o.productId=r.productId`
-    const updateProduct = `UPDATE product
-        SET quantity=product.quantity${getQuantitySign(typeStr, true)}IFNULL(o.quantity,0)${getQuantitySign(typeStr, false)}IFNULL(r.quantity,0)
-        FROM (${orderQuan}) AS o LEFT OUTER JOIN (${refundQuan}) AS r ON o.productId=r.productId
-        WHERE o.productId=product.id`
-    // db.all(overallQuan, (err, rows) => {
-    //     if (err) {
-    //         console.error(err)
-    //     }
-    //     res.send(rows)
-    // })
-
-    db.run(updateProduct, err => {
+    // 1. delete sales order & sales refund (if any)
+    const deleteInvoice = `DELETE FROM invoice 
+        WHERE id IN (${ids}) OR id IN (SELECT refundId AS id FROM invoiceRelation WHERE orderId IN (${ids}))`
+    db.run(deleteInvoice, err => {
         if (err) {
             console.error(err)
             res.status(500).send(err)
             return
         }
-        // 2. delete sales order & sales refund (if any)
-        const deleteInvoice = `DELETE FROM invoice 
-            WHERE id IN (${ids}) OR id IN (SELECT refundId AS id FROM invoiceRelation WHERE orderId IN (${ids}))`
-        db.run(deleteInvoice, err => {
-            if (err) {
-                console.error(err)
-                res.status(500).send(err)
-                return
-            }
-            res.end()
-        })
+        res.end()
     })
 })
 

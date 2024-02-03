@@ -1,5 +1,4 @@
 const db = require('../db')
-const Decimal = require('decimal.js')
 const crypto = require('crypto')
 
 // ----- constant -----
@@ -40,27 +39,6 @@ const formatInsert = (oper, tableName, dictArray, fieldnames) => {
 }
 
 
-const updateProductQuantityByInfo = (material, name, spec, unit, quantityChange) => {
-    return new Promise((resolve, reject) => {
-        db.all(`SELECT * FROM product WHERE material="${material}" AND name="${name}" AND spec="${spec}";`, (err, products) => {
-            if (err) { reject(err) }
-            var query
-            if (products.length === 0) {
-                query = `INSERT INTO product (id, material, name, spec, unit, quantity) 
-                VALUES ("${crypto.randomUUID()}", "${material}", "${name}", "${spec}", "${unit}", "${quantityChange}")`
-            } else {
-                const newQuantity = Decimal(products[0].quantity).plus(quantityChange).toString()
-                query = `UPDATE product SET unit="${unit}", quantity="${newQuantity}" WHERE id="${products[0].id}"`
-            }
-            db.run(query, err => {
-                if (err) { reject(err) }
-                resolve()
-            })
-        })
-    })
-}
-
-
 /*
     Insert partner. (Used when new partner was submitted)
     params oper: INSERT / INSERT OR REPLACE / INSERT OR IGNORE
@@ -75,30 +53,12 @@ const updatePartner = (oper, name, phone, address, folder) => {
     })
 }
 
-/*
-    Calculate new quantity by invoice type.
- */
-const calQuanByInvoiceType = (original, change, invoiceType, reversed) => {
-    if (getQuantitySign(invoiceType, reversed) === '+') {
-        return Decimal(original).plus(change)
-    }
-    return Decimal(original).minus(change)
-}
-
-const getQuantitySign = (invoiceType, ifDelete) => {
-    if (invoiceType === 'salesOrder' || invoiceType === 'purchaseRefund') {
-        if (!ifDelete) return '-'
-        return '+'
-    }
-    if (ifDelete) return '-'
-    return '+'
-}
 
 /*
     Insert product if not existing when new order is created.
     return: product dictionary array
  */
-const updateProductByInvoiceItems = async (items, invoiceType) => {
+const updateProductByInvoiceItems = async (items) => {
     // 1. find if product is in database
     const productDictArray = await Promise.all(
         items.map(item => {
@@ -106,14 +66,12 @@ const updateProductByInvoiceItems = async (items, invoiceType) => {
             return new Promise((resolve, reject) => {
                 db.all(selectQuery, (err, products) => {
                     const productId = err || products.length === 0 ? crypto.randomUUID() : products[0].id
-                    const originalQuan = err || products.length === 0 ? 0 : products[0].quantity
                     resolve({
                         id: productId,
                         material: item.material,
                         name: item.name,
                         spec: item.spec,
                         unit: item.unit,
-                        quantity: calQuanByInvoiceType(originalQuan, item.quantity, invoiceType, false).toString(),
                         info: item,
                         isNew: err || products.length === 0
                     })
@@ -124,7 +82,7 @@ const updateProductByInvoiceItems = async (items, invoiceType) => {
     // 2. insert product (not existing)
     const newProducts = productDictArray.filter(p => p.isNew)
     if (newProducts.length > 0) {
-        const productFieldnames = ['id', 'material', 'name', 'spec', 'unit', 'quantity']
+        const productFieldnames = ['id', 'material', 'name', 'spec', 'unit']
         const { query, flatData } = formatInsert('INSERT', 'product', newProducts, productFieldnames)
         await new Promise((resolve, reject) => { 
             db.run(query, flatData, err => {
@@ -133,18 +91,6 @@ const updateProductByInvoiceItems = async (items, invoiceType) => {
             })
         })
     }
-    // 3. update product (existing)
-    const oldProducts = productDictArray.filter(p => !p.isNew)
-    await Promise.all(oldProducts.map(p => {
-        return new Promise((resolve, reject) => {
-            const query = `UPDATE product 
-            SET material="${p.material}", name="${p.name}", spec="${p.spec}", unit="${p.unit}", quantity="${p.quantity}" WHERE id="${p.id}"`
-            db.run(query, err => {
-                if (err) { reject(err) }
-                resolve()
-            })
-        })
-    }))
     return productDictArray
 }
 
@@ -172,11 +118,9 @@ const isDateValid = (date) => {
 
 exports.isDateValid = isDateValid
 exports.formatInsert = formatInsert
-exports.getQuantitySign = getQuantitySign
 exports.getNextInvoiceId = getNextInvoiceId
-// exports.calQuanByInvoiceType = calQuanByInvoiceType
 
-exports.updateProductQuantityByInfo = updateProductQuantityByInfo
+
 exports.updatePartner = updatePartner
 exports.updateProductByInvoiceItems = updateProductByInvoiceItems
 

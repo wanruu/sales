@@ -112,62 +112,6 @@ router.get('/summary', (req, res) => {
 })
 
 
-// router.get('/name/:name', (req, res) => {
-//     const name = req.params.name
-//     const selectPartner = `SELECT * FROM partner WHERE partner.name="${name}"`
-//     db.each(selectPartner, (err, partner) => {
-//         const selectInvoiceItems = `SELECT *, 
-//         i.id AS invoiceId, ii.id AS invoiceItemId,
-//         i.amount AS invoiceAmount, ii.amount AS itemAmount
-//         FROM invoice AS i LEFT JOIN invoiceItem AS ii, product AS p
-//         ON ii.invoiceId=i.id AND ii.productId=p.id
-//         WHERE i.partner="${name}"`
-
-//         db.all(selectInvoiceItems, (err, items) => {
-//             if (err) {
-//                 console.error(err)
-//                 res.status(500).send(err)
-//                 return
-//             }
-//             const invoicesDict = {}
-//             for (const item of items) {
-//                 const invoiceItem = {
-//                     productId: item.productId,
-//                     price: item.price,
-//                     discount: item.discount,
-//                     quantity: item.quantity,
-//                     weight: item.weight,
-//                     originalAmount: item.originalAmount,
-//                     amount: item.itemAmount,
-//                     remark: item.remark,
-//                     delivered: item.delivered,
-//                     invoiceItemId: item.invoiceItemId,
-//                     material: item.material,
-//                     name: item.name,
-//                     spec: item.spec,
-//                     unit: item.unit
-//                 }
-//                 if (invoicesDict[item.invoiceId] === undefined) {
-//                     invoicesDict[item.invoiceId] = {
-//                         id: item.invoiceId,
-//                         type: item.type,
-//                         date: item.date,
-//                         amount: item.invoiceAmount,
-//                         prepayment: item.prepayment,
-//                         payment: item.payment,
-//                         items: [invoiceItem]
-//                     }
-//                 } else {
-//                     invoicesDict[item.invoiceId].items.push(invoiceItem)
-//                 }
-//             }
-//             partner.invoices = Object.values(invoicesDict)
-//             res.send(partner)
-//         })
-//     })
-// })
-
-
 router.delete('/', (req, res) => {
     const names = (req.body.names || []).map(name => `"${name}"`).join(', ')
     db.run(`DELETE FROM partner WHERE name IN (${names})`, err => {

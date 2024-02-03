@@ -46,9 +46,9 @@ function ProductPage() {
             ifShowMaterial ? { title: '材质', dataIndex: 'material', align: 'center' } : null,
             { title: '名称', dataIndex: 'name', align: 'center' },
             { title: '规格', dataIndex: 'spec', align: 'center' },
-            { title: '库存', dataIndex: 'quantity', align: 'center', render: quantity => <span style={{ color: quantity < 0 ? 'red': 'black' }}>{quantity.toLocaleString()}</span> },
+            // { title: '库存', dataIndex: 'quantity', align: 'center', render: quantity => <span style={{ color: quantity < 0 ? 'red': 'black' }}>{quantity.toLocaleString()}</span> },
             { title: '单位', dataIndex: 'unit', align: 'center' },
-            { title: '预估重量', dataIndex: 'estimatedWeight', align: 'center', render: w => w == null ? null : w.toLocaleString() },
+            // { title: '预估重量', dataIndex: 'estimatedWeight', align: 'center', render: w => w == null ? null : w.toLocaleString() },
             { title: '操作', align: 'center', fixed: 'right', render: (_, record) => 
                 <Space>
                     <Button type='primary' ghost onClick={_ => setEditProduct(record)}>编辑</Button>
