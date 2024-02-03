@@ -1,27 +1,26 @@
 import React, { useState, useEffect } from 'react'
-import { Table, Input, Space, Button, Modal, Form, message, Card } from 'antd'
+import { Table, Space, Button, Modal, message } from 'antd'
 import Axios from 'axios'
-import { ExclamationCircleFilled, TableOutlined, PlusOutlined, ClearOutlined, SearchOutlined } from '@ant-design/icons'
+import { ExclamationCircleFilled, TableOutlined, PlusOutlined, ClearOutlined } from '@ant-design/icons'
 import _ from 'lodash'
 
 const { confirm } = Modal
-const { Item } = Form
+
 
 import { baseURL, DEFAULT_PAGINATION, invoiceSettings } from '../utils/config'
 import { exportExcel, getExportData } from '../utils/export'
 import ProductEditView from '../components/product/ProductEditView'
 import ProductView from '../components/product/ProductView'
+import ProductSearchBox from '../components/product/SearchBox'
 
 
-function ProductPage() {
+export default function ProductPage() {
     const [products, setProducts] = useState([])
     const [filteredProducts, setFilteredProducts] = useState([])
-    const [form] = Form.useForm()
 
     const [selectedProductId, setSelectedProductId] = useState(undefined)
     const [editProduct, setEditProduct] = useState(undefined)
     const [messageApi, contextHolder] = message.useMessage()
-    const itemStyle = { marginTop: '8px', marginBottom: '8px', marginLeft: '10px', marginRight: '10px' }
 
     // 否则不及时更新
     const [ifShowMaterial, setIfShowMaterial] = useState(invoiceSettings.get('ifShowMaterial') === 'true')
@@ -37,7 +36,7 @@ function ProductPage() {
             'Content-Type': 'application/json',
         }).then(res => {
             setProducts(res.data)
-            filterProducts(res.data)
+            setFilteredProducts([...res.data])
         }).catch(_ => { })
     }
     const getTableColumns = () => {
@@ -49,14 +48,15 @@ function ProductPage() {
             // { title: '库存', dataIndex: 'quantity', align: 'center', render: quantity => <span style={{ color: quantity < 0 ? 'red': 'black' }}>{quantity.toLocaleString()}</span> },
             { title: '单位', dataIndex: 'unit', align: 'center' },
             // { title: '预估重量', dataIndex: 'estimatedWeight', align: 'center', render: w => w == null ? null : w.toLocaleString() },
-            { title: '操作', align: 'center', fixed: 'right', render: (_, record) => 
-                <Space>
-                    <Button type='primary' ghost onClick={_ => setEditProduct(record)}>编辑</Button>
-                    {record.invoiceNum > 0 ?
-                        <Button onClick={_ => setSelectedProductId(record.id)}>查看</Button> :
-                        <Button danger onClick={_ => showDeleteConfirm([record])}>删除</Button>
-                    }
-                </Space>
+            {
+                title: '操作', align: 'center', fixed: 'right', render: (_, record) =>
+                    <Space>
+                        <Button type='primary' ghost onClick={_ => setEditProduct(record)}>编辑</Button>
+                        {record.invoiceNum > 0 ?
+                            <Button onClick={_ => setSelectedProductId(record.id)}>查看</Button> :
+                            <Button danger onClick={_ => showDeleteConfirm([record])}>删除</Button>
+                        }
+                    </Space>
             }
         ].filter(i => i != null)
     }
@@ -71,7 +71,7 @@ function ProductPage() {
             okText: '删除',
             okType: 'danger',
             cancelText: '取消',
-            onOk() { 
+            onOk() {
                 Axios({
                     method: 'delete',
                     baseURL: baseURL(),
@@ -86,16 +86,6 @@ function ProductPage() {
                 })
             }
         })
-    }
-
-    // search (filter)
-    const filterProducts = (products) => {
-        const conds = form.getFieldsValue()
-        setFilteredProducts(products.filter(p => 
-            (!conds.material || p.material.includes(conds.material)) &&
-            (!conds.name || p.name.includes(conds.name)) &&
-            (!conds.spec || p.spec.includes(conds.spec))
-        ))
     }
 
     // export
@@ -127,30 +117,20 @@ function ProductPage() {
         </Modal>
 
         <br />
-        <Space direction='vertical' style={{ width: '100%' }}>
-            {/* Function Box */}
-            <Card size='small'><Form form={form} onFinish={_ => filterProducts(products)} layout='inline'>
-                { ifShowMaterial ? 
-                    <Item label='材质' name='material' style={itemStyle}><Input allowClear placeholder='材质' /></Item> : null }
-                <Item label='名称' name='name' style={itemStyle}><Input allowClear placeholder='名称' /></Item>
-                <Item label='规格' name='spec' style={itemStyle}><Input allowClear placeholder='规格' /></Item>
-                <Space wrap style={itemStyle}>
-                    <Button icon={<SearchOutlined />} type='primary' htmlType='submit'>搜索</Button>
-                    <Button icon={<PlusOutlined />} onClick={_ => setEditProduct({
-                        material: '', name: '', spec: '', quantity: '', 
-                        unit: JSON.parse(invoiceSettings.get('unitOptions')).filter(unit => unit.default)[0].label
-                    })}>新增产品</Button>
-                    <Button icon={<TableOutlined />} disabled={filteredProducts.length === 0} onClick={exportProducts}>批量导出</Button>
-                    <Button icon={<ClearOutlined />} type='dashed' disabled={filteredProducts.filter(p => !p.invoiceNum > 0).length === 0}
-                        onClick={_ => showDeleteConfirm(filteredProducts.filter(p => !p.invoiceNum > 0))} danger>批量清理</Button>
-                </Space>
-            </Form></Card>
 
-            {/* Product Table */}
-            <Table dataSource={filteredProducts} size='middle' bordered rowKey={record => record.id} columns={getTableColumns()}
-                pagination={DEFAULT_PAGINATION} scroll={{ x: 'max-content' }} />
-        </Space>
+        {/* 
+            <Button icon={<PlusOutlined />} onClick={_ => setEditProduct({
+                material: '', name: '', spec: '', quantity: '', 
+                unit: JSON.parse(invoiceSettings.get('unitOptions')).filter(unit => unit.default)[0].label
+            })}>新增产品</Button>
+            <Button icon={<TableOutlined />} disabled={filteredProducts.length === 0} onClick={exportProducts}>批量导出</Button>
+            <Button icon={<ClearOutlined />} type='dashed' disabled={filteredProducts.filter(p => !p.invoiceNum > 0).length === 0}
+                onClick={_ => showDeleteConfirm(filteredProducts.filter(p => !p.invoiceNum > 0))} danger>批量清理</Button>
+        */}
+        <ProductSearchBox data={products} setFilteredData={setFilteredProducts} mode='simple' />
+        <br />
+
+        <Table dataSource={filteredProducts} size='middle' bordered rowKey={record => record.id} columns={getTableColumns()}
+            pagination={DEFAULT_PAGINATION} scroll={{ x: 'max-content' }} />
     </>
 }
-
-export default ProductPage
