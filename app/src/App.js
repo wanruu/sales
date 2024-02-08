@@ -6,8 +6,7 @@ import {
     MinusCircleOutlined,
     UserOutlined,
     BarChartOutlined,
-    DropboxOutlined,
-    QuestionCircleOutlined
+    DropboxOutlined
 } from '@ant-design/icons'
 
 const { Header, Content, Footer, Sider } = Layout
@@ -16,7 +15,6 @@ const { Header, Content, Footer, Sider } = Layout
 import SettingPage from './pages/SettingPage.js'
 import ProductPage from './pages/ProductPage.js'
 import PartnerPage from './pages/PartnerPage.js'
-import HelpPage from './pages/HelpPage.js'
 import InvoicePage from './pages/InvoicePage.js'
 
 const defaultMenuKey = 'salesOrder'
@@ -40,8 +38,7 @@ function App() {
         'purchaseRefund': <InvoicePage type='purchaseRefund' drafts={purchaseRefunds} setDrafts={setPurchaseRefunds} />,
         'product': <ProductPage />,
         'partner': <PartnerPage />,
-        'settings': <SettingPage />,
-        'help': <HelpPage />
+        'settings': <SettingPage />
     }
 
     // Menu
@@ -60,8 +57,7 @@ function App() {
         getMenuItem('产品', 'product', <DropboxOutlined />),
         getMenuItem('客户 / 供应商', 'partner', <UserOutlined />),
         getMenuItem('统计数据', 'stat', <BarChartOutlined />),
-        getMenuItem('设置', 'settings', <SettingOutlined />),
-        getMenuItem('帮助', 'help', <QuestionCircleOutlined />)
+        getMenuItem('设置', 'settings', <SettingOutlined />)
     ]
 
     // Return
