@@ -16,7 +16,7 @@ import InvoiceFullView from '../components/invoice/InvoiceFullView'
 
 
 /*
-    Required: drafts, setDrafts, type
+    Required: type
 */
 export default function InvoicePage(props) {
     const [invoices, setInvoices] = useState([])
@@ -125,7 +125,7 @@ export default function InvoicePage(props) {
 
     return <>
         { contextHolder }
-        <MyFloatButton type={props.type} refresh={load} drafts={props.drafts} setDrafts={props.setDrafts} />
+        <MyFloatButton type={props.type} refresh={load} />
 
         <Modal title={null} open={selectedInvoiceId} width={900} destroyOnClose 
             onCancel={_ => setSelectedInvoiceId(undefined)} footer={null} maskClosable={false}>

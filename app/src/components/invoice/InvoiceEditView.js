@@ -8,6 +8,8 @@ import { DeleteOutlined, EditOutlined, ExclamationCircleOutlined, PlusOutlined,
     SaveOutlined, InboxOutlined, CloseOutlined
 } from '@ant-design/icons'
 import { evaluate } from 'mathjs'
+import { useDispatch } from 'react-redux'
+
 
 const { Item } = Form
 
@@ -21,10 +23,12 @@ import './invoiceEditView.css'
 
 /*
     Required: dismiss, refresh, messageApi, type
-    Optional: invoice, saveDraft, removeDraft
+    Optional: invoice
 */
 export default function InvoiceEditView(props) {
     const [form] = Form.useForm()
+    const dispatch = useDispatch()
+
 
     const isOrder = ['salesOrder', 'purchaseOrder'].includes(props.type)
     const isSales = ['salesOrder', 'salesRefund'].includes(props.type)
@@ -70,7 +74,7 @@ export default function InvoiceEditView(props) {
         }).then(_ => {
             props.messageApi.open({ type: 'success', content: '保存成功' })
             props.refresh()
-            if (props.removeDraft) props.removeDraft(invoice)
+            dispatch({ type: 'draft/remove', payload: invoice })
             props.dismiss()
         }).catch(_ => {
             props.messageApi.open({ type: 'error', content: '保存失败' })
@@ -109,7 +113,11 @@ export default function InvoiceEditView(props) {
                     </Button>
                     { 
                         props.invoice && props.invoice.id ? null : 
-                        <Button icon={<InboxOutlined/>} onClick={_ => props.saveDraft(form.getFieldsValue(true))}>
+                        <Button icon={<InboxOutlined/>} onClick={_ => {
+                            const invoice = Object.assign(form.getFieldsValue(true), { type: props.type })
+                            dispatch({ type: 'draft/add', payload: invoice })
+                            props.dismiss()
+                        }}>
                             保存草稿
                         </Button> 
                     }

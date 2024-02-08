@@ -2,15 +2,13 @@ import dayjs from 'dayjs'
 import Decimal from 'decimal.js'
 import uuid from 'react-uuid'
 
-import { invoiceSettings, DATE_FORMAT } from './config'
+import { invoiceSettings } from './config'
 
 
 export const dcInvoice = (invoice) => {
-    if (invoice.date && typeof(invoice.date) !== 'string') {
-        invoice.date = invoice.date.format(DATE_FORMAT)
-    }
     const newInvoice = JSON.parse(JSON.stringify(invoice))
-    newInvoice.date = newInvoice.date == null ? null : dayjs(newInvoice.date)
+    newInvoice.date = dayjs(newInvoice.date)
+    newInvoice.draftTime = dayjs(newInvoice.draftTime)
     return newInvoice
 }
 

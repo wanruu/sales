@@ -24,18 +24,12 @@ function App() {
     const [collapsed, setCollapsed] = useState(false)
     const { token: { colorBgContainer }, } = theme.useToken()
 
-    // drafts
-    const [salesOrders, setSalesOrders] = useState([])
-    const [salesRefunds, setSalesRefunds] = useState([])
-    const [purchaseOrders, setPurchaseOrders] = useState([])
-    const [purchaseRefunds, setPurchaseRefunds] = useState([])
-
     // Pages
     const pages = {
-        'salesOrder': <InvoicePage type='salesOrder' drafts={salesOrders} setDrafts={setSalesOrders} />,
-        'salesRefund': <InvoicePage type='salesRefund' drafts={salesRefunds} setDrafts={setSalesRefunds} />,
-        'purchaseOrder': <InvoicePage type='purchaseOrder' drafts={purchaseOrders} setDrafts={setPurchaseOrders} />,
-        'purchaseRefund': <InvoicePage type='purchaseRefund' drafts={purchaseRefunds} setDrafts={setPurchaseRefunds} />,
+        'salesOrder': <InvoicePage type='salesOrder' />,
+        'salesRefund': <InvoicePage type='salesRefund' />,
+        'purchaseOrder': <InvoicePage type='purchaseOrder' />,
+        'purchaseRefund': <InvoicePage type='purchaseRefund' />,
         'product': <ProductPage />,
         'partner': <PartnerPage />,
         'settings': <SettingPage />
@@ -60,19 +54,20 @@ function App() {
         getMenuItem('设置', 'settings', <SettingOutlined />)
     ]
 
-    // Return
-    return <Layout hasSider style={{ minHeight: '100vh' }}>
-        <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
-            <Menu theme='dark' items={menuItems} mode='inline' defaultSelectedKeys={[defaultMenuKey]}
-                defaultOpenKeys={['order', 'refund']} onSelect={({ key }) => setMenuKey(key)}
-            />
-        </Sider>
-        <Layout>
-            <Content style={{ padding: '0 16px', background: colorBgContainer }}>
-                {pages[menuKey]}
-            </Content>
+    return (
+        <Layout hasSider style={{ minHeight: '100vh' }}>
+            <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
+                <Menu theme='dark' items={menuItems} mode='inline' defaultSelectedKeys={[defaultMenuKey]}
+                    defaultOpenKeys={['order', 'refund']} onSelect={({ key }) => setMenuKey(key)}
+                />
+            </Sider>
+            <Layout>
+                <Content style={{ padding: '0 16px', background: colorBgContainer }}>
+                    { pages[menuKey] }
+                </Content>
+            </Layout>
         </Layout>
-    </Layout>
+    )
 }
 
 export default App
