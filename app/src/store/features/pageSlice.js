@@ -15,7 +15,7 @@ const pageSlice = createSlice({
         salesOrder: { keywords: '', searchForm: {}, searchMode: 'simple' },
         purchaseOrder: { keywords: '', searchForm: {}, searchMode: 'simple' },
         salesRefund: { keywords: '', searchForm: {}, searchMode: 'simple' },
-        purchaseOrder: { keywords: '', searchForm: {}, searchMode: 'simple' }
+        purchaseRefund: { keywords: '', searchForm: {}, searchMode: 'simple' }
     },
     reducers: {
         updateKeywords(state, action) {
