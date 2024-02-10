@@ -1,8 +1,8 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Tag, Form, Select, DatePicker, Space, Input, Button, InputNumber, Card, Tooltip, Row } from 'antd'
 import { ExclamationCircleOutlined, SwapOutlined } from '@ant-design/icons'
 import { pinyin } from 'pinyin-pro'
-
+import { useSelector, useDispatch } from 'react-redux'
 
 import { DATE_FORMAT, DELIVER_COLORS, INVOICE_DELIVER_OPTIONS, invoiceSettings } from '../../utils/config'
 
@@ -17,7 +17,9 @@ const { RangePicker } = DatePicker
     Optional: keywords (TODO: 快捷搜索功能)
 */
 function SimpleSearchBar(props) {
-    const [keywords, setKeywords] = useState(props.keywords || '')
+    // const [keywords, setKeywords] = useState(props.keywords || '')
+    const keywords = useSelector(state => state.page[props.type].keywords || '')
+    const dispatch = useDispatch()
 
     const filterData = () => {
         const keywordArray = keywords.replace(/\s+/g, ' ').split(' ').filter(k => k !== '')
@@ -45,11 +47,15 @@ function SimpleSearchBar(props) {
         }
     }
 
+    useEffect(filterData, [props.type])
+
     return (
         <Space.Compact style={{ width: '100%' }}>
             <Input placeholder='输入关键词' allowClear
             value={keywords}
-            onKeyDown={handleInputKeyDown} onChange={e => setKeywords(e.target.value)} />
+            onKeyDown={handleInputKeyDown} 
+            onChange={e => dispatch({ type: 'page/updateKeywords', menuKey: props.type, payload: e.target.value })} 
+            />
             <Button onClick={filterData} type='primary'>搜索</Button>
         </Space.Compact>
     )
@@ -116,6 +122,8 @@ function ComplexSearchBox(props) {
 
     const partnerTitle = ['salesOrder', 'salesRefund'].includes(props.type) ? '客户' : '供应商'
     const itemStyle = { style: { margin: '8px 0px' }}
+
+    useEffect(resetData, [props.type])
 
     return (
         <Form form={form} onFinish={filterData} labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
