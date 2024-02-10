@@ -1,6 +1,12 @@
 import { createSlice } from '@reduxjs/toolkit'
 
 
+/*
+    {
+        searchMode: simple/complex
+        
+    }
+*/
 const pageSlice = createSlice({
     name: 'page',
     initialState: { 
@@ -21,7 +27,7 @@ const pageSlice = createSlice({
         updateSearchForm(state, action) {
             const updateDict = {}
             updateDict[action.menuKey] = { ...state[action.menuKey], searchForm: action.payload}
-            return { 
+            return {
                 ...state, 
                 ...updateDict
             }
