@@ -1,9 +1,8 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Tag, Form, Select, DatePicker, Space, Input, Button, InputNumber, Card, Tooltip, Row } from 'antd'
 import { ExclamationCircleOutlined, SwapOutlined } from '@ant-design/icons'
 import { pinyin } from 'pinyin-pro'
 import { useSelector, useDispatch } from 'react-redux'
-
 
 import { DATE_FORMAT, DELIVER_COLORS, INVOICE_DELIVER_OPTIONS, invoiceSettings } from '../../utils/config'
 
@@ -180,32 +179,36 @@ export default function InvoiceSearchBox(props) {
     const mode = useSelector(state => state.page[props.type]?.searchMode || 'simple')
     const dispatch = useDispatch()
 
-    const modeDict = {
-        'simple': {
-            title: (
-                <>
-                    智能搜索
-                    <Tooltip title='支持单号、交易对象、日期、金额、配送情况，以空格分开。'>
-                        <ExclamationCircleOutlined style={{ color: 'gray', marginLeft: '3px' }} />
-                    </Tooltip>
-                </>
-            ),
-            content: <SimpleSearchBar {...props} />
-        },
-        'complex': { title: '高级搜索', content: <ComplexSearchBox {...props} /> }
-    }
+    // Animation
+    const nodeRef = useRef(null)
+    const [height, setHeight] = useState(0)
+    const [animate, setAnimate] = useState(false)
+    useEffect(() => {
+        if (nodeRef.current) {
+            setHeight(nodeRef.current.offsetHeight);
+        }
+    }, [mode])
+
+    useEffect(() => {
+        setAnimate(true)  // 在组件挂载后，启用动画效果
+    }, [])
+
 
     const changeMode = () => {
-        props.setFilteredData(props.data || [])
         dispatch({ type: 'page/toggleSearchMode', menuKey: props.type })
     }
 
     return (
-        <Card>
-            <Space direction='vertical' style={{ width: '100%' }}>
-                <Row style={{ justifyContent: 'space-between' }}>
+        <div style={{ transition: animate ? 'height 0.2s ease-in-out' : '', height: animate ? height : 'auto' }}>
+            <Card ref={nodeRef}>
+                <Row style={{ justifyContent: 'space-between', marginBottom: '10px' }}>
                     <b style={{ fontSize: '12pt' }}>
-                        {modeDict[mode]?.title}
+                        {mode === 'simple' ? '智能搜索' : '高级搜索'}
+                        {mode === 'simple' ?
+                            <Tooltip title='支持单号、交易对象、日期、金额、配送情况，以空格分开。'>
+                                <ExclamationCircleOutlined style={{ color: 'gray', marginLeft: '3px' }} />
+                            </Tooltip>
+                            : null}
                     </b>
                     <Button size='small' type='text' style={{ color: 'gray', fontSize: '10pt' }} onClick={changeMode}>
                         <Space size={1} direction='horizontal'>
@@ -214,8 +217,8 @@ export default function InvoiceSearchBox(props) {
                         </Space>
                     </Button>
                 </Row>
-                {modeDict[mode]?.content}
-            </Space>
-        </Card>
+                {mode === 'simple' ? <SimpleSearchBar {...props} /> : <ComplexSearchBox {...props} />}
+            </Card>
+        </div>
     )
 }
