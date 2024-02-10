@@ -31,8 +31,6 @@ export default function InvoicePage(props) {
     const relatedInvoiceDataIndex = isOrder ? 'refundId' : 'orderId'
 
     const load = () => {
-        setInvoices([])
-        setFilteredInvoices([])
         Axios({
             method: 'get',
             baseURL: baseURL(),
@@ -45,7 +43,6 @@ export default function InvoicePage(props) {
                 return invoice
             })
             setInvoices(newInvoices)
-            setFilteredInvoices(newInvoices)
         }).catch(_ => { })
     }
 

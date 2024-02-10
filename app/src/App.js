@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Layout, theme, Menu } from 'antd'
+import { BrowserRouter, Link, Route, Routes } from 'react-router-dom'
 import {
     SettingOutlined,
     PlusCircleOutlined,
@@ -55,18 +56,46 @@ function App() {
     ]
 
     return (
-        <Layout hasSider style={{ minHeight: '100vh' }}>
-            <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
-                <Menu theme='dark' items={menuItems} mode='inline' defaultSelectedKeys={[defaultMenuKey]}
-                    defaultOpenKeys={['order', 'refund']} onSelect={({ key }) => setMenuKey(key)}
-                />
-            </Sider>
-            <Layout>
-                <Content style={{ padding: '0 16px', background: colorBgContainer }}>
-                    { pages[menuKey] }
-                </Content>
+        <BrowserRouter>
+            <Layout hasSider style={{ minHeight: '100vh' }}>
+                <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
+                    {/* <Menu theme='dark' items={menuItems} mode='inline' defaultSelectedKeys={[defaultMenuKey]}
+                        defaultOpenKeys={['order', 'refund']} onSelect={({ key }) => setMenuKey(key)}
+                    /> */}
+                    <Menu theme='dark' mode='inline' defaultSelectedKeys={[defaultMenuKey]}
+                        defaultOpenKeys={['order', 'refund']} onSelect={({ key }) => setMenuKey(key)}
+                    >
+                        <Menu.SubMenu key='order' title='清单' icon={<PlusCircleOutlined />}>
+                            <Menu.Item key='salesOrder'><Link to='/salesOrder'>销售清单</Link></Menu.Item>
+                            <Menu.Item key='purchaseOrder'><Link to='/purchaseOrder'>采购清单</Link></Menu.Item>
+                        </Menu.SubMenu>
+                        <Menu.SubMenu key='refund' title='退货单' icon={<MinusCircleOutlined />}>
+                            <Menu.Item key='salesRefund'><Link to='/salesRefund'>销售退货</Link></Menu.Item>
+                            <Menu.Item key='purchaseRefund'><Link to='/purchaseRefund'>采购退货</Link></Menu.Item>
+                        </Menu.SubMenu>
+                        <Menu.Item key='product' icon={<DropboxOutlined />}><Link to='/product'>产品</Link></Menu.Item>
+                        <Menu.Item key='partner' icon={<UserOutlined />}><Link to='/partner'>客户 / 供应商</Link></Menu.Item>
+                        <Menu.Item key='stat' icon={<BarChartOutlined />}><Link to='/stat'>统计数据</Link></Menu.Item>
+                        <Menu.Item key='settings' icon={<SettingOutlined />}><Link to='/settings'>设置</Link></Menu.Item>
+                    </Menu>
+                </Sider>
+                <Layout>
+                    <Content style={{ padding: '0 16px', background: colorBgContainer }}>
+                        {/* { pages[menuKey] } */}
+                        <Routes>
+                            <Route path='salesOrder' element={<InvoicePage type='salesOrder' key='salesOrder' />} />
+                            <Route path='purchaseOrder' element={<InvoicePage type='purchaseOrder' key='purchaseOrder' />} />
+                            <Route path='salesRefund' element={<InvoicePage type='salesRefund' key='salesRefund' />} />
+                            <Route path='purchaseRefund' element={<InvoicePage type='purchaseRefund' key='purchaseRefund' />} />
+                            <Route path='product' element={<ProductPage />} />
+                            <Route path='partner' element={<PartnerPage />} />
+                            <Route path='stat' element={<></>} />
+                            <Route path='settings' element={<SettingPage />} />
+                        </Routes>
+                    </Content>
+                </Layout>
             </Layout>
-        </Layout>
+        </BrowserRouter>
     )
 }
 
