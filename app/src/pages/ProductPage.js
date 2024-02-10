@@ -27,8 +27,6 @@ export default function ProductPage() {
 
     // load (table data)
     const load = () => {
-        setProducts([])
-        setFilteredProducts([])
         Axios({
             method: 'get',
             baseURL: baseURL(),
@@ -36,7 +34,6 @@ export default function ProductPage() {
             'Content-Type': 'application/json',
         }).then(res => {
             setProducts(res.data)
-            setFilteredProducts([...res.data])
         }).catch(_ => { })
     }
     const getTableColumns = () => {

@@ -173,7 +173,6 @@ function ComplexSearchBox(props) {
 
 /*
     Required: data, setFilteredData, type
-    Optional: mode
 */
 export default function InvoiceSearchBox(props) {
     const mode = useSelector(state => state.page[props.type]?.searchMode || 'simple')

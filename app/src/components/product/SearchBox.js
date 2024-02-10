@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { Form, Select, Space, Input, Button, Card, Tooltip, Row } from 'antd'
 import { ExclamationCircleOutlined, SwapOutlined } from '@ant-design/icons'
 import { pinyin } from 'pinyin-pro'
+import { useSelector, useDispatch } from 'react-redux'
 
 
 import { invoiceSettings } from '../../utils/config'
@@ -12,10 +13,10 @@ const { Item } = Form
 
 /*
     Required: data, setFilteredData
-    Optional: mode, keywords (TODO: 快捷搜索功能)
 */
 export default function ProductSearchBox(props) {
-    const [mode, setMode] = useState(props.mode || 'simple')
+    const mode = useSelector(state => state.page.product?.searchMode || 'simple')
+    const dispatch = useDispatch()
 
     // Animation
     const nodeRef = useRef(null)
@@ -42,12 +43,7 @@ export default function ProductSearchBox(props) {
     }
 
     const changeMode = () => {
-        props.setFilteredData(props.data || [])
-        if (mode === 'simple') {
-            setMode('complex')
-        } else {
-            setMode('simple')
-        }
+        dispatch({ type: 'page/toggleSearchMode', menuKey: 'product' })
     }
 
     return (
@@ -74,10 +70,10 @@ export default function ProductSearchBox(props) {
 
 /*
     Required: data, setFilteredData
-    Optional: keywords (TODO: 快捷搜索功能)
 */
 function SimpleSearchBar(props) {
-    const [keywords, setKeywords] = useState(props.keywords || '')
+    const keywords = useSelector(state => state.page.product.keywords || '')
+    const dispatch = useDispatch()
 
     const filterData = () => {
         const keywordArray = keywords.replace(/\s+/g, ' ').split(' ').filter(k => k !== '')
@@ -110,11 +106,16 @@ function SimpleSearchBar(props) {
         }
     }
 
+    const handleInputChange = (event) => {
+        dispatch({ type: 'page/updateKeywords', menuKey: 'product', payload: event.target.value })
+    }
+
+    useEffect(filterData, [props.data])
+
     return (
         <Space.Compact style={{ width: '100%' }}>
-            <Input placeholder='输入关键词' allowClear
-                value={keywords}
-                onKeyDown={handleInputKeyDown} onChange={e => setKeywords(e.target.value)} />
+            <Input placeholder='输入关键词' allowClear value={keywords}
+                onKeyDown={handleInputKeyDown} onChange={handleInputChange} />
             <Button onClick={filterData} type='primary'>搜索</Button>
         </Space.Compact>
     )
@@ -123,18 +124,25 @@ function SimpleSearchBar(props) {
 
 /*
     Required: data, setFilteredData
-    Optional: 
 */
 function ComplexSearchBox(props) {
     const [form] = Form.useForm()
 
-    const resetData = () => {
+    const searchForm = useSelector(state => state.page.product.searchForm || {})
+    const dispatch = useDispatch()
+
+    // Form control
+    const initForm = () => {
+        form.resetFields()
+        form.setFieldsValue(searchForm)
+        filterData()
+    }
+    const resetForm = () => {
         form.resetFields()
         props.setFilteredData(props.data || [])
     }
     const filterData = () => {
         const conds = form.getFieldsValue()
-        console.log(conds)
         const targetMaterial = (conds.material || '').replace(' ', '')
         const targetName = (conds.name || '').replace(' ', '')
         const targetSpec = (conds.spec || '').replace(' ', '')
@@ -162,11 +170,21 @@ function ComplexSearchBox(props) {
         })
         props.setFilteredData(filteredData)
     }
+    const handleFormValuesChange = (values) => {
+        dispatch({ type: 'page/updateSearchForm', menuKey: 'product', payload: values })
+    }
+    const handleFormReset = () => {
+        dispatch({ type: 'page/resetSearchForm', menuKey: 'product' })
+    }
+    useEffect(initForm, [props.data])
 
+    // Render
     const itemStyle = { style: { margin: '8px 0px' } }
 
     return (
-        <Form form={form} onFinish={filterData} labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+        <Form form={form} onFinish={filterData} onReset={resetForm}
+        onValuesChange={handleFormValuesChange} onResetCapture={handleFormReset}
+        labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {
                 invoiceSettings.get('ifShowMaterial') === 'true' ?
                     <Item label='材质' name='material' {...itemStyle}>
@@ -186,7 +204,7 @@ function ComplexSearchBox(props) {
             </Item>
             <Item label=' ' colon={false} style={{ marginTop: 0, marginBottom: 0 }} >
                 <Space direction='horizontal'>
-                    <Button onClick={resetData}>清空</Button>
+                    <Button htmlType='reset'>清空</Button>
                     <Button htmlType='submit' type='primary'>搜索</Button>
                 </Space>
             </Item>
