@@ -113,8 +113,6 @@ export default function ProductPage() {
             <ProductView id={selectedProductId} dismiss={_ => setSelectedProductId(undefined)} />
         </Modal>
 
-        <br />
-
         {/* 
             <Button icon={<PlusOutlined />} onClick={_ => setEditProduct({
                 material: '', name: '', spec: '', quantity: '', 

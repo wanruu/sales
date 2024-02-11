@@ -129,7 +129,6 @@ export default function InvoicePage(props) {
             <InvoiceFullView id={selectedInvoiceId} refresh={load} messageApi={messageApi} allowEditPartner={true} />
         </Modal>
 
-        <br />
         <InvoiceSearchBox data={invoices} setFilteredData={setFilteredInvoices} type={props.type} />
         <br />
         <Table dataSource={filteredInvoices} bordered rowKey={record => record.id} size='middle'

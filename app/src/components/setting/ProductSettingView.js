@@ -128,7 +128,7 @@ export default function ProductSettingView() {
     const [ifShowMaterial, setIfShowMaterial] = useState(invoiceSettings.get('ifShowMaterial'))
 
     return (<>
-        <Title id='product' level={2}>产品设置</Title>
+        <Title id='product' level={2} style={{ marginTop: 10 }}>产品设置</Title>
 
         <Card>
             <Title id='product-material' level={3}>材质</Title>

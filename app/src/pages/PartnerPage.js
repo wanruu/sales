@@ -106,7 +106,6 @@ function PartnerPage() {
             <PartnerView name={selectedPartnerName} dismiss={_ => setSelectedPartnerName(undefined)} refresh={load} />
         </Modal>
 
-        <br />
         <SearchBox data={partners} setFilteredData={setFilteredPartners} />
         <br />
         <Card size='small'>
