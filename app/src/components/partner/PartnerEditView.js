@@ -19,11 +19,17 @@ function PartnerEditView(props) {
 
     const upload = () => {
         const m = props.messageApi || messageApi
+        const partner = form.getFieldsValue()
+        for (const key in partner) {
+            if (partner[key] == null) {
+                partner[key] = ''
+            }
+        }
         Axios({
             method: props.partner.name === '' ? 'post' : 'put',
             baseURL: baseURL(),
             url: props.partner.name === '' ? '/partner' : `/partner/name/${props.partner.name}`,
-            data: form.getFieldsValue(),
+            data: partner,
             'Content-Type': 'application/json',
         }).then(res => {
             if (res.data.changes === 1) {
