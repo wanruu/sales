@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import Axios from 'axios'
 import Decimal from 'decimal.js'
-import { Form, Input, Table, Button, InputNumber, Select, Row, DatePicker, Popover, 
-    Modal, Collapse, Space, Col, Divider 
+import {
+    Form, Input, Table, Button, InputNumber, Select, Row, DatePicker, Popover,
+    Modal, Collapse, Space, Col, Divider
 } from 'antd'
-import { DeleteOutlined, EditOutlined, ExclamationCircleOutlined, PlusOutlined, 
+import {
+    DeleteOutlined, EditOutlined, ExclamationCircleOutlined, PlusOutlined,
     SaveOutlined, InboxOutlined, CloseOutlined
 } from '@ant-design/icons'
 import { evaluate } from 'mathjs'
@@ -32,7 +34,7 @@ export default function InvoiceEditView(props) {
 
     const isOrder = ['salesOrder', 'purchaseOrder'].includes(props.type)
     const isSales = ['salesOrder', 'salesRefund'].includes(props.type)
-    
+
     const upload = () => {
         const invoice = form.getFieldsValue(true)
 
@@ -81,7 +83,7 @@ export default function InvoiceEditView(props) {
         })
     }
 
-    const resetForm = () => {        
+    const resetForm = () => {
         if (props.invoice) {
             const invoice = dcInvoice(props.invoice)
             if (isOrder) {
@@ -108,22 +110,22 @@ export default function InvoiceEditView(props) {
 
             <Col align='end'>
                 <Space>
-                    <Button icon={<SaveOutlined/>} type='primary' htmlType='submit'>
+                    <Button icon={<SaveOutlined />} type='primary' htmlType='submit'>
                         保存
                     </Button>
-                    { 
-                        props.invoice && props.invoice.id ? null : 
-                        <Button icon={<InboxOutlined/>} onClick={_ => {
-                            const invoice = Object.assign(form.getFieldsValue(true), { type: props.type })
-                            dispatch({ type: 'draft/add', payload: invoice })
-                            props.dismiss()
-                        }}>
-                            保存草稿
-                        </Button> 
+                    {
+                        props.invoice && props.invoice.id ? null :
+                            <Button icon={<InboxOutlined />} onClick={_ => {
+                                const invoice = Object.assign(form.getFieldsValue(true), { type: props.type })
+                                dispatch({ type: 'draft/add', payload: invoice })
+                                props.dismiss()
+                            }}>
+                                保存草稿
+                            </Button>
                     }
-                    <Button icon={<CloseOutlined/>} onClick={_ => { 
+                    <Button icon={<CloseOutlined />} onClick={_ => {
                         resetForm()
-                        props.dismiss() 
+                        props.dismiss()
                     }}>
                         取消
                     </Button>
@@ -143,6 +145,7 @@ function SubEditView(props) {
 
     const isRefund = props.type === 'salesRefund' || props.type === 'purchaseRefund'
     const isSales = props.type === 'salesRefund' || props.type === 'salesOrder'
+    const ifShowPayment = invoiceSettings.get('ifShowPayment') === 'true'
 
     const getTableColumns = (add, remove) => {
         const ifShowDiscount = invoiceSettings.get('ifShowDiscount') === 'true'
@@ -151,11 +154,11 @@ function SubEditView(props) {
         const allowEditAmount = invoiceSettings.get('allowEditAmount') === 'true'
         const ifShowRemarkCalculator = invoiceSettings.get('ifShowRemarkCalculator') === 'true'
         return [
-            { 
-                title: '', align: 'center', width: 30, fixed: 'left', 
-                render: (_, __, idx) => idx + 1 
+            {
+                title: '', align: 'center', width: 30, fixed: 'left',
+                render: (_, __, idx) => idx + 1
             },
-            ifShowMaterial ? { 
+            ifShowMaterial ? {
                 title: '材质', dataIndex: 'material', align: 'center', width: 60,
                 render: (_, field, idx) => (
                     <Item shouldUpdate>
@@ -163,92 +166,92 @@ function SubEditView(props) {
                             const record = (getFieldValue('items') || [])?.[idx] || {}
                             return isRefund ? record.material : (
                                 <ProductInput field='material' size='small' style={{ width: '100%' }}
-                                value={record.material}
-                                onChange={value => { 
-                                    setFieldValue(['items', idx, 'material'], value)
-                                    updateUnit(idx)
-                                    updateTableRows()
-                                }} />
+                                    value={record.material}
+                                    onChange={value => {
+                                        setFieldValue(['items', idx, 'material'], value)
+                                        updateUnit(idx)
+                                        updateTableRows()
+                                    }} />
                             )
                         }}
                     </Item>
                 )
             } : null,
-            { 
-                title: '名称', dataIndex: 'name', align: 'center', width: 140, 
+            {
+                title: '名称', dataIndex: 'name', align: 'center', width: 140,
                 render: (_, field, idx) => (
                     <Item shouldUpdate>
                         {({ getFieldValue, setFieldValue }) => {
                             const record = (getFieldValue('items') || [])?.[idx] || {}
                             return isRefund ? record.name : (
-                                <ProductInput field='name' size='small' style={{ width: '100%' }} 
-                                value={record.name} 
-                                onChange={value => {
-                                    setFieldValue(['items', idx, 'name'], value)
-                                    updateUnit(idx)
-                                    updateTableRows()
-                                }} />
+                                <ProductInput field='name' size='small' style={{ width: '100%' }}
+                                    value={record.name}
+                                    onChange={value => {
+                                        setFieldValue(['items', idx, 'name'], value)
+                                        updateUnit(idx)
+                                        updateTableRows()
+                                    }} />
                             )
                         }}
                     </Item>
                 )
             },
-            { 
-                title: '规格', dataIndex: 'spec', align: 'center', width: 120, 
+            {
+                title: '规格', dataIndex: 'spec', align: 'center', width: 120,
                 render: (_, field, idx) => (
                     <Item shouldUpdate>
                         {({ getFieldValue, setFieldValue }) => {
                             const record = (getFieldValue('items') || [])?.[idx] || {}
                             return isRefund ? record.spec : (
-                                <ProductInput field='spec' size='small' style={{ width: '100%' }} 
-                                value={record.spec} 
-                                onChange={value => {
-                                    setFieldValue(['items', idx, 'spec'], value)
-                                    updateUnit(idx)
-                                    updateTableRows()
-                                }} />
+                                <ProductInput field='spec' size='small' style={{ width: '100%' }}
+                                    value={record.spec}
+                                    onChange={value => {
+                                        setFieldValue(['items', idx, 'spec'], value)
+                                        updateUnit(idx)
+                                        updateTableRows()
+                                    }} />
                             )
                         }}
                     </Item>
                 )
             },
-            { 
+            {
                 title: (
-                    isRefund ? 
-                    <span>数量 
-                        <Popover content={<>黄色：数量超过采购单上限。<br/>红色：产品已从采购单中移除。</>}>
-                            <ExclamationCircleOutlined style={{ color: 'gray', marginLeft: '2px'  }}/>
-                        </Popover>
-                    </span> : '数量'
-                ), 
-                dataIndex: 'quantity', align: 'center', width: 80, 
+                    isRefund ?
+                        <span>数量
+                            <Popover content={<>黄色：数量超过采购单上限。<br />红色：产品已从采购单中移除。</>}>
+                                <ExclamationCircleOutlined style={{ color: 'gray', marginLeft: '2px' }} />
+                            </Popover>
+                        </span> : '数量'
+                ),
+                dataIndex: 'quantity', align: 'center', width: 80,
                 render: (_, field, idx) => (
                     <Item shouldUpdate>
                         {({ getFieldValue, setFieldValue }) => {
                             const record = (getFieldValue('items') || [])?.[idx] || {}
                             return (
-                                <InputNumber min={0} stringMode keyboard={false} size='small' controls={false} style={{ width: '100%' }} 
-                                value={record.quantity} 
-                                placeholder={record.maxQuantity}
-                                status={
-                                    isRefund ? (
-                                        record.maxQuantity == null ? 'error' : (
-                                            Decimal(record.quantity || 0).gt(record.maxQuantity) ? 'warning' : ''
-                                        )
-                                    ) : ''
-                                }
-                                onChange={value => {
-                                    setFieldValue(['items', idx, 'quantity'], value)
-                                    updateTableRows()
-                                    updateItemAmount(idx)
-                                }} />
+                                <InputNumber min={0} stringMode keyboard={false} size='small' controls={false} style={{ width: '100%' }}
+                                    value={record.quantity}
+                                    placeholder={record.maxQuantity}
+                                    status={
+                                        isRefund ? (
+                                            record.maxQuantity == null ? 'error' : (
+                                                Decimal(record.quantity || 0).gt(record.maxQuantity) ? 'warning' : ''
+                                            )
+                                        ) : ''
+                                    }
+                                    onChange={value => {
+                                        setFieldValue(['items', idx, 'quantity'], value)
+                                        updateTableRows()
+                                        updateItemAmount(idx)
+                                    }} />
                             )
                         }}
                     </Item>
                 )
             },
-            { 
-                title: '单位', dataIndex: 'unit', align: 'center', width: 50, 
+            {
+                title: '单位', dataIndex: 'unit', align: 'center', width: 50,
                 render: (_, field, idx) => (
                     <Item shouldUpdate>
                         {({ getFieldValue, setFieldValue }) => {
@@ -256,10 +259,10 @@ function SubEditView(props) {
                             if (!record.productExisting && !isRefund) {
                                 return (
                                     <Select size='small'
-                                    options={JSON.parse(invoiceSettings.get('unitOptions')).filter(unit => unit.showing)} 
-                                    align='center' style={{ width: '100%' }}
-                                    value={record.unit} 
-                                    onChange={value => setFieldValue(['items', idx, 'unit'], value)} />
+                                        options={JSON.parse(invoiceSettings.get('unitOptions')).filter(unit => unit.showing)}
+                                        align='center' style={{ width: '100%' }}
+                                        value={record.unit}
+                                        onChange={value => setFieldValue(['items', idx, 'unit'], value)} />
                                 )
                             }
                             return record.unit
@@ -267,89 +270,89 @@ function SubEditView(props) {
                     </Item>
                 )
             },
-            { 
-                title: '单价', dataIndex: 'price', align: 'center', width: 90, 
+            {
+                title: '单价', dataIndex: 'price', align: 'center', width: 90,
                 render: (_, field, idx) => (
                     <Item shouldUpdate>
                         {({ getFieldValue, setFieldValue }) => {
                             const record = (getFieldValue('items') || [])?.[idx] || {}
                             return isRefund ? record.price : (
                                 <PriceInput partner={getFieldValue('partner')}
-                                material={record.material} name={record.name} spec={record.spec}
-                                min={0} stringMode keyboard={false} size='small' controls={false} style={{ width: '100%' }} 
-                                value={record.price} 
-                                onChange={value => {
-                                    setFieldValue(['items', idx, 'price'], value)
-                                    updateTableRows()
-                                    updateItemAmount(idx)
-                                }} />
+                                    material={record.material} name={record.name} spec={record.spec}
+                                    min={0} stringMode keyboard={false} size='small' controls={false} style={{ width: '100%' }}
+                                    value={record.price}
+                                    onChange={value => {
+                                        setFieldValue(['items', idx, 'price'], value)
+                                        updateTableRows()
+                                        updateItemAmount(idx)
+                                    }} />
                             )
                         }}
                     </Item>
-                ) 
+                )
             },
-            ifShowDiscount ? 
-            { 
-                title: '金额', dataIndex: 'originalAmount', align: 'center', width: 80, 
-                render: (_, field, idx) => (
-                    <Item shouldUpdate>
-                        {({ getFieldValue, setFieldValue }) => {
-                            const record = (getFieldValue('items') || [])?.[idx] || {}
-                            if (allowEditAmount) {
-                                return (
-                                    <InputNumber keyboard={false} size='small' controls={false} style={{ width: '100%' }} 
-                                    value={record.originalAmount}
-                                    onChange={value => {
-                                        setFieldValue(['items', idx, 'originalAmount'], value)
-                                        setFieldValue(['items', idx, 'amount'], Decimal(value || 0).times(record.discount).dividedBy(100).toString())
-                                        updateTableRows()
-                                        updateTotalAmount()
-                                    }} />
+            ifShowDiscount ?
+                {
+                    title: '金额', dataIndex: 'originalAmount', align: 'center', width: 80,
+                    render: (_, field, idx) => (
+                        <Item shouldUpdate>
+                            {({ getFieldValue, setFieldValue }) => {
+                                const record = (getFieldValue('items') || [])?.[idx] || {}
+                                if (allowEditAmount) {
+                                    return (
+                                        <InputNumber keyboard={false} size='small' controls={false} style={{ width: '100%' }}
+                                            value={record.originalAmount}
+                                            onChange={value => {
+                                                setFieldValue(['items', idx, 'originalAmount'], value)
+                                                setFieldValue(['items', idx, 'amount'], Decimal(value || 0).times(record.discount).dividedBy(100).toString())
+                                                updateTableRows()
+                                                updateTotalAmount()
+                                            }} />
+                                    )
+                                }
+                                return parseFloat(record.originalAmount).toLocaleString()
+                            }}
+                        </Item>
+                    )
+                } : null,
+            ifShowDiscount ?
+                {
+                    title: '折扣', dataIndex: 'discount', align: 'center', width: 65,
+                    render: (_, field, idx) => (
+                        <Item shouldUpdate>
+                            {({ getFieldValue, setFieldValue }) => {
+                                const record = (getFieldValue('items') || [])?.[idx] || {}
+                                return isRefund ? `${record.discount}%` : (
+                                    <InputNumber keyboard={false} size='small'
+                                        min={0} max={100} controls={false} style={{ width: '100%' }}
+                                        // formatter={(value) => `${value}%`} parser={(value) => value.replace('%', '')}
+                                        value={record.discount}
+                                        onChange={value => {
+                                            setFieldValue(['items', idx, 'discount'], value)
+                                            updateTableRows()
+                                            updateItemAmount(idx)
+                                        }}
+                                        addonAfter='%' />
                                 )
-                            }
-                            return parseFloat(record.originalAmount).toLocaleString()
-                        }}
-                    </Item>
-                )
-            } : null,
-            ifShowDiscount ? 
-            { 
-                title: '折扣', dataIndex: 'discount', align: 'center', width: 65, 
-                render: (_, field, idx) => (
-                    <Item shouldUpdate>
-                        {({ getFieldValue, setFieldValue }) => {
-                            const record = (getFieldValue('items') || [])?.[idx] || {}
-                            return isRefund ? `${record.discount}%` : (
-                                <InputNumber keyboard={false} size='small' 
-                                min={0} max={100} controls={false} style={{ width: '100%' }} 
-                                // formatter={(value) => `${value}%`} parser={(value) => value.replace('%', '')}
-                                value={record.discount} 
-                                onChange={value => {
-                                    setFieldValue(['items', idx, 'discount'], value)
-                                    updateTableRows()
-                                    updateItemAmount(idx)
-                                }}
-                                addonAfter='%' />
-                            )
-                        }}
-                    </Item>
-                )
-            } : null,
-            { 
-                title: ifShowDiscount ? '折后价' : '金额', dataIndex: 'amount', align: 'center', width: 80, 
+                            }}
+                        </Item>
+                    )
+                } : null,
+            {
+                title: ifShowDiscount ? '折后价' : '金额', dataIndex: 'amount', align: 'center', width: 80,
                 render: (_, field, idx) => (
                     <Item shouldUpdate>
                         {({ getFieldValue, setFieldValue }) => {
                             const record = (getFieldValue('items') || [])?.[idx] || {}
                             if (allowEditAmount) {
                                 return (
-                                    <InputNumber keyboard={false} size='small' controls={false} style={{ width: '100%' }} 
-                                    value={record.amount}
-                                    onChange={value => {
-                                        setFieldValue(['items', idx, 'amount'], value)
-                                        updateTableRows()
-                                        updateTotalAmount()
-                                    }} />
+                                    <InputNumber keyboard={false} size='small' controls={false} style={{ width: '100%' }}
+                                        value={record.amount}
+                                        onChange={value => {
+                                            setFieldValue(['items', idx, 'amount'], value)
+                                            updateTableRows()
+                                            updateTotalAmount()
+                                        }} />
                                 )
                             }
                             return parseFloat(record.amount).toLocaleString()
@@ -357,52 +360,52 @@ function SubEditView(props) {
                     </Item>
                 )
             },
-            { 
-                title: '备注', dataIndex: 'remark', align: 'center', width: 180, 
+            {
+                title: '备注', dataIndex: 'remark', align: 'center', width: 180,
                 render: (_, field, idx) => (
                     <Item shouldUpdate>
                         {({ getFieldValue, setFieldValue }) => {
                             const record = (getFieldValue('items') || [])?.[idx] || {}
                             return (<Space size={3}>
-                                <Input size='small' 
-                                    value={record.remark} 
+                                <Input size='small'
+                                    value={record.remark}
                                     onChange={e => {
                                         setFieldValue(['items', idx, 'remark'], e.target.value)
                                         updateTableRows()
                                     }} />
-                                { ifShowRemarkCalculator ?
+                                {ifShowRemarkCalculator ?
                                     <Button size='small' style={{ paddingLeft: '4px', paddingRight: '4px' }}
-                                    onClick={_ => {
-                                        const quantity = calRemark(record.remark)
-                                        if (quantity) {
-                                            setFieldValue(['items', idx, 'quantity'], quantity)
-                                        }
-                                    }}> = </Button> :null
+                                        onClick={_ => {
+                                            const quantity = calRemark(record.remark)
+                                            if (quantity) {
+                                                setFieldValue(['items', idx, 'quantity'], quantity)
+                                            }
+                                        }}> = </Button> : null
                                 }
                             </Space>)
                         }}
                     </Item>
                 )
             },
-            ifShowDelivered ? 
-            { 
-                title: '配送', dataIndex: 'delivered', align: 'center', width: 60, 
-                render: (_, field, idx) => (
-                    <Item shouldUpdate>
-                        {({ getFieldValue, setFieldValue }) => {
-                            const record = (getFieldValue('items') || [])?.[idx] || {}
-                            return <Select size='small' style={{ width: '100%' }}
-                                options={[{ label: '未配送', value: false }, { label: '已配送', value: true }]} 
-                                value={record.delivered}
-                                align='center'
-                                onChange={value => setFieldValue(['items', idx, 'delivered'], value)}
-                            />
-                        }}
-                    </Item>
-                )
-            } : null,
-            { 
-                title: '', align: 'center', width: 30, fixed: 'right', 
+            ifShowDelivered ?
+                {
+                    title: '配送', dataIndex: 'delivered', align: 'center', width: 60,
+                    render: (_, field, idx) => (
+                        <Item shouldUpdate>
+                            {({ getFieldValue, setFieldValue }) => {
+                                const record = (getFieldValue('items') || [])?.[idx] || {}
+                                return <Select size='small' style={{ width: '100%' }}
+                                    options={[{ label: '未配送', value: false }, { label: '已配送', value: true }]}
+                                    value={record.delivered}
+                                    align='center'
+                                    onChange={value => setFieldValue(['items', idx, 'delivered'], value)}
+                                />
+                            }}
+                        </Item>
+                    )
+                } : null,
+            {
+                title: '', align: 'center', width: 30, fixed: 'right',
                 render: (_, field, idx) => {
                     return <Button type='link' size='small' danger onClick={_ => {
                         addToUnrefundedItems(idx)
@@ -421,42 +424,58 @@ function SubEditView(props) {
         const ifShowDiscount = invoiceSettings.get('ifShowDiscount') === 'true'
         const ifShowMaterial = invoiceSettings.get('ifShowMaterial') === 'true'
         return [
-            { title: '', align: 'center', render: (_, __, idx) => idx + 1},
-            ifShowMaterial ? { title: '材质', dataIndex: 'material', align: 'center', render: (_, field, idx) => (
-                form.getFieldValue(['unrefundedItems', idx, 'material'])
-            ) } : null,
-            { title: '名称', dataIndex: 'name', align: 'center', render: (_, field, idx) => (
-                form.getFieldValue(['unrefundedItems', idx, 'name'])
-            )},
-            { title: '规格', dataIndex: 'spec', align: 'center', render: (_, field, idx) => (
-                form.getFieldValue(['unrefundedItems', idx, 'spec'])
-            ) },
-            { title: '数量', dataIndex: 'maxQuantity', align: 'center', render: (_, field, idx) => (
-                form.getFieldValue(['unrefundedItems', idx, 'maxQuantity']).toLocaleString()
-            ) },
-            { title: '单位', dataIndex: 'unit', align: 'center', render: (_, field, idx) => (
-                form.getFieldValue(['unrefundedItems', idx, 'unit'])
-            ) },
-            { title: '单价', dataIndex: 'price', align: 'center', render: (_, field, idx) => {
-                const amountSign = invoiceSettings.get('ifShowAmountSign') === 'true' ? invoiceSettings.get('amountSign') : ''
-                return amountSign + form.getFieldValue(['unrefundedItems', idx, 'price']).toLocaleString()
-            } },
-            ifShowDiscount ? { title: '折扣', dataIndex: 'discount', align: 'center', render: (_, field, idx) => (
-                `${form.getFieldValue(['unrefundedItems', idx, 'discount'])}%`
-            ) } : null,
-            { title: '', width: 30, fixed: 'right', render: (_, field, idx) => {
-                return <Button type='link' size='small' onClick={_ => {
-                    const item = form.getFieldValue(['unrefundedItems', idx])
-                    item.quantity = item.maxQuantity
-                    const { originalAmount, amount } = calItemAmount(item)
-                    item.originalAmount = originalAmount
-                    item.amount = amount
-                    const items = [...(form.getFieldValue('items') || []), item]
-                    form.setFieldValue('items', items)
-                    updateTotalAmount()
-                    remove(idx)
-                }}><PlusOutlined /></Button>
-            }}
+            { title: '', align: 'center', render: (_, __, idx) => idx + 1 },
+            ifShowMaterial ? {
+                title: '材质', dataIndex: 'material', align: 'center', render: (_, field, idx) => (
+                    form.getFieldValue(['unrefundedItems', idx, 'material'])
+                )
+            } : null,
+            {
+                title: '名称', dataIndex: 'name', align: 'center', render: (_, field, idx) => (
+                    form.getFieldValue(['unrefundedItems', idx, 'name'])
+                )
+            },
+            {
+                title: '规格', dataIndex: 'spec', align: 'center', render: (_, field, idx) => (
+                    form.getFieldValue(['unrefundedItems', idx, 'spec'])
+                )
+            },
+            {
+                title: '数量', dataIndex: 'maxQuantity', align: 'center', render: (_, field, idx) => (
+                    form.getFieldValue(['unrefundedItems', idx, 'maxQuantity']).toLocaleString()
+                )
+            },
+            {
+                title: '单位', dataIndex: 'unit', align: 'center', render: (_, field, idx) => (
+                    form.getFieldValue(['unrefundedItems', idx, 'unit'])
+                )
+            },
+            {
+                title: '单价', dataIndex: 'price', align: 'center', render: (_, field, idx) => {
+                    const amountSign = invoiceSettings.get('ifShowAmountSign') === 'true' ? invoiceSettings.get('amountSign') : ''
+                    return amountSign + form.getFieldValue(['unrefundedItems', idx, 'price']).toLocaleString()
+                }
+            },
+            ifShowDiscount ? {
+                title: '折扣', dataIndex: 'discount', align: 'center', render: (_, field, idx) => (
+                    `${form.getFieldValue(['unrefundedItems', idx, 'discount'])}%`
+                )
+            } : null,
+            {
+                title: '', width: 30, fixed: 'right', render: (_, field, idx) => {
+                    return <Button type='link' size='small' onClick={_ => {
+                        const item = form.getFieldValue(['unrefundedItems', idx])
+                        item.quantity = item.maxQuantity
+                        const { originalAmount, amount } = calItemAmount(item)
+                        item.originalAmount = originalAmount
+                        item.amount = amount
+                        const items = [...(form.getFieldValue('items') || []), item]
+                        form.setFieldValue('items', items)
+                        updateTotalAmount()
+                        remove(idx)
+                    }}><PlusOutlined /></Button>
+                }
+            }
         ].filter(c => c != null)
     }
 
@@ -537,7 +556,7 @@ function SubEditView(props) {
                 {
                     isRefund ? (
                         <Item label={isSales ? '客户' : '供应商'} style={{ margin: 0 }}>
-                            { form.getFieldValue('partner') || <span style={{ color: 'gray' }}>(选择产品后自动显示)</span> }
+                            {form.getFieldValue('partner') || <span style={{ color: 'gray' }}>(选择产品后自动显示)</span>}
                         </Item>
                     ) : (
                         <Item label={isSales ? '客户' : '供应商'} name='partner' style={{ margin: 0 }}>
@@ -546,100 +565,102 @@ function SubEditView(props) {
                     )
                 }
                 <Item label='日期' shouldUpdate style={{ margin: 0 }}>
-                    { ({ getFieldValue, setFieldValue }) => {
-                        return typeof(getFieldValue('date')) === 'object' ? 
-                        <DatePicker style={{ width: 150 }} size='small' 
-                        value={getFieldValue('date')}
-                        onChange={val => setFieldValue('date', val)} /> : typeof(getFieldValue('date'))
-                    } }
+                    {({ getFieldValue, setFieldValue }) => {
+                        return typeof (getFieldValue('date')) === 'object' ?
+                            <DatePicker style={{ width: 150 }} size='small'
+                                value={getFieldValue('date')}
+                                onChange={val => setFieldValue('date', val)} /> : typeof (getFieldValue('date'))
+                    }}
                 </Item>
                 {
-                    isRefund ? 
+                    isRefund ?
                         <Button icon={<PlusOutlined />} type='primary' ghost onClick={_ => setSelectionModalOpen(true)}>选择退货产品</Button> : null
                 }
             </Row>
             <Row style={{ justifyContent: 'space-between', marginBottom: '10px' }}>
                 <Item label='总金额' shouldUpdate style={{ margin: 0 }}>
-                    { ({ getFieldValue }) => {
+                    {({ getFieldValue }) => {
                         return <div style={{ width: 150 }}>
-                            { parseFloat(getFieldValue('amount')).toLocaleString() }
+                            {parseFloat(getFieldValue('amount')).toLocaleString()}
                         </div>
-                    } }
-                </Item>
-                {
-                    isRefund ? null :
-                    <Item label='订金' name='prepayment' style={{ margin: 0 }}>
-                        <InputNumber style={{ width: 150 }} size='small' keyboard={false} stringMode controls={false} />
-                    </Item>
-                }
-                
-                <Item label={isRefund ? '付款' : '尾款'} shouldUpdate style={{ margin: 0 }}>
-                    { ({ getFieldValue, setFieldValue }) => {
-                        const p = Decimal(getFieldValue('amount') || 0).minus(getFieldValue('prepayment') || 0)
-                        return (
-                            <>
-                                <InputNumber size='small' keyboard={false} stringMode controls={false} style={{ width: 120 }}
-                                    placeholder={`应付 ${p.toNumber().toLocaleString()}`} 
-                                    value={getFieldValue('payment')} 
-                                    onChange={val => setFieldValue('payment', val)}/>
-                                <Button size='small' style={{ marginLeft: '5px' }} icon={<EditOutlined />}
-                                    onClick={_ => setFieldValue('payment', p.toString())} 
-                                />
-                            </>
-                        )
                     }}
                 </Item>
+                {
+                    isRefund || !ifShowPayment ? null :
+                        <Item label='订金' name='prepayment' style={{ margin: 0 }}>
+                            <InputNumber style={{ width: 150 }} size='small' keyboard={false} stringMode controls={false} />
+                        </Item>
+                }
+                {
+                    ifShowPayment ?
+                        <Item label={isRefund ? '付款' : '尾款'} shouldUpdate style={{ margin: 0 }}>
+                            {({ getFieldValue, setFieldValue }) => {
+                                const p = Decimal(getFieldValue('amount') || 0).minus(getFieldValue('prepayment') || 0)
+                                return (
+                                    <>
+                                        <InputNumber size='small' keyboard={false} stringMode controls={false} style={{ width: 120 }}
+                                            placeholder={`应付 ${p.toNumber().toLocaleString()}`}
+                                            value={getFieldValue('payment')}
+                                            onChange={val => setFieldValue('payment', val)} />
+                                        <Button size='small' style={{ marginLeft: '5px' }} icon={<EditOutlined />}
+                                            onClick={_ => setFieldValue('payment', p.toString())}
+                                        />
+                                    </>
+                                )
+                            }}
+                        </Item> : null
+                }
             </Row>
             <Form.List name="items">
                 {(fields, { add, remove }) => (
-                    <Table className='editTable' size='small' bordered 
+                    <Table className='editTable' size='small' bordered
                         dataSource={fields} columns={getTableColumns(add, remove)}
-                        style={isRefund ? {} : { height: 400 }} scroll={isRefund ? {} : {x: 'max-content', y: 400 }}
+                        style={isRefund ? {} : { height: 400 }} scroll={isRefund ? {} : { x: 'max-content', y: 400 }}
                         pagination={false}
                         rowKey={field => field.key}
                     />
                 )}
             </Form.List>
             {
-                isRefund ? 
-                <>
-                    <br />
-                    <Form.List name="unrefundedItems">
-                        {(fields, { add, remove }) => (
-                            <Collapse defaultActiveKey={'1'}>
-                                <Collapse.Panel header={`待退货产品 (${fields.length})`} key='1'>
-                                    { fields.length > 0 ? 
-                                        <Table size='small' bordered dataSource={fields} rowKey={r => r.key}
-                                        pagination={false}
-                                        columns={getUnrefundedTableColumns(add, remove)} /> : null
-                                    }
-                                </Collapse.Panel>
-                            </Collapse>
-                        )}
-                    </Form.List>
+                isRefund ?
+                    <>
+                        <br />
+                        <Form.List name="unrefundedItems">
+                            {(fields, { add, remove }) => (
+                                <Collapse defaultActiveKey={'1'}>
+                                    <Collapse.Panel header={`待退货产品 (${fields.length})`} key='1'>
+                                        {fields.length > 0 ?
+                                            <Table size='small' bordered dataSource={fields} rowKey={r => r.key}
+                                                pagination={false}
+                                                columns={getUnrefundedTableColumns(add, remove)} /> : null
+                                        }
+                                    </Collapse.Panel>
+                                </Collapse>
+                            )}
+                        </Form.List>
 
-                    <Modal title='选择退货' open={isSelectionModalOpen} width={1000} center 
-                    onCancel={_ => setSelectionModalOpen(false)} footer={null} destroyOnClose>
-                        {
-                            props.type === 'salesRefund' ? 
-                            <RefundSelectionView 
-                            type='salesOrder'
-                            refund={form.getFieldsValue(true)} 
-                            setRefund={r => form.setFieldsValue(r)}
-                            dismiss={_ => setSelectionModalOpen(false)} />
-                            : null
-                        }
-                        {
-                            props.type === 'purchaseRefund' ?
-                            <RefundSelectionView 
-                            type='purchaseOrder'
-                            refund={form.getFieldsValue(true)} 
-                            setRefund={r => form.setFieldsValue(r)}
-                            dismiss={_ => setSelectionModalOpen(false)} /> 
-                            : null
-                        }
-                    </Modal>
-                </> : null
+                        <Modal title='选择退货' open={isSelectionModalOpen} width={1000} center
+                            onCancel={_ => setSelectionModalOpen(false)} footer={null} destroyOnClose>
+                            {
+                                props.type === 'salesRefund' ?
+                                    <RefundSelectionView
+                                        type='salesOrder'
+                                        refund={form.getFieldsValue(true)}
+                                        setRefund={r => form.setFieldsValue(r)}
+                                        dismiss={_ => setSelectionModalOpen(false)} />
+                                    : null
+                            }
+                            {
+                                props.type === 'purchaseRefund' ?
+                                    <RefundSelectionView
+                                        type='purchaseOrder'
+                                        refund={form.getFieldsValue(true)}
+                                        setRefund={r => form.setFieldsValue(r)}
+                                        dismiss={_ => setSelectionModalOpen(false)} />
+                                    : null
+                            }
+                        </Modal>
+                    </> : null
             }
         </>
     )

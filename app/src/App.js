@@ -65,7 +65,7 @@ function App() {
                     </Menu>
                 </Sider>
                 <Layout style={{ marginLeft: siderWidth, transition: 'margin 0.2s ease-in-out' }}>
-                    <Content style={{ padding: '10px', background: colorBgContainer, overflow: 'initial' }}>
+                    <Content style={{ padding: '10px 16px', background: colorBgContainer, overflow: 'initial' }}>
                         <Routes>
                             <Route path='/' element={<InvoicePage type='salesOrder' key='salesOrder' />} />
                             <Route path='purchaseOrder' element={<InvoicePage type='purchaseOrder' key='purchaseOrder' />} />

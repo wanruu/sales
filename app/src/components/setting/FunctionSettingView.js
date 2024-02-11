@@ -65,9 +65,9 @@ export default function FunctionSettingView() {
                 label='开启配送功能' help={false} />
             <Divider />
 
-            <Title id='function-payment' level={3}>入账功能</Title>
+            <Title id='function-payment' level={3}>付款功能</Title>
             <SettingSwitchItem keyy='ifShowPayment' value={ifShowPayment} setValue={setIfShowPayment}
-                label='开启入账功能' help={false} />
+                label='开启付款功能' help={false} />
         </Card>
     </>)
 }

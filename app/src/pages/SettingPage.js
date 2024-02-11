@@ -123,7 +123,7 @@ export default function SettingPage() {
                 { key: 'function-amount', href: '#function-amount', title: '金额计算功能' },
                 { key: 'function-discount', href: '#function-discount', title: '折扣功能' },
                 { key: 'function-deliver', href: '#function-deliver', title: '配送功能' },
-                { key: 'function-account', href: '#function-account', title: '入账功能' }
+                { key: 'function-payment', href: '#function-payment', title: '付款功能' }
             ]
         },
         {

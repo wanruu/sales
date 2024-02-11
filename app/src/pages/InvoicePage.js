@@ -27,7 +27,7 @@ export default function InvoicePage(props) {
     const isOrder = ['salesOrder', 'purchaseOrder'].includes(props.type)
     const isSales = ['salesOrder', 'salesRefund'].includes(props.type)
     const partnerTitle = isSales ? '客户' : '供应商'
-    const relatedInvoiceTitle = isOrder ? '关联退货单' : ( isSales ? '关联销售单' : '关联采购单' )
+    const relatedInvoiceTitle = isOrder ? '关联退货单' : (isSales ? '关联销售单' : '关联采购单')
     const relatedInvoiceDataIndex = isOrder ? 'refundId' : 'orderId'
 
     const load = () => {
@@ -49,25 +49,31 @@ export default function InvoicePage(props) {
     const getTableColumns = () => {
         const ifShowDelivered = invoiceSettings.get('ifShowDelivered') == 'true'
         const amountSign = invoiceSettings.get('ifShowAmountSign') === 'true' ? invoiceSettings.get('amountSign') : ''
+        const ifShowPayment = invoiceSettings.get('ifShowPayment') === 'true'
         return [
             { title: '序号', align: 'center', render: (_, __, idx) => idx + 1, fixed: 'left' },
             { title: '单号', dataIndex: 'id', align: 'center', render: id => <a onClick={_ => setSelectedInvoiceId(id)}>{id}</a> },
             { title: partnerTitle, dataIndex: 'partner', align: 'center' },
             { title: '日期', dataIndex: 'date', align: 'center' },
             { title: '金额', dataIndex: 'amount', align: 'center', render: amount => amountSign + amount.toLocaleString() },
-            { title: '已付', dataIndex: 'paid', align: 'center', render: paid => amountSign + paid.toLocaleString() },
-            { title: '未付', dataIndex: 'unpaid', align: 'center', render: unpaid => 
-                <span style={{ color: unpaid === 0 ? 'black' : 'red' }}>{amountSign + unpaid.toLocaleString()}</span>
-            },
-            ifShowDelivered ? { 
+            ifShowPayment ? {
+                title: '已付', dataIndex: 'paid', align: 'center', render: paid => amountSign + paid.toLocaleString()
+            } : null,
+            ifShowPayment ? {
+                title: '未付', dataIndex: 'unpaid', align: 'center', render: unpaid =>
+                    <span style={{ color: unpaid === 0 ? 'black' : 'red' }}>{amountSign + unpaid.toLocaleString()}</span>
+            } : null,
+            ifShowDelivered ? {
                 title: '配送情况', dataIndex: 'delivered', align: 'center', render: d => <Tag color={DELIVER_COLORS[d]}>{d}</Tag>
             } : null,
             { title: relatedInvoiceTitle, dataIndex: relatedInvoiceDataIndex, align: 'center', render: id => id ? <a onClick={_ => setSelectedInvoiceId(id)}>{id}</a> : null },
-            { title: '操作', align: 'center', fixed: 'right', render: (_, record) => (
-                <Space.Compact>
-                    <Button onClick={_ => showDeleteConfirm([record.id])} danger>删除</Button>
-                </Space.Compact>
-            ) }
+            {
+                title: '操作', align: 'center', fixed: 'right', render: (_, record) => (
+                    <Space.Compact>
+                        <Button onClick={_ => showDeleteConfirm([record.id])} danger>删除</Button>
+                    </Space.Compact>
+                )
+            }
         ].filter(i => i != null)
     }
 
@@ -121,10 +127,10 @@ export default function InvoicePage(props) {
     useEffect(load, [props.type])
 
     return <>
-        { contextHolder }
+        {contextHolder}
         <MyFloatButton type={props.type} refresh={load} />
 
-        <Modal title={null} open={selectedInvoiceId} width={900} destroyOnClose 
+        <Modal title={null} open={selectedInvoiceId} width={900} destroyOnClose
             onCancel={_ => setSelectedInvoiceId(undefined)} footer={null} maskClosable={false}>
             <InvoiceFullView id={selectedInvoiceId} refresh={load} messageApi={messageApi} allowEditPartner={true} />
         </Modal>
@@ -132,6 +138,6 @@ export default function InvoicePage(props) {
         <InvoiceSearchBox data={invoices} setFilteredData={setFilteredInvoices} type={props.type} />
         <br />
         <Table dataSource={filteredInvoices} bordered rowKey={record => record.id} size='middle'
-        columns={getTableColumns()} pagination={DEFAULT_PAGINATION} scroll={{ x: 'max-content' }} />
+            columns={getTableColumns()} pagination={DEFAULT_PAGINATION} scroll={{ x: 'max-content' }} />
     </>
 }
