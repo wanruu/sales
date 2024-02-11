@@ -9,30 +9,29 @@ import InvoiceView from './InvoiceView'
 import InvoiceEditView from './InvoiceEditView'
 
 
-const PREFIX_DICT = {
-    'XS': { type: 'salesOrder', title: '销售清单' },
-    'CG': { type: 'purchaseOrder', title: '采购清单' },
-    'XT': { type: 'salesRefund', title: '销售退货单' },
-    'CT': { type: 'purchaseRefund', title: '采购退货单' }
+const TITLE_DICT = {
+    'salesOrder': '销售清单',
+    'purchaseOrder': '采购清单',
+    'salesRefund': '销售退货单',
+    'purchaseRefund': '采购退货单'
 }
 
 
 /*
-    Required: id, refresh, messageApi
-    Optional: allowEditPartner (false by default)
+    Required: type, invoice, refresh, messageApi, dismiss
+    Optional: //allowEditPartner (false by default)
 */
-export default function InvoiceFullView(props) {
-    const type = PREFIX_DICT[props.id.slice(0, 2)].type
-    const title = PREFIX_DICT[props.id.slice(0, 2)].title
+export default function NewInvoiceView(props) {
+    const title = TITLE_DICT[props.type]
 
-    const [invoice, setInvoice] = useState(undefined)
-    const [mode, setMode] = useState('view')
+    const [invoice, setInvoice] = useState(props.invoice)
+    const [mode, setMode] = useState('edit')
 
-    const load = () => {
+    const refresh = (id) => {
         Axios({
             method: 'get',
             baseURL: baseURL(),
-            url: `${type}/id/${props.id}`,
+            url: `${props.type}/id/${id}`,
             'Content-Type': 'application/json',
         }).then(res => {
             const newInvoice = res.data
@@ -44,29 +43,22 @@ export default function InvoiceFullView(props) {
             })
             setInvoice(newInvoice)
         }).catch(_ => { })
-    }
-
-    const refresh = () => {
-        load()
         props.refresh()
     }
 
     const modeDict = {
-        'edit': <InvoiceEditView type={type} invoice={invoice}
+        'edit': <InvoiceEditView type={props.type} invoice={invoice} dismiss={props.dismiss}
             setMode={setMode} refresh={refresh} messageApi={props.messageApi} />,
-        'view': invoice ?
-            <InvoiceView type={type} invoice={invoice} allowEditPartner={props.allowEditPartner} refresh={refresh}
-                setMode={setMode} />
-            : null,
-        'print': <InvoicePrintView invoice={invoice} type={type} setMode={setMode} />
+        'view': <InvoiceView type={props.type} invoice={invoice} allowEditPartner={false} refresh={refresh}
+            setMode={setMode} />,
+        'print': invoice.id ? <InvoicePrintView invoice={invoice} type={props.type} setMode={setMode} /> : null
     }
 
-    useEffect(load, [])
 
     return (
         <>
             <div style={{ fontSize: '12pt', fontWeight: 'bold', margin: '5px 0px' }}>
-                {title} ({props.id})
+                {invoice.id ? `${title} (${invoice.id})` : `新建${title}`}
             </div>
             {modeDict[mode]}
         </>

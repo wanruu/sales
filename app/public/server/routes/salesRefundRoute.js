@@ -93,14 +93,14 @@ router.post('/', async (req, res) => {
     // ---------- data ----------
     const partner = req.body.partner
     const date = req.body.date
-    const amount = req.body.amount
+    const amount = req.body.amount || '0'
     const prepayment = req.body.prepayment || '0'
     const payment = req.body.payment || '0'
     const items = req.body.items || []
     const orderId = req.body.orderId
 
     // ---------- validate ----------
-    if (!partner || !date || !amount || !orderId || items.length === 0) {
+    if (!partner || !date || !orderId || items.length === 0) {
         res.status(400).send('Insufficient data')
         return
     }
@@ -169,7 +169,7 @@ router.post('/', async (req, res) => {
     })
 
     // 5. return
-    res.end()
+    res.send({ id: refundId })
 })
 
 
@@ -194,14 +194,14 @@ router.put('/id/:id', async (req, res) => {
     const refundId = req.params.id
     const newOrderId = req.body.orderId
     const partner = req.body.partner
-    const amount = req.body.amount
+    const amount = req.body.amount || '0'
     const date = req.body.date
     const items = req.body.items || []
     const payment = req.body.payment || '0'
     const prepayment = req.body.prepayment || '0'
 
     // ---------- validate ----------
-    if (!partner || !date || !amount || !newOrderId || items.length === 0) {
+    if (!partner || !date || !newOrderId || items.length === 0) {
         res.status(400).send('Insufficient data')
         return
     }

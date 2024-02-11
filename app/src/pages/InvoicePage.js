@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import Axios from 'axios'
 import { Table, Modal, Button, Space, message, Tag } from 'antd'
 import { Decimal } from 'decimal.js'
-import { ExclamationCircleFilled } from '@ant-design/icons'
+import { ExclamationCircleFilled, DeleteOutlined, PrinterOutlined, EditOutlined } from '@ant-design/icons'
 
 
 const { confirm } = Modal
@@ -69,9 +69,7 @@ export default function InvoicePage(props) {
             { title: relatedInvoiceTitle, dataIndex: relatedInvoiceDataIndex, align: 'center', render: id => id ? <a onClick={_ => setSelectedInvoiceId(id)}>{id}</a> : null },
             {
                 title: '操作', align: 'center', fixed: 'right', render: (_, record) => (
-                    <Space.Compact>
-                        <Button onClick={_ => showDeleteConfirm([record.id])} danger>删除</Button>
-                    </Space.Compact>
+                    <Button onClick={_ => showDeleteConfirm([record.id])} danger icon={<DeleteOutlined />} />
                 )
             }
         ].filter(i => i != null)
@@ -131,7 +129,7 @@ export default function InvoicePage(props) {
         <MyFloatButton type={props.type} refresh={load} />
 
         <Modal title={null} open={selectedInvoiceId} width={900} destroyOnClose
-            onCancel={_ => setSelectedInvoiceId(undefined)} footer={null} maskClosable={false}>
+            onCancel={_ => setSelectedInvoiceId(undefined)} footer={null}>
             <InvoiceFullView id={selectedInvoiceId} refresh={load} messageApi={messageApi} allowEditPartner={true} />
         </Modal>
 

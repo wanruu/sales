@@ -7,6 +7,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { emptyInvoice } from '../../utils/invoiceUtils'
 import InvoiceEditView from '../invoice/InvoiceEditView'
 import './myFloatButton.css'
+import NewInvoiceView from '../invoice/NewInvoiceView'
 
 
 
@@ -21,12 +22,6 @@ export default function MyFloatButton(props) {
 
     const isSales = ['salesOrder', 'salesRefund'].includes(props.type)
     const isOrder = ['salesOrder', 'purchaseOrder'].includes(props.type)
-    const modalTitle = {
-        'salesOrder': '新建销售清单',
-        'salesRefund': '新建销售退货',
-        'purchaseOrder': '新建采购清单',
-        'purchaseRefund': '新建采购退货'
-    }[props.type] || '错误'
 
     const columns = [
         { title: '保存时间', dataIndex: 'draftTime', align: 'center', render: time => time.format('HH:mm:ss') },
@@ -46,34 +41,27 @@ export default function MyFloatButton(props) {
         }
     ]
 
-    const getTitle = (type) => {
-        switch (type) {
-            case 'salesOrder': return '新建销售清单'
-            case 'salesRefund': return '新建销售退货'
-            case 'purchaseOrder': return '新建采购清单'
-            case 'purchaseRefund': return '新建采购退货'
-            default: return ''
-        }
-    }
     return <>
         {contextHolder}
-        <Popover title={`草稿箱 (${drafts.filter(d => d.type===props.type).length})`} placement='topLeft' zIndex={999} trigger='click' destroyTooltipOnHide 
-        content={
-            <Table className='draftTable' dataSource={drafts.filter(d => d.type===props.type)} rowKey={r => r.draftTime}
-                size='small' pagination={{ pageSize: 5, size: 'small' }}
-                hideOnSinglePage bordered columns={columns} />
-        }>
-            <FloatButton icon={<InboxOutlined />} style={{ right: 80 }} badge={{ count: drafts.filter(d => d.type===props.type).length, color: 'blue' }} />
+        <Popover title={`草稿箱 (${drafts.filter(d => d.type === props.type).length})`} placement='topLeft' zIndex={999} trigger='click' destroyTooltipOnHide
+            content={
+                <Table className='draftTable' dataSource={drafts.filter(d => d.type === props.type)} rowKey={r => r.draftTime}
+                    size='small' pagination={{ pageSize: 5, size: 'small' }}
+                    hideOnSinglePage bordered columns={columns} />
+            }>
+            <FloatButton icon={<InboxOutlined />} style={{ right: 80 }} badge={{ count: drafts.filter(d => d.type === props.type).length, color: 'blue' }} />
         </Popover>
 
         <FloatButton icon={<PlusOutlined />} type='primary' style={{ right: 24 }} onClick={_ => {
             setEditInvoice(emptyInvoice(isOrder ? 1 : 0))
         }} />
 
-        <Modal title={modalTitle} open={editInvoice} width={1000} centered destroyOnClose
-        onCancel={_ => setEditInvoice(undefined)} footer={null}>
-            <InvoiceEditView invoice={editInvoice} messageApi={messageApi} type={props.type}
-                dismiss={_ => setEditInvoice(undefined)} refresh={props.refresh} />
+        <Modal title={null} open={editInvoice} width={1000} centered destroyOnClose
+            onCancel={_ => setEditInvoice(undefined)} footer={null}>
+            {/* <InvoiceEditView invoice={editInvoice} messageApi={messageApi} type={props.type}
+                dismiss={_ => setEditInvoice(undefined)} refresh={props.refresh} /> */}
+            <NewInvoiceView invoice={editInvoice} dismiss={_ => setEditInvoice(undefined)}
+                messageApi={messageApi} type={props.type} refresh={props.refresh} />
         </Modal>
     </>
 }

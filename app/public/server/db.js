@@ -29,7 +29,6 @@ const product = `CREATE TABLE IF NOT EXISTS product(
     name TEXT NOT NULL, 
     spec TEXT NOT NULL, 
     unit TEXT NOT NULL,
-    quantity DECIMAL NOT NULL,
     PRIMARY KEY(material, name, spec)
 );`
 

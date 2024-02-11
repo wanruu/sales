@@ -24,11 +24,13 @@ function PreviewTable(props) {
             { title: '规格', dataIndex: 'spec', width: '10%' },
             { title: '数量', dataIndex: 'quantity', width: '8%', render: q => q.toLocaleString() },
             { title: '单位', dataIndex: 'unit', width: '6%' },
-            { title: '单价', dataIndex: 'price', width: '8%', render: p => 
-                amountSign + p.toLocaleString()
+            {
+                title: '单价', dataIndex: 'price', width: '8%', render: p =>
+                    amountSign + p.toLocaleString()
             },
-            { title: '金额', dataIndex: 'amount', width: '11%', render: a => 
-                amountSign + a.toLocaleString() 
+            {
+                title: '金额', dataIndex: 'amount', width: '11%', render: a =>
+                    amountSign + a.toLocaleString()
             },
             { title: '备注', dataIndex: 'remark', width: '15%' }
         ].filter(i => i != null)
@@ -39,16 +41,16 @@ function PreviewTable(props) {
                 <thead>
                     <tr>
                         <th style={{ width: '04.0%', }}>序号</th>
-                        { getTableColumns().map(col => <th key={ col.dataIndex } style={{ width: col.width }}>{ col.title }</th>)}
+                        {getTableColumns().map(col => <th key={col.dataIndex} style={{ width: col.width }}>{col.title}</th>)}
                     </tr>
                 </thead>
                 <tbody>
-                    { props.invoice.items.filter(item => item.quantity != null).map((item, itemIdx) =>
+                    {props.invoice.items.filter(item => item.quantity != null).map((item, itemIdx) =>
                         <tr key={item.productId}>
-                            <td>{itemIdx+1}</td>
-                            { getTableColumns().map(col => 
-                                <th key={ col.dataIndex }>
-                                    { col.render ? col.render(item[col.dataIndex]) : item[col.dataIndex] }
+                            <td>{itemIdx + 1}</td>
+                            {getTableColumns().map(col =>
+                                <th key={col.dataIndex}>
+                                    {col.render ? col.render(item[col.dataIndex]) : item[col.dataIndex]}
                                 </th>
                             )}
                         </tr>
@@ -91,11 +93,11 @@ function PreviewTitle(props) {
     const ifInline = printSettings.get('subtitleStyle') === 'inline'
     // Return
     return <Space direction='vertical' style={{ width: '100%' }} align='center' size={0}>
-        { ifInline ? 
-            <span style={{ ...titleFontSize }}>{ title }&nbsp;&nbsp;&nbsp;{ subtitle }</span> :
-            <span style={{ ...titleFontSize }}>{ title }</span>
+        {ifInline ?
+            <span style={{ ...titleFontSize }}>{title}&nbsp;&nbsp;&nbsp;{subtitle}</span> :
+            <span style={{ ...titleFontSize }}>{title}</span>
         }
-        { ifInline ? null : <span style={{ ...subtitleFontSize }}>{ subtitle }</span> }
+        {ifInline ? null : <span style={{ ...subtitleFontSize }}>{subtitle}</span>}
     </Space>
 }
 
@@ -113,14 +115,14 @@ function PreviewFooter() {
     const fontSize = { fontSize: printSettings.get('footerFontSize') + 'px' }
 
     // Return
-    return content.map((arr, idx) => 
+    return content.map((arr, idx) =>
         <Row key={idx}>
             <Col align='left' span={12} style={{ ...fontSize }}>
-                { arr[0] }
+                {arr[0]}
             </Col>
-            { arr.length !== 2 ? null : 
+            {arr.length !== 2 ? null :
                 <Col align='left' span={12} style={{ ...fontSize }}>
-                    { arr[1] }
+                    {arr[1]}
                 </Col>
             }
         </Row>
@@ -143,22 +145,22 @@ function PreviewHeader(props) {
     return <Space style={{ width: '100%' }} direction='vertical' size='10px'>
         <Row>
             <Col span={8} style={{ ...fontSize }} align='left'>
-                { ['salesOrder', 'salesRefund'].includes(props.type) ? '客户' : '供应商' }：
-                { props.invoice.partner }
+                {['salesOrder', 'salesRefund'].includes(props.type) ? '客户' : '供应商'}：
+                {props.invoice.partner}
             </Col>
             <Col span={8} style={{ ...fontSize }} align='center'>
                 日期：{props.invoice.date}
             </Col>
             <Col span={8} style={{ ...fontSize }} align='right'>
-                <FieldNumberOutlined style={{ marginRight: '4px' }}/>
-                { props.invoice.id }    
+                <FieldNumberOutlined style={{ marginRight: '4px' }} />
+                {props.invoice.id}
             </Col>
         </Row>
-        { !ifShowPhone ? null : <span style={{ ...fontSize }}>电话：{props.invoice.phone}</span> }
-        { !ifShowAddress ? null :
+        {!ifShowPhone ? null : <span style={{ ...fontSize }}>电话：{props.invoice.phone}</span>}
+        {!ifShowAddress ? null :
             <span style={{ ...fontSize }}>
-                { ['salesOrder', 'purchaseRefund'].includes(props.type) ? '收货地址' : '发货地址' }：
-                { props.invoice.address }
+                {['salesOrder', 'purchaseRefund'].includes(props.type) ? '收货地址' : '发货地址'}：
+                {props.invoice.address}
             </span>
         }
     </Space>
@@ -167,7 +169,7 @@ function PreviewHeader(props) {
 
 /*
     Required: invoice, type
-    Optional: footer (true by default), dismiss (required when footer=true)
+    Optional: footer (true by default), setMode (required when footer=true)
 */
 export default function InvoicePrintView(props) {
     // for print
@@ -178,10 +180,10 @@ export default function InvoicePrintView(props) {
         <Space direction='vertical' size='middle' style={{ width: '100%', marginTop: '10px', marginBottom: '10px' }}>
             <Col align='middle' style={{ overflowX: 'auto', overflowY: 'clip' }}>
                 <div ref={componentRef} >
-                    <div className='invoiceWrapper' style={{ width: printSettings.get('width') + 'px', height: printSettings.get('height')+'px' }}>
+                    <div className='invoiceWrapper' style={{ width: printSettings.get('width') + 'px', height: printSettings.get('height') + 'px' }}>
                         <div className='invoiceContent' style={{
-                            paddingTop: printSettings.get('vPadding')+'px', paddingBottom: printSettings.get('vPadding')+'px',
-                            paddingLeft: printSettings.get('hPadding')+'px', paddingRight: printSettings.get('hPadding')+'px',
+                            paddingTop: printSettings.get('vPadding') + 'px', paddingBottom: printSettings.get('vPadding') + 'px',
+                            paddingLeft: printSettings.get('hPadding') + 'px', paddingRight: printSettings.get('hPadding') + 'px',
                         }}>
                             <Space direction='vertical' style={{ width: '100%' }} size={5}>
                                 <PreviewTitle {...props} />
@@ -196,12 +198,12 @@ export default function InvoicePrintView(props) {
         </Space>
         {
             props.footer === false ? null :
-            <Col align='end'>
-                <Space>
-                    <Button onClick={props.dismiss} icon={<RollbackOutlined />}>返回</Button>
-                    <Button onClick={handlePrint} type='primary' icon={<PrinterOutlined />}>打印</Button>
-                </Space>
-            </Col>
+                <Col align='end'>
+                    <Space>
+                        <Button onClick={handlePrint} type='primary' icon={<PrinterOutlined />}>打印</Button>
+                        <Button onClick={_ => props.setMode('view')} icon={<RollbackOutlined />}>返回</Button>
+                    </Space>
+                </Col>
         }
     </>)
 }

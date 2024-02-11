@@ -5,7 +5,7 @@ import _ from 'lodash'
 import { EditOutlined, PrinterOutlined } from '@ant-design/icons'
 
 
-import { invoiceSettings, DELIVER_COLORS } from '../../utils/config'
+import { invoiceSettings, DELIVER_COLORS, DATE_FORMAT } from '../../utils/config'
 import PartnerPopoverView from '../partner/PartnerPopoverView'
 
 
@@ -117,7 +117,9 @@ export default function InvoiceView(props) {
                             : props.invoice.partner
                     }
                 </Col>
-                <Col span={8}>日期：{props.invoice.date}</Col>
+                <Col span={8}>日期：{
+                    typeof (props.invoice.date) === 'string' ? props.invoice.date : props.invoice.date.format(DATE_FORMAT)
+                }</Col>
                 {
                     isRefund ?
                         <Col span={8}>关联{isSales ? '销售' : '采购'}单：{props.invoice.orderId || '无'}</Col> :

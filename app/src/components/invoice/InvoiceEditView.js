@@ -7,7 +7,7 @@ import {
 } from 'antd'
 import {
     DeleteOutlined, EditOutlined, ExclamationCircleOutlined, PlusOutlined,
-    SaveOutlined, InboxOutlined, CloseOutlined
+    SaveOutlined, InboxOutlined, RollbackOutlined
 } from '@ant-design/icons'
 import { evaluate } from 'mathjs'
 import { useDispatch } from 'react-redux'
@@ -24,8 +24,8 @@ import './invoiceEditView.css'
 
 
 /*
-    Required: dismiss, refresh, messageApi, type
-    Optional: invoice
+    Required: setMode, refresh, messageApi, type
+    Optional: invoice, dismiss
 */
 export default function InvoiceEditView(props) {
     const [form] = Form.useForm()
@@ -73,11 +73,11 @@ export default function InvoiceEditView(props) {
             url: newInvoice.id ? `${props.type}/id/${newInvoice.id}` : props.type,
             data: newInvoice,
             'Content-Type': 'application/json',
-        }).then(_ => {
+        }).then(res => {
             props.messageApi.open({ type: 'success', content: '保存成功' })
-            props.refresh()
+            props.refresh(res.data.id)
             dispatch({ type: 'draft/remove', payload: invoice })
-            props.dismiss()
+            props.setMode('view')
         }).catch(_ => {
             props.messageApi.open({ type: 'error', content: '保存失败' })
         })
@@ -114,7 +114,13 @@ export default function InvoiceEditView(props) {
                         保存
                     </Button>
                     {
-                        props.invoice && props.invoice.id ? null :
+                        props.invoice && props.invoice.id ?
+                            <Button icon={<RollbackOutlined />} onClick={_ => {
+                                resetForm()
+                                props.setMode('view')
+                            }}>
+                                返回
+                            </Button> :
                             <Button icon={<InboxOutlined />} onClick={_ => {
                                 const invoice = Object.assign(form.getFieldsValue(true), { type: props.type })
                                 dispatch({ type: 'draft/add', payload: invoice })
@@ -123,12 +129,7 @@ export default function InvoiceEditView(props) {
                                 保存草稿
                             </Button>
                     }
-                    <Button icon={<CloseOutlined />} onClick={_ => {
-                        resetForm()
-                        props.dismiss()
-                    }}>
-                        取消
-                    </Button>
+
                 </Space>
             </Col>
         </Form>
