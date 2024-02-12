@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import Axios from 'axios'
-import { Table, Modal, Button, Space, message, Tag } from 'antd'
+import { Table, Modal, Button, Space, message, Tag, Affix, theme } from 'antd'
 import { Decimal } from 'decimal.js'
 import { ExclamationCircleFilled, DeleteOutlined, PrinterOutlined, EditOutlined } from '@ant-design/icons'
 
@@ -23,6 +23,7 @@ export default function InvoicePage(props) {
     const [filteredInvoices, setFilteredInvoices] = useState([])
     const [selectedInvoiceId, setSelectedInvoiceId] = useState(undefined)
     const [messageApi, contextHolder] = message.useMessage()
+    const { token: { colorBgContainer }, } = theme.useToken()
 
     const isOrder = ['salesOrder', 'purchaseOrder'].includes(props.type)
     const isSales = ['salesOrder', 'salesRefund'].includes(props.type)
@@ -124,18 +125,24 @@ export default function InvoicePage(props) {
 
     useEffect(load, [props.type])
 
-    return <>
+    return <Space direction='vertical' style={{ width: '100%' }}>
         {contextHolder}
-        <MyFloatButton type={props.type} refresh={load} />
 
         <Modal title={null} open={selectedInvoiceId} width={900} destroyOnClose
             onCancel={_ => setSelectedInvoiceId(undefined)} footer={null}>
             <InvoiceFullView id={selectedInvoiceId} refresh={load} messageApi={messageApi} allowEditPartner={true} />
         </Modal>
 
-        <InvoiceSearchBox data={invoices} setFilteredData={setFilteredInvoices} type={props.type} />
-        <br />
-        <Table dataSource={filteredInvoices} bordered rowKey={record => record.id} size='middle'
-            columns={getTableColumns()} pagination={DEFAULT_PAGINATION} scroll={{ x: 'max-content' }} />
-    </>
+        <Affix offsetTop={0}>
+            <Space className='toolBar' style={{ background: colorBgContainer, justifyContent: 'space-between' }}>
+                <InvoiceSearchBox data={invoices} setFilteredData={setFilteredInvoices} type={props.type} />
+            </Space>
+        </Affix>
+
+        <div className='pageMainContent'>
+            <Table dataSource={filteredInvoices} bordered rowKey={record => record.id} size='middle'
+                columns={getTableColumns()} pagination={DEFAULT_PAGINATION} scroll={{ x: 'max-content' }} />
+        </div>
+        <MyFloatButton type={props.type} refresh={load} />
+    </Space>
 }

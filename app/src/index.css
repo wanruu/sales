@@ -1,0 +1,14 @@
+body {
+    margin: 0;
+}
+
+
+.toolBar {
+    padding: 10px;
+    width: 100%;
+    box-shadow: 0 0 5px 0.5px gray;
+}
+
+.pageMainContent {
+    padding: 15px;
+}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Table, Button, Space, message, Modal, Form, Input, Card, Tag } from 'antd'
+import { Table, Button, Space, message, Modal, Form, Input, Card, Tag, theme, Affix, Col, Row } from 'antd'
 import Axios from 'axios'
 import { ExclamationCircleFilled, PlusOutlined, TableOutlined, ClearOutlined, SearchOutlined } from '@ant-design/icons'
 
@@ -21,6 +21,7 @@ function PartnerPage() {
     const [messageApi, contextHolder] = message.useMessage()
     const [editPartner, setEditPartner] = useState(undefined)
     const [selectedPartnerName, setSelectedPartnerName] = useState(undefined)
+    const { token: { colorBgContainer }, } = theme.useToken()
 
     // load
     const load = () => {
@@ -94,7 +95,7 @@ function PartnerPage() {
 
     useEffect(load, [])
 
-    return <>
+    return <Space direction='vertical' style={{ width: '100%' }}>
         {contextHolder}
 
         <Modal title={editPartner && editPartner.name !== '' ? '编辑交易对象' : '新增交易对象'} open={editPartner !== undefined} destroyOnClose
@@ -106,23 +107,29 @@ function PartnerPage() {
             <PartnerView name={selectedPartnerName} dismiss={_ => setSelectedPartnerName(undefined)} refresh={load} />
         </Modal>
 
-        <SearchBox data={partners} setFilteredData={setFilteredPartners} />
-        <br />
-        <Card size='small'>
-            <Space direction='horizontal'>
-                <Button icon={<PlusOutlined />} onClick={_ => setEditPartner({ name: '', phone: '', address: '', folder: '' })}>新增对象</Button>
-                <Button icon={<TableOutlined />} onClick={exportPartners} disabled={filteredPartners.length === 0}>批量导出</Button>
-                <Button icon={<ClearOutlined />} type='dashed' danger disabled={filteredPartners.filter(p => p.orderId == null && p.purchaseId == null).length === 0}
-                    onClick={_ => showDeleteConfirm(filteredPartners.filter(p => p.orderId == null && p.purchaseId == null).map(p => p.name))}>批量清理</Button>
+        <Affix offsetTop={0}>
+            <Space className='toolBar' style={{ background: colorBgContainer, justifyContent: 'space-between' }}>
+                <Row>
+                    <Col span={16}>
+                        <SearchBox data={partners} setFilteredData={setFilteredPartners} />
+                    </Col>
+                    <Col span={8}>
+                        <Space direction='horizontal'>
+                            <Button icon={<PlusOutlined />} onClick={_ => setEditPartner({ name: '', phone: '', address: '', folder: '' })}>新增对象</Button>
+                            <Button icon={<TableOutlined />} onClick={exportPartners} disabled={filteredPartners.length === 0}>批量导出</Button>
+                            <Button icon={<ClearOutlined />} type='dashed' danger disabled={filteredPartners.filter(p => p.orderId == null && p.purchaseId == null).length === 0}
+                                onClick={_ => showDeleteConfirm(filteredPartners.filter(p => p.orderId == null && p.purchaseId == null).map(p => p.name))}>批量清理</Button>
+                        </Space>
+                    </Col>
+                </Row>
             </Space>
-        </Card>
+        </Affix>
 
-        <br />
-
-        <Table dataSource={filteredPartners} size='middle' bordered rowKey={record => record.name}
-            scroll={{ x: 'max-content' }} pagination={DEFAULT_PAGINATION} columns={columns} />
-
-    </>
+        <div className='pageMainContent'>
+            <Table dataSource={filteredPartners} size='middle' bordered rowKey={record => record.name}
+                scroll={{ x: 'max-content' }} pagination={DEFAULT_PAGINATION} columns={columns} />
+        </div>
+    </Space>
 }
 
 export default PartnerPage

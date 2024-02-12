@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import { Table, Space, Button, Modal, message } from 'antd'
+import { Table, Space, Button, Modal, message, Affix, theme } from 'antd'
 import Axios from 'axios'
-import { ExclamationCircleFilled, TableOutlined, PlusOutlined, ClearOutlined } from '@ant-design/icons'
+import {
+    ExclamationCircleFilled, PlusOutlined, ClearOutlined,
+    ExportOutlined
+} from '@ant-design/icons'
 import _ from 'lodash'
 
 const { confirm } = Modal
@@ -21,6 +24,8 @@ export default function ProductPage() {
     const [selectedProductId, setSelectedProductId] = useState(undefined)
     const [editProduct, setEditProduct] = useState(undefined)
     const [messageApi, contextHolder] = message.useMessage()
+
+    const { token: { colorBgContainer }, } = theme.useToken()
 
     // 否则不及时更新
     const [ifShowMaterial, setIfShowMaterial] = useState(invoiceSettings.get('ifShowMaterial') === 'true')
@@ -103,7 +108,16 @@ export default function ProductPage() {
         setIfShowMaterial(invoiceSettings.get('ifShowMaterial') === 'true')
     }, [invoiceSettings.get('ifShowMaterial')])
 
-    return <>
+
+    // handler
+    const handleCreateProduct = () => {
+        setEditProduct({
+            material: '', name: '', spec: '',
+            unit: JSON.parse(invoiceSettings.get('unitOptions')).filter(unit => unit.default)[0].label
+        })
+    }
+
+    return <Space direction='vertical' style={{ width: '100%' }}>
         {contextHolder}
         <Modal open={editProduct !== undefined} onCancel={_ => setEditProduct(undefined)} title={editProduct && editProduct.id ? '编辑产品' : '新增产品'} footer={null} destroyOnClose>
             <ProductEditView product={editProduct} dismiss={_ => setEditProduct(undefined)} refresh={load} messageApi={messageApi} />
@@ -113,19 +127,27 @@ export default function ProductPage() {
             <ProductView id={selectedProductId} dismiss={_ => setSelectedProductId(undefined)} />
         </Modal>
 
-        {/* 
-            <Button icon={<PlusOutlined />} onClick={_ => setEditProduct({
-                material: '', name: '', spec: '', quantity: '', 
-                unit: JSON.parse(invoiceSettings.get('unitOptions')).filter(unit => unit.default)[0].label
-            })}>新增产品</Button>
-            <Button icon={<TableOutlined />} disabled={filteredProducts.length === 0} onClick={exportProducts}>批量导出</Button>
-            <Button icon={<ClearOutlined />} type='dashed' disabled={filteredProducts.filter(p => !p.invoiceNum > 0).length === 0}
-                onClick={_ => showDeleteConfirm(filteredProducts.filter(p => !p.invoiceNum > 0))} danger>批量清理</Button>
-        */}
-        <ProductSearchBox data={products} setFilteredData={setFilteredProducts} mode='simple' />
-        <br />
+        <Affix offsetTop={0}>
+            <Space className='toolBar' style={{ background: colorBgContainer, justifyContent: 'space-between' }}>
+                <ProductSearchBox data={products} setFilteredData={setFilteredProducts} mode='simple' />
+                <Space>
+                    <Button icon={<PlusOutlined />} onClick={handleCreateProduct}>
+                        新增
+                    </Button>
+                    <Button icon={<ExportOutlined />} disabled={filteredProducts.length === 0} onClick={exportProducts}>
+                        导出
+                    </Button>
+                    <Button icon={<ClearOutlined />} type='dashed' disabled={filteredProducts.filter(p => !p.invoiceNum > 0).length === 0}
+                        onClick={_ => showDeleteConfirm(filteredProducts.filter(p => !p.invoiceNum > 0))} danger>
+                        清理
+                    </Button>
+                </Space>
+            </Space>
+        </Affix>
 
-        <Table dataSource={filteredProducts} size='middle' bordered rowKey={record => record.id} columns={getTableColumns()}
-            pagination={DEFAULT_PAGINATION} scroll={{ x: 'max-content' }} />
-    </>
+        <div className='pageMainContent'>
+            <Table dataSource={filteredProducts} size='middle' bordered rowKey={record => record.id} columns={getTableColumns()}
+                pagination={DEFAULT_PAGINATION} scroll={{ x: 'max-content' }} />
+        </div>
+    </Space>
 }
