@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
-import { Input, Space, Button, Form, InputNumber, message, Col, Row } from 'antd'
-import  Axios  from 'axios'
+import { Input, Space, Button, Form, message, Col } from 'antd'
+import Axios from 'axios'
 
 const { Item } = Form
 
@@ -21,7 +21,6 @@ function ProductEditView(props) {
     const upload = () => {
         const m = props.messageApi || messageApi
         const p = form.getFieldsValue()
-        p.quantity = p.quantity || '0'
         p.material = invoiceSettings.get('ifShowMaterial') === 'true' ? p.material : ''
         Axios({
             method: props.product.id === undefined ? 'post' : 'put',
@@ -45,32 +44,35 @@ function ProductEditView(props) {
     // rules
     const materialRules = [
         { required: true }, { whitespace: true },
-        { warningOnly: true, validator: async (rule, value) => {
-            if (props.product.id && value !== props.product.material) throw new Error()
-        }}
+        {
+            warningOnly: true, validator: async (rule, value) => {
+                if (props.product.id && value !== props.product.material) throw new Error()
+            }
+        }
     ]
     const nameRules = [
         { required: true }, { whitespace: true },
-        { warningOnly: true, validator: async (rule, value) => {
-            if (props.product.id && value !== props.product.name) throw new Error()
-        }}
+        {
+            warningOnly: true, validator: async (rule, value) => {
+                if (props.product.id && value !== props.product.name) throw new Error()
+            }
+        }
     ]
     const specRules = [
         { required: true }, { whitespace: true },
-        { warningOnly: true, validator: async (rule, value) => {
-            if (props.product.id && value !== props.product.spec) throw new Error()
-        }}
-    ]
-    const quantityRules = [
-        { warningOnly: true, validator: async (rule, value) => {
-            if (props.product.id && value !== props.product.quantity) throw new Error()
-        }}
+        {
+            warningOnly: true, validator: async (rule, value) => {
+                if (props.product.id && value !== props.product.spec) throw new Error()
+            }
+        }
     ]
     const unitRules = [
         { required: true, message: '请选择单位' },
-        { warningOnly: true, validator: async (rule, value) => {
-            if (props.product.id && value !== props.product.unit) throw new Error()
-        }}
+        {
+            warningOnly: true, validator: async (rule, value) => {
+                if (props.product.id && value !== props.product.unit) throw new Error()
+            }
+        }
     ]
 
     // initialize form
@@ -82,28 +84,17 @@ function ProductEditView(props) {
     return <>
         {contextHolder}
         <Form labelCol={{ span: 3 }} wrapperCol={{ span: 20 }} onFinish={upload} onReset={initForm} form={form}>
-            { invoiceSettings.get('ifShowMaterial') === 'true' ? <Item label='材质' name='material' rules={materialRules}>
+            {invoiceSettings.get('ifShowMaterial') === 'true' ? <Item label='材质' name='material' rules={materialRules}>
                 <Input allowClear />
-            </Item> : null }
+            </Item> : null}
             <Item label='名称' name='name' rules={nameRules}>
                 <Input allowClear />
             </Item>
             <Item label='规格' name='spec' rules={specRules}>
                 <Input allowClear />
             </Item>
-            <Item label='库存'>
-                <Row>
-                    <Col span={12}>
-                        <Item name='quantity' rules={quantityRules}>
-                            <InputNumber stringMode />
-                        </Item>
-                    </Col>
-                    <Col span={12}>
-                        <Item label='单位' name='unit' rules={unitRules}>
-                            <UnitInput size='medium' style={{ width: '80px' }} />
-                        </Item>
-                    </Col>
-                </Row>
+            <Item label='单位' name='unit' rules={unitRules}>
+                <UnitInput size='medium' style={{ width: '80px' }} />
             </Item>
             <Col align='middle'>
                 <Space>
