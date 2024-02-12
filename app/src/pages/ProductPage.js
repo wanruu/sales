@@ -13,7 +13,7 @@ const { confirm } = Modal
 
 
 import { baseURL, DEFAULT_PAGINATION, invoiceSettings } from '../utils/config'
-import { exportExcel, getExportData } from '../utils/export'
+import { MyWorkBook, MyWorkSheet } from '../utils/export'
 import ProductEditView from '../components/product/ProductEditView'
 import ProductView from '../components/product/ProductView'
 import ProductSearchBox from '../components/product/SearchBox'
@@ -95,14 +95,17 @@ export default function ProductPage() {
 
     const handleExport = () => {
         const ifShowMaterial = invoiceSettings.get('ifShowMaterial') === 'true'
-        const productTableColumns = [
+        const headers = [
             ifShowMaterial ? { title: '材质', dataIndex: 'material' } : null,
             { title: '名称', dataIndex: 'name' },
             { title: '规格', dataIndex: 'spec' },
-            { title: '库存', dataIndex: 'quantity' },
             { title: '单位', dataIndex: 'unit' },
         ].filter(i => i != null)
-        exportExcel('产品', getExportData(productTableColumns, filteredProducts))
+        let wb = new MyWorkBook('产品')
+        let ws = new MyWorkSheet('总览')
+        ws.writeJson(filteredProducts, headers)
+        wb.writeSheet(ws)
+        wb.save()
     }
 
     const handleCreateProduct = () => {

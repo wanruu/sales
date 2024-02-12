@@ -14,7 +14,7 @@ const { confirm } = Modal
 import PartnerEditView from '../components/partner/PartnerEditView'
 import PartnerView from '../components/partner/PartnerView'
 import { baseURL, DEFAULT_PAGINATION } from '../utils/config'
-import { exportExcel } from '../utils/export'
+import { MyWorkBook, MyWorkSheet } from '../utils/export'
 import SearchBox from '../components/partner/SearchBox'
 
 
@@ -37,7 +37,12 @@ export default function PartnerPage() {
             url: '/partner',
             'Content-Type': 'application/json',
         }).then(res => {
-            setPartners(res.data)
+            setPartners(res.data.map(partner => {
+                return Object.assign(partner, {
+                    isCustomer: partner.orderId != null,
+                    isProvider: partner.purchaseId != null,
+                })
+            }))
         }).catch(_ => { })
     }
 
@@ -65,10 +70,23 @@ export default function PartnerPage() {
     }
 
     const handleExport = () => {
-        const partners = filteredPartners.map(p => {
-            return { '姓名': p.name, '电话': p.phone, '地址': p.address }
-        })
-        exportExcel('交易对象', partners)
+        const headers = [
+            { title: '姓名', dataIndex: 'name' },
+            { title: '文件位置', dataIndex: 'folder' },
+            { title: '电话', dataIndex: 'phone' },
+            { title: '地址', dataIndex: 'address' },
+            { title: '客户', dataIndex: 'isCustomer' },
+            { title: '供应商', dataIndex: 'isProvider' }
+        ]
+        let wb = new MyWorkBook('交易对象')
+        let ws = new MyWorkSheet('总览')
+        ws.writeJson(filteredPartners.map(p => {
+            p.isCustomer = p.isCustomer ? '是' : ''
+            p.isProvider = p.isProvider ? '是' : ''
+            return p
+        }), headers)
+        wb.writeSheet(ws)
+        wb.save()
     }
 
     const columns = [
@@ -79,8 +97,8 @@ export default function PartnerPage() {
         { title: '地址', align: 'center', dataIndex: 'address' },
         {
             title: '身份', align: 'center', render: (_, record) => {
-                const customer = record.orderId == null ? null : <Tag color='blue'>客户</Tag>
-                const provider = record.purchaseId == null ? null : <Tag color='gold'>供应商</Tag>
+                const customer = record.isCustomer ? <Tag color='blue'>客户</Tag> : null
+                const provider = record.isProvider ? <Tag color='gold'>供应商</Tag> : null
                 return <>{customer} {provider}</>
             }
         },
@@ -89,7 +107,7 @@ export default function PartnerPage() {
                 <Space>
                     <Button type='primary' ghost onClick={_ => setEditPartner(record)}>编辑</Button>
                     {
-                        record.purchaseId != null || record.orderId != null ?
+                        record.isCustomer || record.isProvider ?
                             <Button onClick={_ => setSelectedPartnerName(record.name)}>查看</Button> :
                             <Button danger onClick={_ => showDeleteConfirm([record.name])}>删除</Button>
                     }
@@ -116,8 +134,8 @@ export default function PartnerPage() {
                 <Space wrap>
                     <Button icon={<PlusOutlined />} onClick={_ => setEditPartner({ name: '', phone: '', address: '', folder: '' })}>新增</Button>
                     <Button icon={<ExportOutlined />} onClick={handleExport} disabled={filteredPartners.length === 0}>导出</Button>
-                    <Button icon={<ClearOutlined />} type='dashed' danger disabled={filteredPartners.filter(p => p.orderId == null && p.purchaseId == null).length === 0}
-                        onClick={_ => showDeleteConfirm(filteredPartners.filter(p => p.orderId == null && p.purchaseId == null).map(p => p.name))}>清理</Button>
+                    <Button icon={<ClearOutlined />} type='dashed' danger disabled={filteredPartners.filter(p => !p.isCustomer && !p.isProvider).length === 0}
+                        onClick={_ => showDeleteConfirm(filteredPartners.filter(p => !p.isCustomer && !p.isProvider).map(p => p.name))}>清理</Button>
                     <Button onClick={_ => dispatch({ type: 'page/toggleShowSearchBox', menuKey: 'partner' })}
                         icon={showSearchBox ? <UpOutlined /> : <DownOutlined />}>
                         {showSearchBox ? '收起搜索' : '展开搜索'}
