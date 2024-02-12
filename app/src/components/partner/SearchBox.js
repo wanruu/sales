@@ -87,10 +87,10 @@ function SimpleSearchBar(props) {
 
         const filteredData = (props.data || []).filter(record => {
             var textToVerify = []
-            if (record.orderId != null) {
+            if (record.isCustomer) {
                 textToVerify = [...textToVerify, '客户', 'kh', 'kehu']
             }
-            if (record.purchaseId != null) {
+            if (record.isProvider) {
                 textToVerify = [...textToVerify, '供应商', 'gys', 'gongyingshang']
             }
             for (const key of ['name', 'folder', 'phone', 'address']) {
@@ -181,7 +181,7 @@ function ComplexSearchBox(props) {
             const name = (record.name || '').replace(' ', '')
             const address = (record.address || '').replace(' ', '')
             const phone = (record.phone || '').replace(' ', '')
-            const identity = [record.orderId == null ? null : '客户', record.purchaseId == null ? null : '供应商'].filter(x => x != null)
+            const identity = [record.isCustomer ? '客户' : null, record.isProvider ? '供应商' : null].filter(x => x != null)
 
             return (
                 folder.includes(targetFolder) ||
