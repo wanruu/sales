@@ -1,11 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Form, Select, Space, Input, Button, Card, Tooltip, Row, Tag } from 'antd'
+import { Form, Select, Space, Input, Button, Tooltip, Row, Tag, Divider } from 'antd'
 import { ExclamationCircleOutlined, SwapOutlined } from '@ant-design/icons'
 import { pinyin } from 'pinyin-pro'
 import { useSelector, useDispatch } from 'react-redux'
-
-
-import { invoiceSettings } from '../../utils/config'
 
 
 const { Item } = Form
@@ -16,6 +13,7 @@ const { Item } = Form
 */
 export default function PartnerSearchBox(props) {
     const mode = useSelector(state => state.page.partner.searchMode || 'simple')
+    const showing = useSelector(state => state.page.partner.showSearchBox)
     const dispatch = useDispatch()
 
     // Animation
@@ -24,9 +22,9 @@ export default function PartnerSearchBox(props) {
     const [animate, setAnimate] = useState(false)
     useEffect(() => {
         if (nodeRef.current) {
-            setHeight(nodeRef.current.offsetHeight);
+            setHeight(nodeRef.current.offsetHeight)
         }
-    }, [mode])
+    }, [mode, showing])
     useEffect(() => {
         setAnimate(true)  // 在组件挂载后，启用动画效果
     }, [])
@@ -37,31 +35,39 @@ export default function PartnerSearchBox(props) {
             title: <>智能搜索<Tooltip title='支持姓名、文件位置、电话、地址、身份，以空格分开。'>
                 <ExclamationCircleOutlined style={{ color: 'gray', marginLeft: '3px' }} />
             </Tooltip></>,
-            content: <SimpleSearchBar {...props} />
+            content: <div style={{ display: showing ? 'block' : 'none' }}><SimpleSearchBar {...props} /></div>
         },
-        'complex': { title: '高级搜索', content: <ComplexSearchBox {...props} /> }
+        'complex': {
+            title: '高级搜索',
+            content: <div style={{ display: showing ? 'block' : 'none' }}><ComplexSearchBox {...props} /></div>
+        }
     }
 
     const changeMode = () => {
-        dispatch({ type: 'page/toggleSearchMode', menuKey: 'partner' })
+        dispatch({ type: 'page/setSearchMode', menuKey: 'partner', searchMode: mode === 'simple' ? 'complex' : 'simple' })
     }
 
     return (
-        <div style={{ transition: animate ? 'height 0.2s ease-in-out' : '', height: animate ? height : 'auto' }}>
-            <Card ref={nodeRef}>
-                <Row style={{ justifyContent: 'space-between', marginBottom: '10px' }}>
-                    <b style={{ fontSize: '12pt' }}>
-                        {modeDict[mode]?.title}
-                    </b>
-                    <Button size='small' type='text' style={{ color: 'gray', fontSize: '10pt' }} onClick={changeMode}>
-                        <Space size={1} direction='horizontal'>
-                            <SwapOutlined />
-                            <span>切换模式</span>
-                        </Space>
-                    </Button>
-                </Row>
+        <div style={{ transition: animate ? 'height 0.2s ease-in-out' : '', height: animate ? height : 'auto', overflowY: 'hidden' }}>
+            <div ref={nodeRef}>
+                {
+                    showing ? <div style={{ paddingTop: '10px' }}>
+                        <Divider style={{ margin: 0, padding: '5px 0' }} />
+                        <Row style={{ justifyContent: 'space-between', marginBottom: '10px' }}>
+                            <b style={{ fontSize: '12pt' }}>
+                                {modeDict[mode]?.title}
+                            </b>
+                            <Button size='small' type='text' style={{ color: 'gray', fontSize: '10pt' }} onClick={changeMode}>
+                                <Space size={1} direction='horizontal'>
+                                    <SwapOutlined />
+                                    <span>切换模式</span>
+                                </Space>
+                            </Button>
+                        </Row>
+                    </div> : null
+                }
                 {modeDict[mode]?.content}
-            </Card>
+            </div>
         </div>
     )
 }
@@ -77,7 +83,7 @@ function SimpleSearchBar(props) {
 
     const filterData = () => {
         const keywordArray = keywords.replace(/\s+/g, ' ').split(' ').filter(k => k !== '')
-       
+
 
         const filteredData = (props.data || []).filter(record => {
             var textToVerify = []

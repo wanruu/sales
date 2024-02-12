@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react'
-import { Table, Button, Space, message, Modal, Form, Input, Card, Tag, theme, Affix, Col, Row } from 'antd'
+import { Table, Button, Space, message, Modal, Tag, theme, Affix } from 'antd'
 import Axios from 'axios'
-import { ExclamationCircleFilled, PlusOutlined, TableOutlined, ClearOutlined, SearchOutlined } from '@ant-design/icons'
+import {
+    ExclamationCircleFilled, PlusOutlined, ClearOutlined,
+    ExportOutlined, DownOutlined, UpOutlined
+} from '@ant-design/icons'
+import { useSelector, useDispatch } from 'react-redux'
+
 
 const { confirm } = Modal
-const { Item } = Form
 
 
 import PartnerEditView from '../components/partner/PartnerEditView'
@@ -14,7 +18,7 @@ import { exportExcel } from '../utils/export'
 import SearchBox from '../components/partner/SearchBox'
 
 
-function PartnerPage() {
+export default function PartnerPage() {
     const [partners, setPartners] = useState([])
     const [filteredPartners, setFilteredPartners] = useState([])
 
@@ -22,8 +26,10 @@ function PartnerPage() {
     const [editPartner, setEditPartner] = useState(undefined)
     const [selectedPartnerName, setSelectedPartnerName] = useState(undefined)
     const { token: { colorBgContainer }, } = theme.useToken()
+    const showSearchBox = useSelector(state => state.page.partner?.showSearchBox)
+    const dispatch = useDispatch()
+    const [affixed, setAffixed] = useState(false)
 
-    // load
     const load = () => {
         Axios({
             method: 'get',
@@ -35,7 +41,6 @@ function PartnerPage() {
         }).catch(_ => { })
     }
 
-    // delete partner
     const showDeleteConfirm = (names) => {
         const title = names.length === 1 ? `是否删除交易对象 “${names[0]}” ?` : `是否删除 ${names.length} 个交易对象?`
         confirm({
@@ -59,8 +64,7 @@ function PartnerPage() {
         })
     }
 
-    // export
-    const exportPartners = () => {
+    const handleExport = () => {
         const partners = filteredPartners.map(p => {
             return { '姓名': p.name, '电话': p.phone, '地址': p.address }
         })
@@ -107,21 +111,19 @@ function PartnerPage() {
             <PartnerView name={selectedPartnerName} dismiss={_ => setSelectedPartnerName(undefined)} refresh={load} />
         </Modal>
 
-        <Affix offsetTop={0}>
-            <Space className='toolBar' style={{ background: colorBgContainer, justifyContent: 'space-between' }}>
-                <Row>
-                    <Col span={16}>
-                        <SearchBox data={partners} setFilteredData={setFilteredPartners} />
-                    </Col>
-                    <Col span={8}>
-                        <Space direction='horizontal'>
-                            <Button icon={<PlusOutlined />} onClick={_ => setEditPartner({ name: '', phone: '', address: '', folder: '' })}>新增对象</Button>
-                            <Button icon={<TableOutlined />} onClick={exportPartners} disabled={filteredPartners.length === 0}>批量导出</Button>
-                            <Button icon={<ClearOutlined />} type='dashed' danger disabled={filteredPartners.filter(p => p.orderId == null && p.purchaseId == null).length === 0}
-                                onClick={_ => showDeleteConfirm(filteredPartners.filter(p => p.orderId == null && p.purchaseId == null).map(p => p.name))}>批量清理</Button>
-                        </Space>
-                    </Col>
-                </Row>
+        <Affix offsetTop={0} onChange={setAffixed}>
+            <Space className={`toolBar-${affixed}`} direction='vertical' style={{ background: colorBgContainer }} size={0}>
+                <Space wrap>
+                    <Button icon={<PlusOutlined />} onClick={_ => setEditPartner({ name: '', phone: '', address: '', folder: '' })}>新增</Button>
+                    <Button icon={<ExportOutlined />} onClick={handleExport} disabled={filteredPartners.length === 0}>导出</Button>
+                    <Button icon={<ClearOutlined />} type='dashed' danger disabled={filteredPartners.filter(p => p.orderId == null && p.purchaseId == null).length === 0}
+                        onClick={_ => showDeleteConfirm(filteredPartners.filter(p => p.orderId == null && p.purchaseId == null).map(p => p.name))}>清理</Button>
+                    <Button onClick={_ => dispatch({ type: 'page/toggleShowSearchBox', menuKey: 'partner' })}
+                        icon={showSearchBox ? <UpOutlined /> : <DownOutlined />}>
+                        {showSearchBox ? '收起搜索' : '展开搜索'}
+                    </Button>
+                </Space>
+                <SearchBox data={partners} setFilteredData={setFilteredPartners} />
             </Space>
         </Affix>
 
@@ -131,5 +133,3 @@ function PartnerPage() {
         </div>
     </Space>
 }
-
-export default PartnerPage

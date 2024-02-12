@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { useMemo, useRef } from 'react'
 import { Row, Col, Space, Button } from 'antd'
 import { FieldNumberOutlined } from '@ant-design/icons'
 import { useReactToPrint } from 'react-to-print'
@@ -14,10 +14,10 @@ import './invoicePrintView.css'
     Required: invoice
 */
 function PreviewTable(props) {
-    const ifShowMaterial = invoiceSettings.get('ifShowMaterial') === 'true'
     const amountSign = printSettings.get('ifShowPrintAmountSign') === 'true' ? printSettings.get('printAmountSign') : ''
 
-    const getTableColumns = () => {
+    const tableColumns = useMemo(() => {
+        const ifShowMaterial = invoiceSettings.get('ifShowMaterial') === 'true'
         return [
             ifShowMaterial ? { title: '材质', dataIndex: 'material', width: '5%' } : null,
             { title: '名称', dataIndex: 'name', width: '10%' },
@@ -34,21 +34,22 @@ function PreviewTable(props) {
             },
             { title: '备注', dataIndex: 'remark', width: '15%' }
         ].filter(i => i != null)
-    }
+    }, [localStorage])
+
     return (
         <div style={{ fontSize: printSettings.get('tableFontSize') + 'px' }}>
             <table className='previewTable' style={{ width: '100%', height: '100%' }} >
                 <thead>
                     <tr>
                         <th style={{ width: '04.0%', }}>序号</th>
-                        {getTableColumns().map(col => <th key={col.dataIndex} style={{ width: col.width }}>{col.title}</th>)}
+                        {tableColumns.map(col => <th key={col.dataIndex} style={{ width: col.width }}>{col.title}</th>)}
                     </tr>
                 </thead>
                 <tbody>
                     {props.invoice.items.filter(item => item.quantity != null).map((item, itemIdx) =>
                         <tr key={item.productId}>
                             <td>{itemIdx + 1}</td>
-                            {getTableColumns().map(col =>
+                            {tableColumns.map(col =>
                                 <th key={col.dataIndex}>
                                     {col.render ? col.render(item[col.dataIndex]) : item[col.dataIndex]}
                                 </th>

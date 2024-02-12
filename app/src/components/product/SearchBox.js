@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Form, Select, Space, Input, Button, Card, Tooltip, Row } from 'antd'
+import { Form, Select, Space, Input, Button, Tooltip, Row, Divider } from 'antd'
 import { ExclamationCircleOutlined, SwapOutlined } from '@ant-design/icons'
 import { pinyin } from 'pinyin-pro'
 import { useSelector, useDispatch } from 'react-redux'
@@ -16,6 +16,7 @@ const { Item } = Form
 */
 export default function ProductSearchBox(props) {
     const mode = useSelector(state => state.page.product?.searchMode || 'simple')
+    const showing = useSelector(state => state.page.product?.showSearchBox)
     const dispatch = useDispatch()
 
     // Animation
@@ -24,44 +25,51 @@ export default function ProductSearchBox(props) {
     const [animate, setAnimate] = useState(false)
     useEffect(() => {
         if (nodeRef.current) {
-            setHeight(nodeRef.current.offsetHeight);
+            setHeight(nodeRef.current.offsetHeight)
         }
-    }, [mode])
+    }, [mode, showing])
     useEffect(() => {
         setAnimate(true)  // 在组件挂载后，启用动画效果
     }, [])
-
 
     const modeDict = {
         'simple': {
             title: <>智能搜索<Tooltip title='支持材质、名称、规格、单位，以空格分开。'>
                 <ExclamationCircleOutlined style={{ color: 'gray', marginLeft: '3px' }} />
             </Tooltip></>,
-            content: <SimpleSearchBar {...props} />
+            content: <div style={{ display: showing ? 'block' : 'none' }}><SimpleSearchBar {...props} /></div>
         },
-        'complex': { title: '高级搜索', content: <ComplexSearchBox {...props} /> }
+        'complex': { 
+            title: '高级搜索', 
+            content: <div style={{ display: showing ? 'block' : 'none' }}><ComplexSearchBox {...props} /></div>
+        }
     }
 
     const changeMode = () => {
-        dispatch({ type: 'page/toggleSearchMode', menuKey: 'product' })
+        dispatch({ type: 'page/setSearchMode', menuKey: 'product', searchMode: mode === 'simple' ? 'complex' : 'simple' })
     }
 
     return (
-        <div style={{ transition: animate ? 'height 0.2s ease-in-out' : '', height: animate ? height : 'auto' }}>
-            <Card ref={nodeRef}>
-                <Row style={{ justifyContent: 'space-between', marginBottom: '10px' }}>
-                    <b style={{ fontSize: '12pt' }}>
-                        {modeDict[mode]?.title}
-                    </b>
-                    <Button size='small' type='text' style={{ color: 'gray', fontSize: '10pt' }} onClick={changeMode}>
-                        <Space size={1} direction='horizontal'>
-                            <SwapOutlined />
-                            <span>切换模式</span>
-                        </Space>
-                    </Button>
-                </Row>
+        <div style={{ transition: animate ? 'height 0.2s ease-in-out' : '', height: animate ? height : 'auto', overflowY: 'hidden' }}>
+            <div ref={nodeRef}>
+                {
+                    showing ? <div style={{ paddingTop: '10px' }}>
+                        <Divider style={{ margin: 0, padding: '5px 0' }} />
+                        <Row style={{ justifyContent: 'space-between', marginBottom: '10px' }}>
+                            <b style={{ fontSize: '12pt' }}>
+                                {modeDict[mode]?.title}
+                            </b>
+                            <Button size='small' type='text' style={{ color: 'gray', fontSize: '10pt' }} onClick={changeMode}>
+                                <Space size={1} direction='horizontal'>
+                                    <SwapOutlined />
+                                    <span>切换模式</span>
+                                </Space>
+                            </Button>
+                        </Row>
+                    </div> : null
+                }
                 {modeDict[mode]?.content}
-            </Card>
+            </div>
         </div>
     )
 }
@@ -183,8 +191,8 @@ function ComplexSearchBox(props) {
 
     return (
         <Form form={form} onFinish={filterData} onReset={resetForm}
-        onValuesChange={handleFormValuesChange} onResetCapture={handleFormReset}
-        labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+            onValuesChange={handleFormValuesChange} onResetCapture={handleFormReset}
+            labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             {
                 invoiceSettings.get('ifShowMaterial') === 'true' ?
                     <Item label='材质' name='material' {...itemStyle}>

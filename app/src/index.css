@@ -3,12 +3,17 @@ body {
 }
 
 
-.toolBar {
-    padding: 10px;
+.toolBar-true {
+    padding: 15px;
     width: 100%;
     box-shadow: 0 0 5px 0.5px gray;
 }
 
-.pageMainContent {
+.toolBar-false {
     padding: 15px;
+    width: 100%;
+}
+
+.pageMainContent {
+    padding: 0 15px;
 }

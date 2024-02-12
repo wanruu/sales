@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import Axios from 'axios'
 import { AutoComplete, Button, Divider, InputNumber, Modal, Radio, Row, Select, 
     Space, Table, Checkbox 
@@ -99,12 +99,12 @@ export function UnitInput(props) {
         })
     }
 
-    const getStatus = () => {
+    const status = useMemo(() => {
         if (props.status !== undefined) {
             return props.status
         }
         return unit !== undefined && unit != props.value ? 'warning' : ''
-    }
+    }, [props.status, props.value])
 
     useEffect(load, [props.material, props.name, props.spec])
 
@@ -112,7 +112,7 @@ export function UnitInput(props) {
         options={JSON.parse(invoiceSettings.get('unitOptions')).filter(unit => unit.showing)} 
         disabled={props.disabled || false}
         align={props.align || 'center'} style={props.style || {}} value={props.value} 
-        onChange={props.onChange} status={getStatus()}
+        onChange={props.onChange} status={status}
     /> : unit
 }
 
@@ -123,7 +123,7 @@ function PriceHistory(props) {
     const [tableFilters, setTableFilters] = useState(['salesOrder', 'purchaseOrder'])
 
     // table
-    const getTableColumns = () =>  {
+    const tableColumns = useMemo(() =>  {
         const ifShowDiscount = invoiceSettings.get('ifShowDiscount') === 'true'
         return [
             { title: '序号', align: 'center', render: (_, __, idx) => idx + 1, width: 45, fixed: 'left' },
@@ -144,7 +144,7 @@ function PriceHistory(props) {
             },
             { title: '备注', dataIndex: 'remark', align: 'center', width: 120 }
         ]
-    }
+    }, [localStorage])
 
     // chart
     const getChartOption = (data) => {
@@ -221,7 +221,7 @@ function PriceHistory(props) {
                 <Radio.Button value='table'>表格</Radio.Button>
                 <Radio.Button value='chart'>折线图</Radio.Button>
             </Radio.Group>
-            { displayType === 'chart' ? null : <Checkbox.Group value={tableFilters} onChange={val => setTableFilters(val)}>
+            { displayType === 'chart' ? null : <Checkbox.Group value={tableFilters} onChange={setTableFilters}>
                 <Checkbox value='salesOrder'>销售单</Checkbox>
                 <Checkbox value='purchaseOrder'>采购单</Checkbox>
             </Checkbox.Group> }
@@ -230,7 +230,7 @@ function PriceHistory(props) {
         {/* Main Content */}
         { displayType === 'chart' ? 
             <ReactEcharts option={getChartOption(prices)} style={{ height: 400 }} /> :
-            <Table dataSource={prices.filter(p => tableFilters.includes(p.type))} size='small' rowKey={record => record.id} columns={getTableColumns()}
+            <Table dataSource={prices.filter(p => tableFilters.includes(p.type))} size='small' rowKey={record => record.id} columns={tableColumns}
                 scroll={{ x: 'max-content', y: 400 }} style={{ height: 400 }} pagination={false} bordered /> 
         }
         <Divider />

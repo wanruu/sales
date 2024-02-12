@@ -1,23 +1,23 @@
 import { createSlice } from '@reduxjs/toolkit'
 
 
-/*
-    {
-        searchMode: simple/complex
-        keywords: string
-        searchForm: {},
-        searchMode: 'simple'
+const initPage = () => {
+    return {
+        showSearchBox: false,
+        searchMode: 'simple',
+        keywords: '',
+        searchForm: {}
     }
-*/
+}
 const pageSlice = createSlice({
     name: 'page',
     initialState: { 
-        salesOrder: { keywords: '', searchForm: {}, searchMode: 'simple' },
-        purchaseOrder: { keywords: '', searchForm: {}, searchMode: 'simple' },
-        salesRefund: { keywords: '', searchForm: {}, searchMode: 'simple' },
-        purchaseRefund: { keywords: '', searchForm: {}, searchMode: 'simple' },
-        product: { keywords: '', searchForm: {}, searchMode: 'simple' },
-        partner: { keywords: '', searchForm: {}, searchMode: 'simple' }
+        salesOrder: initPage(),
+        purchaseOrder: initPage(),
+        salesRefund: initPage(),
+        purchaseRefund: initPage(),
+        product: initPage(),
+        partner: initPage()
     },
     reducers: {
         updateKeywords(state, action) {
@@ -53,11 +53,22 @@ const pageSlice = createSlice({
                 ...updateDict
             }
         },
-        toggleSearchMode(state, action) {
+        setSearchMode(state, action) {
             const updateDict = {}
             updateDict[action.menuKey] = { 
                 ...state[action.menuKey], 
-                searchMode: state[action.menuKey]?.searchMode === 'complex' ? 'simple' : 'complex'
+                searchMode: action.searchMode
+            }
+            return {
+                ...state, 
+                ...updateDict
+            }
+        },
+        toggleShowSearchBox(state, action) {
+            const updateDict = {}
+            updateDict[action.menuKey] = { 
+                ...state[action.menuKey], 
+                showSearchBox: !state[action.menuKey].showSearchBox
             }
             return {
                 ...state, 

@@ -1,15 +1,18 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import Axios from 'axios'
 import { Table, Modal, Button, Space, message, Tag, Affix, theme } from 'antd'
 import { Decimal } from 'decimal.js'
-import { ExclamationCircleFilled, DeleteOutlined, PrinterOutlined, EditOutlined } from '@ant-design/icons'
-
+import {
+    ExclamationCircleFilled, DeleteOutlined, ExportOutlined,
+    DownOutlined, UpOutlined
+} from '@ant-design/icons'
+import { useSelector, useDispatch } from 'react-redux'
 
 const { confirm } = Modal
 
 
-import { baseURL, DEFAULT_PAGINATION, DELIVER_COLORS, invoiceSettings } from '../utils/config'
-import { exportExcel, getExportData } from '../utils/export'
+import { baseURL, DEFAULT_PAGINATION, DELIVER_COLORS, INVOICE_TITLE_OPTIONS, invoiceSettings } from '../utils/config'
+import { MyWorkBook, MyWorkSheet } from '../utils/export'
 import InvoiceSearchBox from '../components/invoice/SearchBox'
 import MyFloatButton from '../components/common/MyFloatButton'
 import InvoiceFullView from '../components/invoice/InvoiceFullView'
@@ -24,6 +27,9 @@ export default function InvoicePage(props) {
     const [selectedInvoiceId, setSelectedInvoiceId] = useState(undefined)
     const [messageApi, contextHolder] = message.useMessage()
     const { token: { colorBgContainer }, } = theme.useToken()
+    const showSearchBox = useSelector(state => state.page[props.type]?.showSearchBox)
+    const dispatch = useDispatch()
+    const [affixed, setAffixed] = useState(false)
 
     const isOrder = ['salesOrder', 'purchaseOrder'].includes(props.type)
     const isSales = ['salesOrder', 'salesRefund'].includes(props.type)
@@ -47,7 +53,7 @@ export default function InvoicePage(props) {
         }).catch(_ => { })
     }
 
-    const getTableColumns = () => {
+    const tableColumns = useMemo(() => {
         const ifShowDelivered = invoiceSettings.get('ifShowDelivered') == 'true'
         const amountSign = invoiceSettings.get('ifShowAmountSign') === 'true' ? invoiceSettings.get('amountSign') : ''
         const ifShowPayment = invoiceSettings.get('ifShowPayment') === 'true'
@@ -74,7 +80,7 @@ export default function InvoicePage(props) {
                 )
             }
         ].filter(i => i != null)
-    }
+    }, [localStorage])
 
     const showDeleteConfirm = (invoiceIds) => {
         const invoiceName = {
@@ -105,23 +111,28 @@ export default function InvoicePage(props) {
         })
     }
 
-    // export
-    // const exportSalesOrders = () => {
-    //     const orderTableColumns = [
-    //         { title: '单号', dataIndex: 'id', summary: '总计' },
-    //         { title: '客户', dataIndex: 'partner' },
-    //         { title: '日期', dataIndex: 'date' },
-    //         { title: '金额', dataIndex: 'amount', summary: 'sum' },
-    //         { title: '订金', dataIndex: 'prepayment', summary: 'sum' },
-    //         { title: '尾款', dataIndex: 'payment', summary: 'sum' },
-    //         { title: '已付', dataIndex: 'paid', summary: 'sum' },
-    //         { title: '未付', dataIndex: 'unpaid', summary: 'sum' },
-    //         { title: '配送情况', dataIndex: 'delivered' },
-    //         { title: '关联退货单', dataIndex: 'refundId' }
-    //     ]
-    //     exportExcel('销售单', getExportData(orderTableColumns, filteredInvoices))
-    // }
-
+    const handleExport = () => {
+        const ifShowDelivered = invoiceSettings.get('ifShowDelivered') == 'true'
+        const ifShowPayment = invoiceSettings.get('ifShowPayment') === 'true'
+        const headers = [
+            { title: '单号', dataIndex: 'id' },
+            { title: '客户', dataIndex: 'partner' },
+            { title: '日期', dataIndex: 'date' },
+            { title: '金额', dataIndex: 'amount' },
+            ifShowPayment ? { title: '订金', dataIndex: 'prepayment' } : null,
+            ifShowPayment ? { title: '尾款', dataIndex: 'payment' } : null,
+            ifShowPayment ? { title: '已付', dataIndex: 'paid' } : null,
+            ifShowPayment ? { title: '未付', dataIndex: 'unpaid' } : null,
+            ifShowDelivered ? { title: '配送情况', dataIndex: 'delivered' } : null,
+            { title: '关联退货单', dataIndex: 'refundId' }
+        ].filter(h => h != null)
+        const title = INVOICE_TITLE_OPTIONS.filter(o => o.key === props.type)?.[0]?.label || ''
+        let wb = new MyWorkBook(title ? title + '单' : '错误')
+        let ws = new MyWorkSheet('总览')
+        ws.writeJson(filteredInvoices, headers)
+        wb.writeSheet(ws)
+        wb.save()
+    }
 
     useEffect(load, [props.type])
 
@@ -133,15 +144,22 @@ export default function InvoicePage(props) {
             <InvoiceFullView id={selectedInvoiceId} refresh={load} messageApi={messageApi} allowEditPartner={true} />
         </Modal>
 
-        <Affix offsetTop={0}>
-            <Space className='toolBar' style={{ background: colorBgContainer, justifyContent: 'space-between' }}>
+        <Affix offsetTop={0} onChange={setAffixed}>
+            <Space className={`toolBar-${affixed}`} direction='vertical' style={{ background: colorBgContainer }} size={0}>
+                <Space wrap>
+                    <Button icon={<ExportOutlined />} onClick={handleExport}>导出</Button>
+                    <Button onClick={_ => dispatch({ type: 'page/toggleShowSearchBox', menuKey: props.type })}
+                        icon={showSearchBox ? <UpOutlined /> : <DownOutlined />}>
+                        {showSearchBox ? '收起搜索' : '展开搜索'}
+                    </Button>
+                </Space>
                 <InvoiceSearchBox data={invoices} setFilteredData={setFilteredInvoices} type={props.type} />
             </Space>
         </Affix>
 
         <div className='pageMainContent'>
             <Table dataSource={filteredInvoices} bordered rowKey={record => record.id} size='middle'
-                columns={getTableColumns()} pagination={DEFAULT_PAGINATION} scroll={{ x: 'max-content' }} />
+                columns={tableColumns} pagination={DEFAULT_PAGINATION} scroll={{ x: 'max-content' }} />
         </div>
         <MyFloatButton type={props.type} refresh={load} />
     </Space>

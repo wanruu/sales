@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { Table, Space, Button, Modal, message, Affix, theme } from 'antd'
 import Axios from 'axios'
 import {
     ExclamationCircleFilled, PlusOutlined, ClearOutlined,
-    ExportOutlined
+    ExportOutlined, UpOutlined, DownOutlined
 } from '@ant-design/icons'
 import _ from 'lodash'
+import { useDispatch, useSelector } from 'react-redux'
+
 
 const { confirm } = Modal
 
@@ -26,11 +28,11 @@ export default function ProductPage() {
     const [messageApi, contextHolder] = message.useMessage()
 
     const { token: { colorBgContainer }, } = theme.useToken()
+    const showSearchBox = useSelector(state => state.page.product.showSearchBox)
+    const dispatch = useDispatch()
+    const [affixed, setAffixed] = useState(false)
 
-    // 否则不及时更新
-    const [ifShowMaterial, setIfShowMaterial] = useState(invoiceSettings.get('ifShowMaterial') === 'true')
 
-    // load (table data)
     const load = () => {
         Axios({
             method: 'get',
@@ -41,7 +43,9 @@ export default function ProductPage() {
             setProducts(res.data)
         }).catch(_ => { })
     }
-    const getTableColumns = () => {
+
+    const tableColumns = useMemo(() => {
+        const ifShowMaterial = invoiceSettings.get('ifShowMaterial') === 'true'
         return [
             { title: '序号', align: 'center', render: (_, __, idx) => idx + 1, fixed: 'left' },
             ifShowMaterial ? { title: '材质', dataIndex: 'material', align: 'center' } : null,
@@ -61,9 +65,8 @@ export default function ProductPage() {
                     </Space>
             }
         ].filter(i => i != null)
-    }
+    }, [localStorage])
 
-    // delete products
     const showDeleteConfirm = (products) => {
         const title = products.length === 1 ? `是否删除产品 “${products[0].material} ${products[0].name} ${products[0].spec}” ?` : `是否删除 ${products.length} 个产品 ?`
         confirm({
@@ -90,8 +93,8 @@ export default function ProductPage() {
         })
     }
 
-    // export
-    const exportProducts = () => {
+    const handleExport = () => {
+        const ifShowMaterial = invoiceSettings.get('ifShowMaterial') === 'true'
         const productTableColumns = [
             ifShowMaterial ? { title: '材质', dataIndex: 'material' } : null,
             { title: '名称', dataIndex: 'name' },
@@ -102,20 +105,14 @@ export default function ProductPage() {
         exportExcel('产品', getExportData(productTableColumns, filteredProducts))
     }
 
-    // effect
-    useEffect(load, [])
-    useEffect(() => {
-        setIfShowMaterial(invoiceSettings.get('ifShowMaterial') === 'true')
-    }, [invoiceSettings.get('ifShowMaterial')])
-
-
-    // handler
     const handleCreateProduct = () => {
         setEditProduct({
             material: '', name: '', spec: '',
             unit: JSON.parse(invoiceSettings.get('unitOptions')).filter(unit => unit.default)[0].label
         })
     }
+
+    useEffect(load, [])
 
     return <Space direction='vertical' style={{ width: '100%' }}>
         {contextHolder}
@@ -127,26 +124,30 @@ export default function ProductPage() {
             <ProductView id={selectedProductId} dismiss={_ => setSelectedProductId(undefined)} />
         </Modal>
 
-        <Affix offsetTop={0}>
-            <Space className='toolBar' style={{ background: colorBgContainer, justifyContent: 'space-between' }}>
-                <ProductSearchBox data={products} setFilteredData={setFilteredProducts} mode='simple' />
-                <Space>
+        <Affix offsetTop={0} onChange={setAffixed}>
+            <Space className={`toolBar-${affixed}`} direction='vertical' style={{ background: colorBgContainer }} size={0}>
+                <Space wrap>
                     <Button icon={<PlusOutlined />} onClick={handleCreateProduct}>
                         新增
                     </Button>
-                    <Button icon={<ExportOutlined />} disabled={filteredProducts.length === 0} onClick={exportProducts}>
+                    <Button icon={<ExportOutlined />} disabled={filteredProducts.length === 0} onClick={handleExport}>
                         导出
                     </Button>
                     <Button icon={<ClearOutlined />} type='dashed' disabled={filteredProducts.filter(p => !p.invoiceNum > 0).length === 0}
                         onClick={_ => showDeleteConfirm(filteredProducts.filter(p => !p.invoiceNum > 0))} danger>
                         清理
                     </Button>
+                    <Button onClick={_ => dispatch({ type: 'page/toggleShowSearchBox', menuKey: 'product' })}
+                        icon={showSearchBox ? <UpOutlined /> : <DownOutlined />}>
+                        {showSearchBox ? '收起搜索' : '展开搜索'}
+                    </Button>
                 </Space>
+                <ProductSearchBox data={products} setFilteredData={setFilteredProducts} mode='simple' />
             </Space>
         </Affix>
 
         <div className='pageMainContent'>
-            <Table dataSource={filteredProducts} size='middle' bordered rowKey={record => record.id} columns={getTableColumns()}
+            <Table dataSource={filteredProducts} size='middle' bordered rowKey={record => record.id} columns={tableColumns}
                 pagination={DEFAULT_PAGINATION} scroll={{ x: 'max-content' }} />
         </div>
     </Space>

@@ -31,7 +31,7 @@ function App() {
     return (
         <BrowserRouter>
             <Layout hasSider style={{ background: colorBgContainer }}>
-                <Sider collapsible collapsed={collapsed} onCollapse={value => setCollapsed(value)}
+                <Sider collapsible collapsed={collapsed} onCollapse={setCollapsed}
                     style={{ overflow: 'auto', height: '100vh', left: 0, top: 0, bottom: 0, position: 'fixed' }}>
                     <Menu theme='dark' mode='inline' defaultOpenKeys={['order', 'refund']} defaultSelectedKeys={['salesOrder']} >
                         <Menu.SubMenu key='order' title='清单' icon={<PlusCircleOutlined />}>
