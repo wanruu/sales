@@ -127,20 +127,20 @@ export default function InvoiceView(props) {
                 }
             </Row>
             <Row>
-                <Col span={8}>总金额：{props.invoice.amount.toLocaleString()}</Col>
+                <Col span={8}>总金额：{(props.invoice.amount || 0).toLocaleString()}</Col>
                 {
                     invoiceSettings.get('ifShowPayment') === 'true' ?
                         <>
                             <Col span={8}>
-                                已付： {props.invoice.paid.toLocaleString()}
+                                已付： {(props.invoice.paid || 0).toLocaleString()}
                                 {
                                     isRefund ? null :
-                                        <>（订金：{props.invoice.prepayment.toLocaleString()}，尾款：{props.invoice.payment.toLocaleString()}）</>
+                                        <>（订金：{(props.invoice.prepayment || 0).toLocaleString()}，尾款：{(props.invoice.payment || 0).toLocaleString()}）</>
                                 }
                             </Col>
                             <Col span={8}>未付：
                                 <span style={{ color: props.invoice.unpaid === 0 ? 'black' : 'red' }}>
-                                    {props.invoice.unpaid.toLocaleString()}
+                                    {(props.invoice.unpaid || 0).toLocaleString()}
                                 </span>
                             </Col>
                         </> : null
