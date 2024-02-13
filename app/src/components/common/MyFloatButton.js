@@ -1,22 +1,20 @@
 import React, { useState } from 'react'
-import { Table, Modal, Button, message, FloatButton, Space, Popover } from 'antd'
+import { Table, Modal, Button, FloatButton, Space, Popover } from 'antd'
 import { PlusOutlined, InboxOutlined } from '@ant-design/icons'
 import { useSelector, useDispatch } from 'react-redux'
 
 
 import { emptyInvoice } from '../../utils/invoiceUtils'
-import InvoiceEditView from '../invoice/InvoiceEditView'
 import './myFloatButton.css'
 import NewInvoiceView from '../invoice/NewInvoiceView'
 
 
 
 /*
-    Required: type, refresh
+    Required: type, refresh, messageApi
 */
 export default function MyFloatButton(props) {
     const [editInvoice, setEditInvoice] = useState(undefined)
-    const [messageApi, contextHolder] = message.useMessage()
     const drafts = useSelector(state => state.draft.value)
     const dispatch = useDispatch()
 
@@ -26,12 +24,7 @@ export default function MyFloatButton(props) {
     const columns = [
         { title: '保存时间', dataIndex: 'draftTime', align: 'center', render: time => time.format('HH:mm:ss') },
         { title: isSales ? '客户' : '供应商', dataIndex: 'partner', align: 'center' },
-        {
-            title: '产品数', dataIndex: 'items', align: 'center', render: items => {
-                if (isOrder) return items.length - 1
-                return items.length
-            }
-        },
+        { title: '产品数', dataIndex: 'items', align: 'center', render: items => isOrder ? items.length - 1 : items.length },
         {
             title: '操作', align: 'center', render: (_, draft) =>
                 <Space.Compact size='small'>
@@ -42,7 +35,6 @@ export default function MyFloatButton(props) {
     ]
 
     return <>
-        {contextHolder}
         <Popover title={`草稿箱 (${drafts.filter(d => d.type === props.type).length})`} placement='topLeft' zIndex={999} trigger='click' destroyTooltipOnHide
             content={
                 <Table className='draftTable' dataSource={drafts.filter(d => d.type === props.type)} rowKey={r => r.draftTime}
@@ -56,12 +48,10 @@ export default function MyFloatButton(props) {
             setEditInvoice(emptyInvoice(isOrder ? 1 : 0))
         }} />
 
-        <Modal title={null} open={editInvoice} width={1000} centered destroyOnClose
+        <Modal title={null} open={editInvoice} width='90%' destroyOnClose
             onCancel={_ => setEditInvoice(undefined)} footer={null}>
-            {/* <InvoiceEditView invoice={editInvoice} messageApi={messageApi} type={props.type}
-                dismiss={_ => setEditInvoice(undefined)} refresh={props.refresh} /> */}
             <NewInvoiceView invoice={editInvoice} dismiss={_ => setEditInvoice(undefined)}
-                messageApi={messageApi} type={props.type} refresh={props.refresh} />
+                messageApi={props.messageApi} type={props.type} refresh={props.refresh} />
         </Modal>
     </>
 }

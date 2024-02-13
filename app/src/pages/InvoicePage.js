@@ -4,7 +4,7 @@ import { Table, Modal, Button, Space, message, Tag, Affix, theme } from 'antd'
 import { Decimal } from 'decimal.js'
 import {
     ExclamationCircleFilled, DeleteOutlined, ExportOutlined,
-    DownOutlined, UpOutlined
+    DownOutlined, UpOutlined, PlusOutlined
 } from '@ant-design/icons'
 import { useSelector, useDispatch } from 'react-redux'
 
@@ -16,6 +16,8 @@ import { MyWorkBook, MyWorkSheet } from '../utils/export'
 import InvoiceSearchBox from '../components/invoice/SearchBox'
 import MyFloatButton from '../components/common/MyFloatButton'
 import InvoiceFullView from '../components/invoice/InvoiceFullView'
+import NewInvoiceView from '../components/invoice/NewInvoiceView'
+import { emptyInvoice } from '../utils/invoiceUtils'
 
 
 /*
@@ -25,8 +27,11 @@ export default function InvoicePage(props) {
     const [invoices, setInvoices] = useState([])
     const [filteredInvoices, setFilteredInvoices] = useState([])
     const [selectedInvoiceId, setSelectedInvoiceId] = useState(undefined)
+    const [newInvoice, setNewInvoice] = useState(undefined)
+
     const [messageApi, contextHolder] = message.useMessage()
     const { token: { colorBgContainer }, } = theme.useToken()
+    
     const showSearchBox = useSelector(state => state.page[props.type]?.showSearchBox)
     const dispatch = useDispatch()
     const [affixed, setAffixed] = useState(false)
@@ -111,6 +116,7 @@ export default function InvoicePage(props) {
         })
     }
 
+    // button handler
     const handleExport = () => {
         const ifShowDelivered = invoiceSettings.get('ifShowDelivered') == 'true'
         const ifShowPayment = invoiceSettings.get('ifShowPayment') === 'true'
@@ -134,22 +140,36 @@ export default function InvoicePage(props) {
         wb.save()
     }
 
+    const handleCreate = () => {
+        setNewInvoice(emptyInvoice(isOrder ? 1 : 0))
+    }
+
+    const handleSearchToggle = () => {
+        dispatch({ type: 'page/toggleShowSearchBox', menuKey: props.type })
+    }
+
     useEffect(load, [props.type])
 
     return <Space direction='vertical' style={{ width: '100%' }}>
         {contextHolder}
 
-        <Modal title={null} open={selectedInvoiceId} width={900} destroyOnClose
+        <Modal title={null} open={selectedInvoiceId} width='90%' destroyOnClose
             onCancel={_ => setSelectedInvoiceId(undefined)} footer={null}>
             <InvoiceFullView id={selectedInvoiceId} refresh={load} messageApi={messageApi} allowEditPartner={true} />
+        </Modal>
+
+        <Modal title={null} open={newInvoice} width='90%' destroyOnClose
+            onCancel={_ => setNewInvoice(undefined)} footer={null}>
+            <NewInvoiceView invoice={newInvoice} dismiss={_ => setNewInvoice(undefined)}
+                messageApi={messageApi} type={props.type} refresh={load} />
         </Modal>
 
         <Affix offsetTop={0} onChange={setAffixed}>
             <Space className={`toolBar-${affixed}`} direction='vertical' style={{ background: colorBgContainer }} size={0}>
                 <Space wrap>
+                    <Button icon={<PlusOutlined />} onClick={handleCreate}>新增</Button>
                     <Button icon={<ExportOutlined />} onClick={handleExport}>导出</Button>
-                    <Button onClick={_ => dispatch({ type: 'page/toggleShowSearchBox', menuKey: props.type })}
-                        icon={showSearchBox ? <UpOutlined /> : <DownOutlined />}>
+                    <Button onClick={handleSearchToggle} icon={showSearchBox ? <UpOutlined /> : <DownOutlined />}>
                         {showSearchBox ? '收起搜索' : '展开搜索'}
                     </Button>
                 </Space>
@@ -158,9 +178,9 @@ export default function InvoicePage(props) {
         </Affix>
 
         <div className='pageMainContent'>
-            <Table dataSource={filteredInvoices} bordered rowKey={record => record.id} size='middle'
+            <Table dataSource={filteredInvoices} bordered rowKey={record => record.id}
                 columns={tableColumns} pagination={DEFAULT_PAGINATION} scroll={{ x: 'max-content' }} />
         </div>
-        <MyFloatButton type={props.type} refresh={load} />
+        <MyFloatButton type={props.type} refresh={load} messageApi={messageApi} />
     </Space>
 }
