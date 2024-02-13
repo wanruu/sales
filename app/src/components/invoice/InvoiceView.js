@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import Decimal from 'decimal.js'
 import { Table, Col, Row, Divider, Space, Popover, Tag, Button } from 'antd'
 import _ from 'lodash'
@@ -51,7 +51,7 @@ export default function InvoiceView(props) {
     //     const itemColumns = getInvoiceExportColumns('salesOrder')
     //     exportExcel(`销售单${props.order.id}`, getExportData(itemColumns, props.order.items))
     // }
-    const getColumns = () => {
+    const columns = useMemo(() => {
         const ifShowMaterial = invoiceSettings.get('ifShowMaterial') === 'true'
         const ifShowDiscount = invoiceSettings.get('ifShowDiscount') === 'true'
         const ifShowDelivered = invoiceSettings.get('ifShowDelivered') === 'true'
@@ -104,7 +104,7 @@ export default function InvoiceView(props) {
                     </Popover>
             }
         ].filter(i => i != null)
-    }
+    }, [localStorage])
 
     return (<>
         <Space direction='vertical' style={{ width: '100%', marginTop: '10px', marginBottom: '15px' }}>
@@ -148,7 +148,7 @@ export default function InvoiceView(props) {
             </Row>
         </Space>
 
-        <Table dataSource={props.invoice.items.filter(item => item.quantity != null)} columns={getColumns()}
+        <Table dataSource={props.invoice.items.filter(item => item.quantity != null)} columns={columns}
             size='small' bordered style={{ height: 400 }} scroll={{ x: 'max-content', y: 400 }} pagination={false}
             rowKey={record => record.id || record.refundItemId} />
         <Divider />
