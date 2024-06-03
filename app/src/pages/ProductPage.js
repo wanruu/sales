@@ -117,6 +117,24 @@ export default function ProductPage() {
 
     useEffect(load, [])
 
+    // scroll position listener & recover
+    const scrollY = useSelector(state => state.page.product.scrollY)
+
+    useEffect(() => {
+        const handleScroll = () => {
+            if (window.scrollY !== 0) {  // 防止重新渲染时scroll恢复到0的情况
+                dispatch({ type: 'page/updateScrollY', menuKey: 'product', scrollY: window.scrollY })
+            }
+        }
+        window.addEventListener('scroll', handleScroll)
+        return () => {
+            window.removeEventListener('scroll', handleScroll)
+        }
+    }, [])
+
+    useEffect(() => window.scrollTo(0, scrollY), [products])
+    // ------------------------------------
+
     return <Space direction='vertical' style={{ width: '100%' }}>
         {contextHolder}
         <Modal open={editProduct !== undefined} onCancel={_ => setEditProduct(undefined)} title={editProduct && editProduct.id ? '编辑产品' : '新增产品'} footer={null} destroyOnClose>

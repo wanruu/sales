@@ -1,9 +1,9 @@
-import { Typography, Collapse, Space, Anchor, Row, Col } from 'antd'
-import React from 'react'
+import { Anchor, Row, Col } from 'antd'
+import React, { useEffect } from 'react'
 import * as XLSX from 'xlsx'
 
 import uuid from 'react-uuid'
-
+import { useSelector, useDispatch } from 'react-redux'
 
 
 import PhoneAccessView from '../components/common/PhoneAccessView'
@@ -102,12 +102,8 @@ export default function SettingPage() {
     //     readFile(file)
     // }
 
-    const collapseItems = [
-        { header: '产品设置', content: <ProductSettingView /> },
-        { header: '功能设置', content: <FunctionSettingView /> },
-        { header: '显示设置', content: <DisplaySettingView /> },
-        { header: '打印设置', content: <PrintSettingView /> }
-    ]
+    const dispatch = useDispatch()
+
 
     const anchorItems = [
         {
@@ -151,6 +147,25 @@ export default function SettingPage() {
             ]
         },
     ]
+
+
+    // scroll position listener & recover
+    const scrollY = useSelector(state => state.page.settings.scrollY)
+
+    useEffect(() => {
+        const handleScroll = () => {
+            if (window.scrollY !== 0) {  // 防止重新渲染时scroll恢复到0的情况 
+                dispatch({ type: 'page/updateScrollY', menuKey: 'settings', scrollY: window.scrollY })
+            }
+        }
+        window.addEventListener('scroll', handleScroll)
+        return () => {
+            window.removeEventListener('scroll', handleScroll)
+        }
+    }, [])
+
+    useEffect(() => window.scrollTo(0, scrollY), [])
+    // ------------------------------------
 
     return (
         <div className='setting'>

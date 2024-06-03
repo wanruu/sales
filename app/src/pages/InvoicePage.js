@@ -150,6 +150,26 @@ export default function InvoicePage(props) {
 
     useEffect(load, [props.type])
 
+
+    // scroll position listener & recover
+    const scrollY = useSelector(state => state.page[props.type]?.scrollY)
+
+    useEffect(() => {
+        const handleScroll = () => {
+            if (window.scrollY !== 0) {  // 防止重新渲染时scroll恢复到0的情况 
+                dispatch({ type: 'page/updateScrollY', menuKey: props.type, scrollY: window.scrollY })
+            }
+        }
+        window.addEventListener('scroll', handleScroll)
+        return () => {
+            window.removeEventListener('scroll', handleScroll)
+        }
+    }, [props.type])
+
+    useEffect(() => window.scrollTo(0, scrollY), [invoices])
+    // ------------------------------------
+
+
     return <Space direction='vertical' style={{ width: '100%' }}>
         {contextHolder}
 

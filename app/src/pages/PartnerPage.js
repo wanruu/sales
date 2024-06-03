@@ -117,6 +117,24 @@ export default function PartnerPage() {
 
     useEffect(load, [])
 
+    // scroll position listener & recover
+    const scrollY = useSelector(state => state.page.partner.scrollY)
+
+    useEffect(() => {
+        const handleScroll = () => {
+            if (window.scrollY !== 0) {  // 防止重新渲染时scroll恢复到0的情况 
+                dispatch({ type: 'page/updateScrollY', menuKey: 'partner', scrollY: window.scrollY })
+            }
+        }
+        window.addEventListener('scroll', handleScroll)
+        return () => {
+            window.removeEventListener('scroll', handleScroll)
+        }
+    }, [])
+
+    useEffect(() => window.scrollTo(0, scrollY), [partners])
+    // ------------------------------------
+
     return <Space direction='vertical' style={{ width: '100%' }}>
         {contextHolder}
 
