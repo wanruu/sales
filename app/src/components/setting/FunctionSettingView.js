@@ -25,6 +25,7 @@ const DIGIT_NUM_OPTIONS = [
 ]
 
 export default function FunctionSettingView() {
+    const [ifShowRefund, setIfShowRefund] = useState(invoiceSettings.get('ifShowRefund'))
     const [ifShowDiscount, setIfShowDiscount] = useState(invoiceSettings.get('ifShowDiscount'))
     const [ifShowDelivered, setIfShowDelivered] = useState(invoiceSettings.get('ifShowDelivered'))
     const [allowEditAmount, setAllowEditAmount] = useState(invoiceSettings.get('allowEditAmount'))
@@ -53,6 +54,11 @@ export default function FunctionSettingView() {
                         invoiceSettings.set('itemAmountDigitNum', value)
                     }} />
             </Item>
+            <Divider />
+
+            <Title id='function-refund' level={3}>退款功能</Title>
+            <SettingSwitchItem keyy='ifShowRefund' value={ifShowRefund} setValue={setIfShowRefund}
+                label='开启退款功能' help='该开关不会影响原有数据，只是显示或隐藏退货页面。' />
             <Divider />
 
             <Title id='function-discount' level={3}>折扣功能</Title>

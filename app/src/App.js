@@ -17,6 +17,7 @@ import SettingPage from './pages/SettingPage.js'
 import ProductPage from './pages/ProductPage.js'
 import PartnerPage from './pages/PartnerPage.js'
 import InvoicePage from './pages/InvoicePage.js'
+import { invoiceSettings } from './utils/config.js'
 
 
 
@@ -42,14 +43,17 @@ function App() {
                                 <Link to='/purchaseOrder'>采购清单</Link>
                             </Menu.Item>
                         </Menu.SubMenu>
-                        <Menu.SubMenu key='refund' title='退货单' icon={<MinusCircleOutlined />}>
-                            <Menu.Item key='salesRefund'>
-                                <Link to='/salesRefund'>销售退货</Link>
-                            </Menu.Item>
-                            <Menu.Item key='purchaseRefund'>
-                                <Link to='/purchaseRefund'>采购退货</Link>
-                            </Menu.Item>
-                        </Menu.SubMenu>
+                        {
+                            invoiceSettings.get('ifShowRefund') === 'true' ? 
+                            <Menu.SubMenu key='refund' title='退货单' icon={<MinusCircleOutlined />}>
+                                <Menu.Item key='salesRefund'>
+                                    <Link to='/salesRefund'>销售退货</Link>
+                                </Menu.Item>
+                                <Menu.Item key='purchaseRefund'>
+                                    <Link to='/purchaseRefund'>采购退货</Link>
+                                </Menu.Item>
+                            </Menu.SubMenu> : null
+                        }
                         <Menu.Item key='product' icon={<DropboxOutlined />}>
                             <Link to='/product'>产品</Link>
                         </Menu.Item>

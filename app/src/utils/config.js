@@ -36,13 +36,13 @@ export const DEFAULT_PAGINATION = {
 
 
 export const DEFAULT_INVOICE_SETTINGS = {
-    ifShowDiscount: 'true', ifShowMaterial: 'true',
-    ifShowDelivered: 'true',
+    ifShowDiscount: 'false', ifShowMaterial: 'false',
+    ifShowDelivered: 'false',
     ifShowAmountSign: 'true', amountSign: '￥', allowEditAmount: 'false',
     itemAmountDigitNum: '3', invoiceAmountDigitNum: '2',
     unitOptions: JSON.stringify(UNIT_OPTIONS),
     ifShowRemarkCalculator: 'true',
-    ifShowPayment: 'true'
+    ifShowPayment: 'false', ifShowRefund: 'false'
 }
 
 
