@@ -53,7 +53,7 @@ export default function InvoiceView(props) {
     // }
 
     // 有重用
-    const amountSign = invoiceSettings.get('ifShowAmountSign') === 'true' ? invoiceSettings.get('amountSign') : null
+    const amountSign = invoiceSettings.get('ifShowAmountSign') === 'true' ? invoiceSettings.get('amountSign') : ''
     
     
     const columns = useMemo(() => {

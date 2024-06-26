@@ -14,10 +14,10 @@ import './invoicePrintView.css'
     Required: invoice
 */
 function PreviewTable(props) {
+    const ifShowMaterial = invoiceSettings.get('ifShowMaterial') === 'true'
     const amountSign = printSettings.get('ifShowPrintAmountSign') === 'true' ? printSettings.get('printAmountSign') : ''
 
     const tableColumns = useMemo(() => {
-        const ifShowMaterial = invoiceSettings.get('ifShowMaterial') === 'true'
         return [
             ifShowMaterial ? { title: '材质', dataIndex: 'material', width: '5%' } : null,
             { title: '名称', dataIndex: 'name', width: '10%' },
@@ -58,11 +58,11 @@ function PreviewTable(props) {
                     )}
                     <tr>
                         <td>合计</td>
-                        <td style={{ textAlign: 'left' }} colSpan={6}>
-                            <span style={{ marginLeft: '3px' }}>{digitUppercase(props.invoice.amount)}</span>
+                        <td style={{ textAlign: 'left' }} colSpan={ifShowMaterial ? 6 : 5}>
+                            <span style={{ marginLeft: '5px' }}>{digitUppercase(props.invoice.amount)}</span>
                         </td>
                         <td style={{ textAlign: 'left' }} colSpan={2}>
-                            <span style={{ marginLeft: '3px' }}>
+                            <span style={{ marginLeft: '5px' }}>
                                 {amountSign}
                                 {props.invoice.amount.toLocaleString()}
                             </span>
