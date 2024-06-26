@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import { Form, Tooltip, Divider, Card, Segmented } from 'antd'
-import { QuestionCircleOutlined } from '@ant-design/icons'
+import { Form, Tooltip, Divider, Card, Segmented, Col } from 'antd'
+import { QuestionCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons'
 
 
 import { invoiceSettings } from '../../utils/config'
@@ -37,7 +37,7 @@ export default function FunctionSettingView() {
     return (<>
         <Title id='function' level={2}>功能设置</Title>
         <Card>
-            <Title id='function-amount' level={3}>金额计算功能</Title>
+            <Title id='function-amount' level={3}>金额计算</Title>
             <SettingSwitchItem keyy='allowEditAmount' value={allowEditAmount} setValue={setAllowEditAmount}
                 label='允许修改金额' help='若开关打开，则允许在自动计算金额的基础上输入自定义金额。' />
             <Item label={<>清单金额保留小数的位数<TipsView help='不影响已创建的清单。' /></>}>
@@ -56,22 +56,26 @@ export default function FunctionSettingView() {
             </Item>
             <Divider />
 
-            <Title id='function-refund' level={3}>退款功能</Title>
+            <Title id='function-refund' level={3}>退货</Title>
             <SettingSwitchItem keyy='ifShowRefund' value={ifShowRefund} setValue={setIfShowRefund}
-                label='开启退款功能' help='该开关不会影响原有数据，只是显示或隐藏退货页面。' />
+                label='开启退货功能' help='该开关不会影响原有数据，只是显示或隐藏退货页面。' />
+            <Col align='right'>
+                <ExclamationCircleOutlined style={{ color: 'red', marginRight: '3px' }} />
+                <font style={{ color: 'red' }}>重启后生效</font>
+            </Col>
             <Divider />
 
-            <Title id='function-discount' level={3}>折扣功能</Title>
+            <Title id='function-discount' level={3}>折扣</Title>
             <SettingSwitchItem keyy='ifShowDiscount' value={ifShowDiscount} setValue={setIfShowDiscount}
                 label='开启折扣功能' help='该开关不会影响原有数据，只是显示或隐藏折扣及折前金额。' />
             <Divider />
 
-            <Title id='function-deliver' level={3}>配送功能</Title>
+            <Title id='function-deliver' level={3}>配送</Title>
             <SettingSwitchItem keyy='ifShowDelivered' value={ifShowDelivered} setValue={setIfShowDelivered}
                 label='开启配送功能' help={false} />
             <Divider />
 
-            <Title id='function-payment' level={3}>付款功能</Title>
+            <Title id='function-payment' level={3}>付款</Title>
             <SettingSwitchItem keyy='ifShowPayment' value={ifShowPayment} setValue={setIfShowPayment}
                 label='开启付款功能' help={false} />
         </Card>
