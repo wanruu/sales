@@ -122,9 +122,7 @@ export default function ProductPage() {
 
     useEffect(() => {
         const handleScroll = () => {
-            if (window.scrollY !== 0) {  // 防止重新渲染时scroll恢复到0的情况
-                dispatch({ type: 'page/updateScrollY', menuKey: 'product', scrollY: window.scrollY })
-            }
+            dispatch({ type: 'page/updateScrollY', menuKey: 'product', scrollY: window.scrollY })
         }
         window.addEventListener('scroll', handleScroll)
         return () => {
