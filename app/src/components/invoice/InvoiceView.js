@@ -66,20 +66,34 @@ export default function InvoiceView(props) {
             ifShowMaterial ? { title: '材质', dataIndex: 'material', align: 'center', width: 50 } : null,
             { title: '名称', dataIndex: 'name', align: 'center', width: 120 },
             { title: '规格', dataIndex: 'spec', align: 'center', width: 70 },
-            { title: '数量', dataIndex: 'quantity', align: 'center', width: 70, render: q => q.toLocaleString() },
+            { title: '数量', dataIndex: 'quantity', align: 'center', width: 70, render: (q, record) =>
+                (record.refundQuantity || 0) === 0 ? q.toLocaleString() : 
+                <span>
+                    <s style={{color: 'gray', marginRight: '8px', fontSize: '9pt'}}>{q.toLocaleString()}</s>
+                    {(q - record.refundQuantity || 0).toLocaleString()}
+                </span>
+            },
             { title: '单位', dataIndex: 'unit', align: 'center', width: 50 },
             {
                 title: '单价', dataIndex: 'price', align: 'center', width: 70, render: p =>
                     amountSign + p.toLocaleString()
             },
             ifShowDiscount ? {
-                title: '金额', dataIndex: 'originalAmount', align: 'center', width: 80, render: a =>
-                    amountSign + a.toLocaleString()
+                title: '金额', dataIndex: 'originalAmount', align: 'center', width: 80, render: (a, record) =>
+                    (record.refundQuantity || 0) === 0 ? amountSign + a.toLocaleString() :
+                    <span>
+                        <s style={{color: 'gray', marginRight: '8px', fontSize: '9pt'}}>{amountSign + a.toLocaleString()}</s>
+                        {amountSign + (a - record.refundOriginalAmount || 0).toLocaleString()}
+                    </span>
             } : null,
             ifShowDiscount ? { title: '折扣', dataIndex: 'discount', align: 'center', width: 50, render: discount => `${discount}%` } : null,
             {
-                title: ifShowDiscount ? '折后价' : '金额', dataIndex: 'amount', align: 'center', width: 80, render: d =>
-                    amountSign + d.toLocaleString()
+                title: ifShowDiscount ? '折后价' : '金额', dataIndex: 'amount', align: 'center', width: 80, render: (a, record) =>
+                    (record.refundQuantity || 0) === 0 ? amountSign + a.toLocaleString() :
+                    <span>
+                        <s style={{color: 'gray', marginRight: '8px', fontSize: '9pt'}}>{amountSign + a.toLocaleString()}</s>
+                        {amountSign + (a - record.refundAmount || 0).toLocaleString()}
+                    </span>
             },
             ifShowWeight ? {
                 title: '重量', dataIndex: 'weight', align: 'center', width: 80, render: w => w ? w.toLocaleString() : w
@@ -90,25 +104,13 @@ export default function InvoiceView(props) {
                     const text = delivered ? '已配送' : '未配送'
                     return <Tag color={DELIVER_COLORS[text]}>{text}</Tag>
                 }
-            } : null,
-            isRefund ? null : {
-                title: '退货状态', align: 'center', width: 75, fixed: 'right', render: (_, record) =>
-                    <Popover trigger='click' content={
-                        <Space direction='vertical'>
-                            <span>退货数量：{(record.refundQuantity || 0).toLocaleString()}</span>
-                            {ifShowDiscount ? <span>金额：{amountSign + (record.refundOriginalAmount || 0).toLocaleString()}</span> : null}
-                            <span>{ifShowDiscount ? '折后价：' : '金额：'}{amountSign + (record.refundAmount || 0).toLocaleString()}</span>
-                        </Space>
-                    }>
-                        <a>{Decimal(record.refundQuantity || 0).equals(record.quantity) ? '全部退货' :
-                            (Decimal(record.refundQuantity || 0).gt(record.quantity) ? '退货超数' : (
-                                Decimal(record.refundQuantity || 0).equals(0) ? null : '部分退货'
-                            ))
-                        }</a>
-                    </Popover>
-            }
+            } : null
         ].filter(i => i != null)
     }, [localStorage])
+
+    const newAmount = useMemo(() => {
+        return (props.invoice.amount || 0) - props.invoice.items.reduce((p, c) => p.refundAmount || 0 + c.refundAmount || 0, 0)
+    }, [props.invoice])
 
     return (<>
         <Space direction='vertical' style={{ width: '100%', marginTop: '10px', marginBottom: '15px' }}>
@@ -131,7 +133,16 @@ export default function InvoiceView(props) {
                 }
             </Row>
             <Row>
-                <Col span={8}>总金额：{amountSign + (props.invoice.amount || 0).toLocaleString()}</Col>
+                <Col span={8}>总金额：
+                    {
+                        newAmount === props.invoice.amount ? 
+                        amountSign + (props.invoice.amount || 0).toLocaleString() :
+                        <span>
+                            <s style={{color: 'gray', marginRight: '8px', fontSize: '9pt'}}>{amountSign + (props.invoice.amount || 0).toLocaleString()}</s>
+                            {amountSign + newAmount.toLocaleString()}
+                        </span>
+                    }
+                </Col>
                 {
                     invoiceSettings.get('ifShowPayment') === 'true' ?
                         <>
