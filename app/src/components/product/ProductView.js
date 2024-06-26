@@ -54,10 +54,10 @@ function FilterBarView(props) {
             event.preventDefault()
             event.stopPropagation()
         }
-        return <Tag color={INVOICE_TYPE_2_DICT[value].color}
+        return <Tag color={INVOICE_TYPE_2_DICT[value]?.color}
             onMouseDown={onPreventMouseDown}
             closable={closable} onClose={onClose}
-            style={{ marginRight: 3 }}
+            style={{ marginRight: 3 }} 
         >{ label }</Tag>
     }
     const filterItems = (items) => {
