@@ -51,11 +51,15 @@ export default function InvoiceView(props) {
     //     const itemColumns = getInvoiceExportColumns('salesOrder')
     //     exportExcel(`销售单${props.order.id}`, getExportData(itemColumns, props.order.items))
     // }
+
+    // 有重用
+    const amountSign = invoiceSettings.get('ifShowAmountSign') === 'true' ? invoiceSettings.get('amountSign') : null
+    
+    
     const columns = useMemo(() => {
         const ifShowMaterial = invoiceSettings.get('ifShowMaterial') === 'true'
         const ifShowDiscount = invoiceSettings.get('ifShowDiscount') === 'true'
         const ifShowDelivered = invoiceSettings.get('ifShowDelivered') === 'true'
-        const amountSign = invoiceSettings.get('ifShowAmountSign') === 'true' ? invoiceSettings.get('amountSign') : null
         const ifShowWeight = props.type === 'purchaseOrder'
         return [
             { title: '', align: 'center', width: 30, fixed: 'left', render: (_, __, idx) => idx + 1 },
@@ -92,8 +96,8 @@ export default function InvoiceView(props) {
                     <Popover trigger='click' content={
                         <Space direction='vertical'>
                             <span>退货数量：{(record.refundQuantity || 0).toLocaleString()}</span>
-                            {ifShowDiscount ? <span>金额：{(record.refundOriginalAmount || 0).toLocaleString()}</span> : null}
-                            <span>{ifShowDiscount ? '折后价：' : '金额：'}{(record.refundAmount || 0).toLocaleString()}</span>
+                            {ifShowDiscount ? <span>金额：{amountSign + (record.refundOriginalAmount || 0).toLocaleString()}</span> : null}
+                            <span>{ifShowDiscount ? '折后价：' : '金额：'}{amountSign + (record.refundAmount || 0).toLocaleString()}</span>
                         </Space>
                     }>
                         <a>{Decimal(record.refundQuantity || 0).equals(record.quantity) ? '全部退货' :
@@ -127,20 +131,20 @@ export default function InvoiceView(props) {
                 }
             </Row>
             <Row>
-                <Col span={8}>总金额：{(props.invoice.amount || 0).toLocaleString()}</Col>
+                <Col span={8}>总金额：{amountSign + (props.invoice.amount || 0).toLocaleString()}</Col>
                 {
                     invoiceSettings.get('ifShowPayment') === 'true' ?
                         <>
                             <Col span={8}>
-                                已付： {(props.invoice.paid || 0).toLocaleString()}
+                                已付： {amountSign + (props.invoice.paid || 0).toLocaleString()}
                                 {
                                     isRefund ? null :
-                                        <>（订金：{(props.invoice.prepayment || 0).toLocaleString()}，尾款：{(props.invoice.payment || 0).toLocaleString()}）</>
+                                        <>（订金：{amountSign + (props.invoice.prepayment || 0).toLocaleString()}，尾款：{amountSign + (props.invoice.payment || 0).toLocaleString()}）</>
                                 }
                             </Col>
                             <Col span={8}>未付：
                                 <span style={{ color: props.invoice.unpaid === 0 ? 'black' : 'red' }}>
-                                    {(props.invoice.unpaid || 0).toLocaleString()}
+                                    {amountSign + (props.invoice.unpaid || 0).toLocaleString()}
                                 </span>
                             </Col>
                         </> : null
