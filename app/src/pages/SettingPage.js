@@ -116,16 +116,16 @@ export default function SettingPage() {
         {
             key: 'function', href: '#function', title: '功能设置', content: <FunctionSettingView />,
             children: [
-                { key: 'function-amount', href: '#function-amount', title: '金额计算功能' },
-                { key: 'function-discount', href: '#function-discount', title: '折扣功能' },
-                { key: 'function-deliver', href: '#function-deliver', title: '配送功能' },
-                { key: 'function-payment', href: '#function-payment', title: '付款功能' }
+                { key: 'function-amount', href: '#function-amount', title: '金额计算' },
+                { key: 'function-discount', href: '#function-discount', title: '折扣' },
+                { key: 'function-deliver', href: '#function-deliver', title: '配送' },
+                { key: 'function-payment', href: '#function-payment', title: '付款' }
             ]
         },
         {
             key: 'custom', href: '#custom', title: '用户定制', content: <CustomSettingView />,
             children: [
-                { key: 'custom-remark-quantity', href: '#custom-remark-quantity', title: '备注计算功能' },
+                { key: 'custom-remark-quantity', href: '#custom-remark-quantity', title: '备注计算' },
             ]
         },
         {
