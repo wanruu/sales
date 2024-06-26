@@ -162,7 +162,7 @@ export default function PartnerPage() {
         </Affix>
 
         <div className='pageMainContent'>
-            <Table dataSource={filteredPartners} size='middle' bordered rowKey={record => record.name}
+            <Table dataSource={filteredPartners} bordered rowKey={record => record.name}
                 scroll={{ x: 'max-content' }} pagination={DEFAULT_PAGINATION} columns={columns} />
         </div>
     </Space>

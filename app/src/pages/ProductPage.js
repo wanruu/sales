@@ -166,7 +166,7 @@ export default function ProductPage() {
         </Affix>
 
         <div className='pageMainContent'>
-            <Table dataSource={filteredProducts} size='middle' bordered rowKey={record => record.id} columns={tableColumns}
+            <Table dataSource={filteredProducts} bordered rowKey={record => record.id} columns={tableColumns}
                 pagination={DEFAULT_PAGINATION} scroll={{ x: 'max-content' }} />
         </div>
     </Space>

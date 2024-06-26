@@ -10,3 +10,7 @@
 .setting .ant-card-body h3 {
     margin-top: 0;
 }
+
+.setting {
+    padding-bottom: 20px;
+}
