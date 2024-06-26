@@ -551,65 +551,92 @@ function SubEditView(props) {
         }
     }
 
+    const formItemLayout = {
+        labelCol: { span: 6 }
+    }
+
+    const colLayout = {
+        xs: 24, sm: 11, md: 7
+    }
+
     return (
         <>
-            <Row style={{ justifyContent: 'space-between', marginTop: '15px', marginBottom: '5px' }}>
-                {
-                    isRefund ? (
-                        <Item label={isSales ? '客户' : '供应商'} style={{ margin: 0 }}>
-                            {form.getFieldValue('partner') || <span style={{ color: 'gray' }}>(选择产品后自动显示)</span>}
-                        </Item>
-                    ) : (
-                        <Item label={isSales ? '客户' : '供应商'} name='partner' style={{ margin: 0 }}>
-                            <PartnerInput style={{ width: 160 }} size='small' />
-                        </Item>
-                    )
-                }
-                <Item label='日期' shouldUpdate style={{ margin: 0 }}>
-                    {({ getFieldValue, setFieldValue }) => {
-                        return typeof (getFieldValue('date')) === 'object' ?
-                            <DatePicker style={{ width: 150 }} size='small'
-                                value={getFieldValue('date')}
-                                onChange={val => setFieldValue('date', val)} /> : typeof (getFieldValue('date'))
-                    }}
-                </Item>
+            <Row justify='space-between' style={{ paddingTop: '15px' }} wrap>
+                <Col {...colLayout}>
+                    {
+                        isRefund ? (
+                            <Item label={isSales ? '客户' : '供应商'} style={{ margin: 0 }} {...formItemLayout}>
+                                {form.getFieldValue('partner') || <span style={{ color: 'gray' }}>(选择产品后自动显示)</span>}
+                            </Item>
+                        ) : (
+                            <Item label={isSales ? '客户' : '供应商'} name='partner' style={{ margin: 0 }} {...formItemLayout}>
+                                <PartnerInput style={{ width: 160 }} size='small' />
+                            </Item>
+                        )
+                    }
+                </Col>
+                <Col {...colLayout}>
+                    <Item label='日期' shouldUpdate style={{ margin: 0 }} {...formItemLayout}>
+                        {({ getFieldValue, setFieldValue }) => {
+                            return typeof (getFieldValue('date')) === 'object' ?
+                                <DatePicker size='small' value={getFieldValue('date')}
+                                    onChange={val => setFieldValue('date', val)} /> : typeof (getFieldValue('date'))
+                        }}
+                    </Item>
+                </Col>
                 {
                     isRefund ?
-                        <Button icon={<PlusOutlined />} type='primary' ghost onClick={_ => setSelectionModalOpen(true)}>选择退货产品</Button> : null
+                        <Col {...colLayout}>
+                            <Item label='退货' style={{ margin: 0 }} {...formItemLayout}>
+                                <Button size='small' icon={<PlusOutlined />} type='primary' ghost onClick={_ => setSelectionModalOpen(true)}>选择产品</Button>
+                            </Item>
+                        </Col> : null
                 }
             </Row>
-            <Row style={{ justifyContent: 'space-between', marginBottom: '10px' }}>
-                <Item label='总金额' shouldUpdate style={{ margin: 0 }}>
-                    {({ getFieldValue }) => {
-                        return <div style={{ width: 150 }}>
-                            {parseFloat(getFieldValue('amount')).toLocaleString()}
-                        </div>
-                    }}
-                </Item>
+            <Row justify='space-between' style={{ paddingBottom: '10px' }} wrap>
+                <Col {...colLayout}>
+                    {
+                        invoiceSettings.get('allowEditAmount') === 'true' ?
+                        <Item label='总金额' name='amount' style={{ margin: 0 }} {...formItemLayout}>
+                            <InputNumber  size='small' keyboard={false} stringMode controls={false} />
+                        </Item> :
+                        <Item label='总金额' shouldUpdate style={{ margin: 0 }} {...formItemLayout}>
+                            {({ getFieldValue }) => {
+                                return <div style={{ width: 160 }}>
+                                    {parseFloat(getFieldValue('amount')).toLocaleString()}
+                                </div>
+                            }}
+                        </Item>
+                    }
+                </Col>
                 {
                     isRefund || !ifShowPayment ? null :
-                        <Item label='订金' name='prepayment' style={{ margin: 0 }}>
-                            <InputNumber style={{ width: 150 }} size='small' keyboard={false} stringMode controls={false} />
-                        </Item>
+                        <Col {...colLayout}>
+                            <Item label='订金' name='prepayment' style={{ margin: 0 }} {...formItemLayout}>
+                                <InputNumber size='small' keyboard={false} stringMode controls={false} />
+                            </Item>
+                        </Col>
                 }
                 {
                     ifShowPayment ?
-                        <Item label={isRefund ? '付款' : '尾款'} shouldUpdate style={{ margin: 0 }}>
-                            {({ getFieldValue, setFieldValue }) => {
-                                const p = Decimal(getFieldValue('amount') || 0).minus(getFieldValue('prepayment') || 0)
-                                return (
-                                    <>
-                                        <InputNumber size='small' keyboard={false} stringMode controls={false} style={{ width: 120 }}
-                                            placeholder={`应付 ${p.toNumber().toLocaleString()}`}
-                                            value={getFieldValue('payment')}
-                                            onChange={val => setFieldValue('payment', val)} />
-                                        <Button size='small' style={{ marginLeft: '5px' }} icon={<EditOutlined />}
-                                            onClick={_ => setFieldValue('payment', p.toString())}
-                                        />
-                                    </>
-                                )
-                            }}
-                        </Item> : null
+                        <Col {...colLayout}>
+                            <Item label={isRefund ? '付款' : '尾款'} shouldUpdate style={{ margin: 0 }} {...formItemLayout}>
+                                {({ getFieldValue, setFieldValue }) => {
+                                    const p = Decimal(getFieldValue('amount') || 0).minus(getFieldValue('prepayment') || 0)
+                                    return (
+                                        <>
+                                            <InputNumber size='small' keyboard={false} stringMode controls={false}
+                                                placeholder={`应付 ${p.toNumber().toLocaleString()}`}
+                                                value={getFieldValue('payment')}
+                                                onChange={val => setFieldValue('payment', val)} />
+                                            <Button size='small' style={{ marginLeft: '5px' }} icon={<EditOutlined />}
+                                                onClick={_ => setFieldValue('payment', p.toString())}
+                                            />
+                                        </>
+                                    )
+                                }}
+                            </Item>
+                        </Col>: null
                 }
             </Row>
             <Form.List name="items">
