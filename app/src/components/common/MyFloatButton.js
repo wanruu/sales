@@ -22,9 +22,9 @@ export default function MyFloatButton(props) {
     const isOrder = ['salesOrder', 'purchaseOrder'].includes(props.type)
 
     const columns = [
-        { title: '保存时间', dataIndex: 'draftTime', align: 'center', render: time => time.format('HH:mm:ss') },
         { title: isSales ? '客户' : '供应商', dataIndex: 'partner', align: 'center' },
         { title: '产品数', dataIndex: 'items', align: 'center', render: items => isOrder ? items.length - 1 : items.length },
+        { title: '保存时间', dataIndex: 'draftTime', align: 'center', render: time => time.format('HH:mm:ss') },
         {
             title: '操作', align: 'center', render: (_, draft) =>
                 <Space.Compact size='small'>
