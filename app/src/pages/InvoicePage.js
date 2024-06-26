@@ -62,6 +62,7 @@ export default function InvoicePage(props) {
         const ifShowDelivered = invoiceSettings.get('ifShowDelivered') == 'true'
         const amountSign = invoiceSettings.get('ifShowAmountSign') === 'true' ? invoiceSettings.get('amountSign') : ''
         const ifShowPayment = invoiceSettings.get('ifShowPayment') === 'true'
+        const ifShowRefund = invoiceSettings.get('ifShowRefund') === 'true'
         return [
             { title: '序号', align: 'center', render: (_, __, idx) => idx + 1, fixed: 'left' },
             { title: '单号', dataIndex: 'id', align: 'center', render: id => <a onClick={_ => setSelectedInvoiceId(id)}>{id}</a> },
@@ -78,7 +79,10 @@ export default function InvoicePage(props) {
             ifShowDelivered ? {
                 title: '配送情况', dataIndex: 'delivered', align: 'center', render: d => <Tag color={DELIVER_COLORS[d]}>{d}</Tag>
             } : null,
-            { title: relatedInvoiceTitle, dataIndex: relatedInvoiceDataIndex, align: 'center', render: id => id ? <a onClick={_ => setSelectedInvoiceId(id)}>{id}</a> : null },
+            ifShowRefund ? { 
+                title: relatedInvoiceTitle, dataIndex: relatedInvoiceDataIndex, align: 'center', render: id => 
+                    id ? <a onClick={_ => setSelectedInvoiceId(id)}>{id}</a> : null 
+            } : null,
             {
                 title: '操作', align: 'center', fixed: 'right', render: (_, record) => (
                     <Button onClick={_ => showDeleteConfirm([record.id])} danger icon={<DeleteOutlined />} />
