@@ -131,7 +131,7 @@ export default function InvoiceView(props) {
             <Row>
                 <Col span={8}>总金额：
                     {
-                        isRefund || props.invoice.refundAmount === props.invoice.amount ? 
+                        isRefund || (props.invoice.refundAmount || 0) === 0  ? 
                         amountSign + (props.invoice.amount || 0).toLocaleString() :
                         <span>
                             <s style={{color: 'gray', marginRight: '8px', fontSize: '9pt'}}>{amountSign + (props.invoice.amount || 0).toLocaleString()}</s>
