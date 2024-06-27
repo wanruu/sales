@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import Axios from 'axios'
-import { Table, Button } from 'antd'
-import _ from 'lodash'
+import { Table, Button, Space, Input, Form } from 'antd'
+import { pinyin } from 'pinyin-pro'
+
+
+const { Item } = Form
+
 
 import { baseURL, invoiceSettings } from '../../utils/config'
 import { calTotalAmount } from '../../utils/invoiceUtils'
@@ -11,7 +15,9 @@ import { calTotalAmount } from '../../utils/invoiceUtils'
     Required: dismiss, refund, setRefund, type
 */
 export default function RefundSelectionView(props) {
+    const [form] = Form.useForm()
     const [orders, setOrders] = useState([])
+    const [filteredOrders, setFilteredOrders] = useState([])
 
     const load = () => {
         setOrders([])
@@ -21,7 +27,9 @@ export default function RefundSelectionView(props) {
             url: props.type,
             'Content-Type': 'application/json',
         }).then(res => {
-            setOrders(res.data.filter(o => !o.refundId))
+            const os = res.data.filter(o => !o.refundId)
+            setOrders(os)
+            setFilteredOrders(os)
         }).catch(_ => { })
     }
 
@@ -50,6 +58,7 @@ export default function RefundSelectionView(props) {
     }
 
     const orderColumns = [
+        { title: '序号', align: 'center', render: (_, __, idx) => idx + 1 },
         { title: props.type === 'salesOrder' ? '销售单号' : '采购单号', dataIndex: 'id', align: 'center' },
         { title: props.type === 'salesOrder' ? '客户' : '供应商', dataIndex: 'partner', align: 'center' },
         { title: '金额', dataIndex: 'amount', align: 'center', render: amount => {
@@ -62,12 +71,41 @@ export default function RefundSelectionView(props) {
         )}
     ]
 
+    const search = () => {
+        const id = form.getFieldValue('id')
+        const partner = form.getFieldValue('partner')
+        const newOrders = orders.filter(o =>
+            (
+                !partner ||
+                o.partner.includes(partner) ||
+                pinyin(o.partner, { pattern: 'first', toneType: 'none', type: 'array' }).join('').includes(partner) ||
+                pinyin(o.partner, { toneType: 'none', type: 'array' }).join('').includes(partner)
+            ) &&
+            (!id || o.id.includes(id))
+        )
+        setFilteredOrders(newOrders)
+    }
+
     useEffect(load, [])
 
     return (
-        <Table dataSource={orders} rowKey={record => record.id} size='small'
-        columns={orderColumns}
-        pagination={{ showSizeChanger: false, showQuickJumper: true }}
-        />
+        <Space direction='vertical' style={{ width: '100%' }}>
+            <Form form={form} onFinish={search} layout='inline' style={{ paddingTop: 10 }}>
+                <Item name='id' style={{ paddingBottom: 5 }}>
+                    <Input placeholder='单号' allowClear />
+                </Item>
+                <Item name='partner' style={{ paddingBottom: 5 }}>
+                    <Input placeholder='姓名（支持拼音、首字母）' allowClear style={{ width: 250 }} />
+                </Item>
+                <Item style={{ paddingBottom: 5 }}>
+                    <Button type='primary' htmlType='submit'>搜索</Button>
+                </Item>
+            </Form>
+            
+            <Table dataSource={filteredOrders} rowKey={record => record.id} size='small'
+            columns={orderColumns} bordered
+            pagination={{ showSizeChanger: false, showQuickJumper: true }}
+            />
+        </Space>
     )
 }
