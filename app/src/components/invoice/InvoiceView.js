@@ -19,7 +19,6 @@ export default function InvoiceView(props) {
     const isSales = ['salesOrder', 'salesRefund'].includes(props.type)
     const isRefund = ['salesRefund', 'purchaseRefund'].includes(props.type)
 
-
     // const getInvoiceExportColumns = (type) => {
     //     const ifShowMaterial = invoiceSettings.get('ifShowMaterial') === 'true'
     //     const ifShowDiscount = invoiceSettings.get('ifShowDiscount') === 'true'
@@ -108,9 +107,6 @@ export default function InvoiceView(props) {
         ].filter(i => i != null)
     }, [localStorage])
 
-    const newAmount = useMemo(() => {
-        return (props.invoice.amount || 0) - props.invoice.items.reduce((p, c) => p.refundAmount || 0 + c.refundAmount || 0, 0)
-    }, [props.invoice])
 
     return (<>
         <Space direction='vertical' style={{ width: '100%', marginTop: '10px', marginBottom: '15px' }}>
@@ -135,11 +131,11 @@ export default function InvoiceView(props) {
             <Row>
                 <Col span={8}>总金额：
                     {
-                        newAmount === props.invoice.amount ? 
+                        isRefund || props.invoice.refundAmount === props.invoice.amount ? 
                         amountSign + (props.invoice.amount || 0).toLocaleString() :
                         <span>
                             <s style={{color: 'gray', marginRight: '8px', fontSize: '9pt'}}>{amountSign + (props.invoice.amount || 0).toLocaleString()}</s>
-                            {amountSign + newAmount.toLocaleString()}
+                            {amountSign + (props.invoice.amount - props.invoice.refundAmount).toLocaleString()}
                         </span>
                     }
                 </Col>

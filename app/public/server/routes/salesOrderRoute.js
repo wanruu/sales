@@ -1,6 +1,5 @@
 const express = require('express')
 const router = express.Router()
-const _ = require('lodash')
 
 const db = require('../db')
 const { updatePartner, updateProductByInvoiceItems, isDateValid, getNextInvoiceId, formatInsert,
@@ -235,9 +234,11 @@ router.get('/id/:id', (req, res) => {
         return
     }
 
-    const selectOrder = `SELECT i.*, p.*, r.refundId 
+    const selectOrder = `SELECT i.*, p.*, r.refundId, r.refundAmount
         FROM invoice AS i, partner AS p
-        LEFT JOIN invoiceRelation AS r ON i.id=r.orderId 
+        LEFT JOIN (
+        SELECT r.orderId, r.refundId, ri.amount AS refundAmount FROM invoiceRelation AS r, invoice AS ri WHERE r.refundId=ri.id
+        ) AS r ON i.id=r.orderId 
         WHERE id="${orderId}" AND partner=name`
     db.each(selectOrder, (err, order) => {
         if (err) {
