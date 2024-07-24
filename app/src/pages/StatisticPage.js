@@ -1,12 +1,15 @@
 import dayjs from 'dayjs'
 import Axios from 'axios'
-import React, { useEffect, useState } from 'react'
-import { Card, Col, Row, Statistic, Select, Space, Button } from 'antd'
+import React, { useEffect, useMemo, useState } from 'react'
+import { Card, Col, Row, Statistic, Select, Space, Button, DatePicker } from 'antd'
 import ReactEcharts from 'echarts-for-react'
 import Title from 'antd/es/typography/Title'
 import { LeftOutlined, RightOutlined } from '@ant-design/icons'
 
 import { DATE_FORMAT, baseURL } from '../utils/config'
+
+
+const { RangePicker } = DatePicker
 
 
 const RANGE_OPTIONS = [
@@ -22,50 +25,116 @@ const RANGE_OPTIONS = [
 const RangeSelectionView = ({ dateRange, setDateRange }) => {
     const [rangeOption, setRangeOption] = useState('week')
 
-    const handleRangeChange = (value) => {
-        setRangeOption(value)
-    }
-
     const initRange = () => {
-        const current = new Date()
+        const curr = dayjs()
         if (rangeOption === 'week') {
-
-        } else if (rangeOption === 'month') {
-            
+            setDateRange([curr.startOf('week'), null])
+        } else if (rangeOption === 'month' || rangeOption === 'year') {
+            setDateRange([curr, null])
+        } else {
+            Axios({
+                method: 'get',
+                baseURL: baseURL(),
+                url: '/stat/range',
+                'Content-Type': 'application/json',
+            }).then(res => {
+                // TODO
+                // setDateRange([dayjs('2000/01/01'), dayjs()])
+            }).catch(_ => {
+                // setDateRange([null, null])
+                setDateRange([dayjs('2000/01/01'), dayjs()])
+            })
         }
     }
 
-    const dateFormatter = (date, style) => {
-        const year = date.getFullYear()
-        const month = date.getMonth() + 1
-        const day = date.getDate()
-        switch (style) {
-            case 'year':
-                return year + '年'
-            case 'month':
-                return year + '年' + month + '月'
-            default:
-                return year + '年' + month + '月' + day + '日'
+    const handleRangeMinus = () => {
+        const handleDateMinus = (date) => {
+            if (date == null) {
+                return null
+            }
+            if (rangeOption === 'week') {
+                return date.subtract(7, 'day')
+            } else if (rangeOption === 'month') {
+                return date.subtract(1, 'month')
+            } else if (rangeOption === 'year') {
+                return date.subtract(1, 'year')
+            }
         }
+        setDateRange([handleDateMinus(dateRange[0]), handleDateMinus(dateRange[1])])
     }
 
-    useEffect(initRange, [])
+    const handleRangePlus = () => {
+        const handleDatePlus = (date) => {
+            if (date == null) {
+                return null
+            }
+            if (rangeOption === 'week') {
+                return date.add(7, 'day')
+            } else if (rangeOption === 'month') {
+                return date.add(1, 'month')
+            } else if (rangeOption === 'year') {
+                return date.add(1, 'year')
+            }
+        }
+        setDateRange([handleDatePlus(dateRange[0]), handleDatePlus(dateRange[1])])
+    }
+
+    const rangeDisplay = useMemo(() => {
+        if (dateRange[0] == null && dateRange[1] == null) {
+            return '...'
+        } else if (dateRange[1] == null) {
+            if (rangeOption === 'year') {
+                return <Space.Compact direction='horizontal'>
+                    <Button icon={<LeftOutlined />} onClick={_ => handleRangeMinus()}></Button>
+                    <DatePicker picker='year' format='YYYY年' allowClear={false}
+                        value={dateRange[0]} onChange={val => setDateRange([val, null])} />
+                    <Button icon={<RightOutlined />} onClick={_ => handleRangePlus()}></Button>
+                </Space.Compact>
+            } else if (rangeOption === 'month') {
+                return <Space.Compact direction='horizontal'>
+                    <Button icon={<LeftOutlined />} onClick={_ => handleRangeMinus()}></Button>
+                    <DatePicker picker='month' format='YYYY年MM月' allowClear={false}
+                        value={dateRange[0]} onChange={val => setDateRange([val, null])} />
+                    <Button icon={<RightOutlined />} onClick={_ => handleRangePlus()}></Button>
+                </Space.Compact>
+            } else if (rangeOption === 'week') {
+                return <Space.Compact direction='horizontal'>
+                    <Button icon={<LeftOutlined />} onClick={_ => handleRangeMinus()}></Button>
+                    <DatePicker picker='week' format='YYYY年MM月DD日 + 7' allowClear={false} 
+                        value={dateRange[0]} onChange={val => setDateRange([val.startOf('week'), null])} />
+                    <Button icon={<RightOutlined />} onClick={_ => handleRangePlus()}></Button>
+                </Space.Compact>
+            }
+        } else {
+            return <RangePicker value={dateRange} onChange={val => setDateRange(val)} />
+        }
+    }, [dateRange, rangeOption])
+
+    useEffect(initRange, [rangeOption])
 
     return (
         <Row align='middle' style={{ marginTop: '15px' }}>
             <Col span={8}>
-                <Select options={RANGE_OPTIONS} defaultValue='week' onChange={handleRangeChange} />
+                <Select options={RANGE_OPTIONS} defaultValue='week' onChange={val => setRangeOption(val)} />
             </Col>
             <Col span={8} align='center'>
-                <Button icon={<LeftOutlined />}></Button>
-                <Button>
-                    test
-                </Button>
-                <Button icon={<RightOutlined />}></Button>
+                {
+                    // ["week", "month", "year"].includes(rangeOption) ? 
+                    // <Space.Compact direction='horizontal'>
+                    //     <Button icon={<LeftOutlined />} onClick={_ => handleRangeMinus()}></Button>
+                    //     <Button>{rangeDisplay}</Button>
+                    //     <Button icon={<RightOutlined />} onClick={_ => handleRangePlus()}></Button>
+                    // </Space.Compact> : <Space.Compact direction='horizontal'>
+                    //     <RangePicker />
+                    // </Space.Compact>
+                    
+                }
+                {rangeDisplay}
             </Col>
         </Row>
     )
 }
+
 
 export default function StatisticPage() {
     const [salesStat, setSalesStat] = useState({
