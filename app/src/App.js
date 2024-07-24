@@ -17,6 +17,7 @@ import SettingPage from './pages/SettingPage.js'
 import ProductPage from './pages/ProductPage.js'
 import PartnerPage from './pages/PartnerPage.js'
 import InvoicePage from './pages/InvoicePage.js'
+import StatisticPage from './pages/StatisticPage.js'
 import { invoiceSettings } from './utils/config.js'
 
 
@@ -77,7 +78,7 @@ function App() {
                             <Route path='purchaseRefund' element={<InvoicePage type='purchaseRefund' key='purchaseRefund' />} />
                             <Route path='product' element={<ProductPage />} />
                             <Route path='partner' element={<PartnerPage />} />
-                            <Route path='stat' element={<></>} />
+                            <Route path='stat' element={<StatisticPage />} />
                             <Route path='settings' element={<SettingPage />} />
                         </Routes>
                     </Content>
